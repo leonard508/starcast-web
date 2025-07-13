@@ -1,10 +1,32 @@
 import { useState, useEffect } from 'react';
 
-export const usePackages = () => {
-  const [providers, setProviders] = useState([]);
-  const [packages, setPackages] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+interface Package {
+  id: number | string;
+  title: string;
+  download: string;
+  upload: string;
+  price: number;
+  features: string[];
+}
+
+interface Provider {
+  id: number | string;
+  name: string;
+  logo: string;
+}
+
+interface UsePackagesReturn {
+  providers: Provider[];
+  packages: Package[];
+  loading: boolean;
+  error: string | null;
+}
+
+export const usePackages = (): UsePackagesReturn => {
+  const [providers, setProviders] = useState<Provider[]>([]);
+  const [packages, setPackages] = useState<Package[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {

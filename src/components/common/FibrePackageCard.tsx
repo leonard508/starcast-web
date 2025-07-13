@@ -1,8 +1,37 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './FibrePackageCard.module.css';
+import Button from '../design-system/Button/Button';
+import Card from '../design-system/Card/Card';
 
-const FibrePackageCard = ({ package: pkg, provider, onSelect }) => {
+interface Package {
+  id: number | string;
+  name?: string;
+  title?: string;
+  speed?: string;
+  download?: string;
+  upload?: string;
+  download_display?: string;
+  upload_display?: string;
+  upload_speed?: string;
+  price: number;
+  promo_price?: number;
+  effective_price?: number;
+  has_promo?: boolean;
+}
+
+interface Provider {
+  name: string;
+  logo?: string;
+}
+
+interface FibrePackageCardProps {
+  package: Package;
+  provider?: Provider;
+  onSelect?: (pkg: Package) => void;
+}
+
+const FibrePackageCard: React.FC<FibrePackageCardProps> = ({ package: pkg, provider, onSelect }) => {
   const navigate = useNavigate();
   
   if (!pkg) return null;
@@ -15,7 +44,7 @@ const FibrePackageCard = ({ package: pkg, provider, onSelect }) => {
     }
   };
 
-  const getSpeedDisplay = (speed) => {
+  const getSpeedDisplay = (speed: string | undefined): string => {
     if (!speed) return 'N/A';
     return String(speed).replace(/\s*Mbps/i, '');
   };
@@ -29,8 +58,8 @@ const FibrePackageCard = ({ package: pkg, provider, onSelect }) => {
   const hasPromo = pkg.has_promo && promoPrice && promoPrice < originalPrice;
 
   return (
-    <div 
-      className={`${styles.packageCard} ${hasPromo ? styles.hasPromo : ''}`
+    <Card 
+      className={`${styles.packageCard} ${hasPromo ? styles.hasPromo : ''}`}
       onClick={handleClick}
     >
       {/* Promo Badge */}
@@ -147,11 +176,9 @@ const FibrePackageCard = ({ package: pkg, provider, onSelect }) => {
           )}
         </div>
         
-        <button className={styles.selectButton}>
-          Choose Plan
-        </button>
+        <Button onClick={handleClick} variant="primary">Choose Plan</Button>
       </div>
-    </div>
+    </Card>
   );
 };
 

@@ -11,9 +11,31 @@ import styles from './ModernHomePage.module.css';
  * Modern Homepage - Light Earthy Theme
  * Inspired by LottoStar/Betway mobile-first design
  */
-const ModernHomePage = () => {
+interface Package {
+  id: number | string;
+  name?: string;
+  title?: string;
+  speed?: string;
+  download?: string;
+  upload?: string;
+  download_display?: string;
+  upload_display?: string;
+  upload_speed?: string;
+  price: number;
+  promo_price?: number;
+  effective_price?: number;
+  has_promo?: boolean;
+}
+
+interface Provider {
+  id: number | string;
+  name: string;
+  logo?: string;
+}
+
+const ModernHomePage: React.FC = () => {
   const navigate = useNavigate();
-  const { providers, packages, loading, error } = usePackages();
+  const { providers, packages, loading, error }: { providers: Provider[]; packages: Package[]; loading: boolean; error: string | null } = usePackages();
   const [activeProvider, setActiveProvider] = useState(0);
 
   const heroVariants = {
@@ -21,7 +43,7 @@ const ModernHomePage = () => {
     visible: { 
       opacity: 1, 
       y: 0,
-      transition: { duration: 0.6, ease: "easeOut" }
+      transition: { duration: 0.6 }
     }
   };
 
@@ -136,7 +158,7 @@ const ModernHomePage = () => {
               ←
             </button>
             <div className={styles.providerSlider}>
-              {providers.map((provider, index) => (
+              {providers.map((provider: Provider, index: number) => (
                 <motion.div 
                   key={provider.id} 
                   className={`${styles.providerCard} ${index === activeProvider ? styles.active : ''}`}
@@ -191,7 +213,7 @@ const ModernHomePage = () => {
             animate="visible"
             viewport={{ once: true }}
           >
-            {packages.map((pkg) => (
+            {packages.map((pkg: Package) => (
               <motion.div 
                 key={pkg.id}
                 variants={heroVariants}
@@ -220,7 +242,13 @@ const ModernHomePage = () => {
             <p className="text-stone-600 text-sm mb-4">
               Our experts are here to help you find the perfect plan
             </p>
-            <Button variant="outlined" className="border-stone-300 text-stone-700 hover:bg-stone-50">
+            <Button 
+              variant="outlined" 
+              className="border-stone-300 text-stone-700 hover:bg-stone-50"
+              onClick={() => {}}
+              startIcon={undefined}
+              endIcon={undefined}
+            >
               Chat with Expert
             </Button>
         </motion.div>
