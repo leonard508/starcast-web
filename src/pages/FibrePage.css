@@ -28,7 +28,7 @@
 /* Header Styles */
 .fibre-page .fibre-header {
   text-align: center;
-  padding: 60px 0 40px;
+  padding: 25px 0 20px;
   background: transparent;
   position: relative;
   overflow: hidden;
@@ -53,10 +53,10 @@
 }
 
 .fibre-page .heading-gradient {
-  font-size: 2.2rem;
+  font-size: 1.6rem;
   font-weight: 800;
   color: #2d2823;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   line-height: 1.1;
   letter-spacing: -0.02em;
 }
@@ -66,7 +66,7 @@
 }
 
 .fibre-page .subheading {
-  font-size: 1rem;
+  font-size: 0.875rem;
   color: #6b6355;
   max-width: 600px;
   margin: 0 auto;
@@ -104,7 +104,7 @@
 .fibre-page .section-title {
   text-align: center;
   color: #2d2823;
-  font-size: 1.8rem;
+  font-size: 1.3rem;
   font-weight: 800;
   margin: 0 auto;
   display: inline-block;
@@ -158,8 +158,8 @@
 .fibre-page .provider-card {
   scroll-snap-align: center;
   flex: 0 0 auto;
-  width: 200px;
-  height: 100px;
+  width: 120px;
+  height: 70px;
   border-radius: 16px;
   background: rgba(250, 247, 244, 0.6);
   backdrop-filter: blur(20px);
@@ -174,8 +174,9 @@
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  padding: 16px;
-  min-width: 200px;
+  padding: 8px;
+  min-width: 120px;
+  touch-action: manipulation;
 }
 
 .fibre-page .provider-card::before {
@@ -207,11 +208,11 @@
 }
 
 .fibre-page .provider-text {
-  font-size: 1.2rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #2d2823;
   text-align: center;
-  padding: 0 15px;
+  padding: 0 8px;
   z-index: 2;
   margin: 0;
 }
@@ -256,11 +257,11 @@
 }
 
 .fibre-page .nav-arrow {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: rgba(250, 247, 244, 0.8);
   backdrop-filter: blur(20px);
@@ -271,7 +272,8 @@
   box-shadow: 0 8px 32px rgba(74, 69, 63, 0.1);
   z-index: 5;
   flex-shrink: 0;
-  min-width: 40px;
+  min-width: 32px;
+  touch-action: manipulation;
 }
 
 .fibre-page .nav-arrow:hover {
@@ -324,7 +326,7 @@
 .fibre-page .packages-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
+  gap: 12px;
   margin-top: 10px;
   width: 100%;
   position: relative;
@@ -391,29 +393,82 @@
   box-shadow: 0 8px 20px rgba(214, 125, 62, 0.3);
 }
 
-/* Responsive Adjustments */
-@media (min-width: 576px) {
-  .container {
-    padding: 0 16px;
+/* Progressive Enhancement - Mobile First */
+@media (min-width: 481px) {
+  .fibre-page .nav-arrow {
+    display: flex;
   }
   
+  .fibre-page .provider-card {
+    width: 140px;
+    height: 80px;
+    padding: 10px;
+  }
+  
+  .fibre-page .provider-text {
+    font-size: 1rem;
+  }
+  
+  .fibre-page .heading-gradient {
+    font-size: 1.8rem;
+  }
+  
+  .fibre-page .subheading {
+    font-size: 1rem;
+  }
+  
+  .fibre-page .section-title {
+    font-size: 1.4rem;
+  }
+}
+
+@media (min-width: 576px) {
   .fibre-page .packages-grid {
     grid-template-columns: repeat(2, 1fr);
   }
   
   .fibre-page .provider-card {
-    width: 180px;
-    height: 100px;
+    width: 160px;
+    height: 90px;
+    padding: 12px;
+  }
+  
+  .fibre-page .provider-text {
+    font-size: 1.1rem;
   }
 }
 
 @media (min-width: 768px) {
-  .container {
-    padding: 0 20px;
+  .fibre-page .fibre-header {
+    padding: 40px 0 30px;
   }
   
+  .fibre-page .heading-gradient {
+    font-size: 2rem;
+  }
+  
+  .fibre-page .subheading {
+    font-size: 1rem;
+  }
+  
+  .fibre-page .section-title {
+    font-size: 1.6rem;
+  }
+  
+  .fibre-page .provider-card {
+    width: 180px;
+    height: 100px;
+    padding: 14px;
+  }
+  
+  .fibre-page .provider-text {
+    font-size: 1.15rem;
+  }
+}
+
+@media (min-width: 992px) {
   .fibre-page .fibre-header {
-    padding: 50px 0 35px;
+    padding: 60px 0 40px;
   }
   
   .fibre-page .heading-gradient {
@@ -425,20 +480,27 @@
   }
   
   .fibre-page .section-title {
-    font-size: 1.7rem;
+    font-size: 1.8rem;
+  }
+  
+  .fibre-page .packages-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
   }
   
   .fibre-page .provider-card {
     width: 200px;
     height: 110px;
+    padding: 16px;
+  }
+  
+  .fibre-page .provider-text {
+    font-size: 1.2rem;
+    padding: 0 15px;
   }
 }
 
-@media (min-width: 992px) {
-  .container {
-    padding: 0 24px;
-  }
-  
+@media (min-width: 1200px) {
   .fibre-page .fibre-header {
     padding: 80px 0 50px;
   }
@@ -456,7 +518,6 @@
   }
   
   .fibre-page .packages-grid {
-    grid-template-columns: repeat(3, 1fr);
     gap: 24px;
   }
   
@@ -466,141 +527,6 @@
   }
 }
 
-@media (min-width: 1200px) {
-  .fibre-page .fibre-header {
-    padding: 120px 0 80px;
-  }
-  
-  .fibre-page .heading-gradient {
-    font-size: 3.5rem;
-  }
-  
-  .fibre-page .section-title {
-    font-size: 2.5rem;
-  }
-  
-  .fibre-page .provider-card {
-    width: 300px;
-    height: 140px;
-  }
-}
-
-@media (max-width: 768px) {
-  .container {
-    padding: 0 16px;
-  }
-  
-  .fibre-page .fibre-header {
-    padding: 40px 0 30px;
-  }
-
-  .fibre-page .heading-gradient {
-    font-size: 1.8rem;
-  }
-  
-  .fibre-page .section-title {
-    font-size: 1.4rem;
-  }
-  
-  .fibre-page .title-container {
-    margin-bottom: 30px;
-  }
-  
-  .fibre-page .provider-slider {
-    margin: 0 30px;
-    padding: 12px 5px;
-    gap: 10px;
-  }
-  
-  .fibre-page .provider-card {
-    width: 160px;
-    height: 80px;
-    padding: 12px;
-    flex-shrink: 0;
-    scroll-snap-align: center;
-  }
-  
-  .fibre-page .provider-logo {
-    max-width: 70%;
-    max-height: 70%;
-    object-fit: contain;
-  }
-  
-  .fibre-page .provider-text {
-    font-size: 1.1rem;
-  }
-  
-  .fibre-page .nav-arrow {
-    width: 44px;
-    height: 44px;
-    position: absolute;
-    z-index: 10;
-  }
-  
-  .fibre-page .nav-prev {
-    left: 10px;
-  }
-  
-  .fibre-page .nav-next {
-    right: 10px;
-  }
-  
-  .fibre-page .packages-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .fibre-page .fibre-section {
-    padding: 60px 0 80px;
-  }
-}
-
-@media (max-width: 480px) {
-  .container {
-    padding: 0 12px;
-  }
-
-  .fibre-page .fibre-header {
-    padding: 25px 0 20px;
-  }
-
-  .fibre-page .heading-gradient {
-    font-size: 1.6rem;
-  }
-
-  .fibre-page .subheading {
-    font-size: 0.875rem;
-  }
-  
-  .fibre-page .section-title {
-    font-size: 1.3rem;
-  }
-  
-  .fibre-page .fibre-section {
-    padding: 30px 0 40px;
-  }
-  
-  .fibre-page .provider-slider {
-    margin: 0 20px;
-    padding: 8px 5px;
-    gap: 8px;
-  }
-  
-  .fibre-page .provider-card {
-    width: 120px;
-    height: 70px;
-    padding: 8px;
-  }
-  
-  .fibre-page .nav-arrow {
-    display: none;
-  }
-  
-  .fibre-page .packages-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-}
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {

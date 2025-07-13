@@ -2,22 +2,22 @@
 .package-card {
   background: rgba(250, 247, 244, 0.6);
   backdrop-filter: blur(20px);
-  border-radius: 20px;
+  border-radius: 12px;
   box-shadow: 
-    0 8px 32px rgba(74, 69, 63, 0.08),
+    0 4px 16px rgba(74, 69, 63, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
   border: 1px solid rgba(232, 227, 219, 0.3);
-  padding: 24px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 280px;
   margin: 0 auto;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 .package-card::before {
@@ -55,21 +55,21 @@
 }
 
 .package-provider-name {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #2d2823;
   font-weight: 600;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   text-align: center;
   position: relative;
   z-index: 2;
 }
 
 .package-price-badge {
-  font-size: 1.8rem;
+  font-size: 1.4rem;
   font-weight: 700;
   border-radius: 6px;
-  padding: 4px 8px;
-  margin-bottom: 10px;
+  padding: 3px 6px;
+  margin-bottom: 8px;
   display: inline-flex;
   align-items: baseline;
   letter-spacing: -0.5px;
@@ -83,7 +83,7 @@
 }
 
 .package-price-badge .currency {
-  font-size: 1.2rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #6b6355;
   margin-right: 2px;
@@ -113,8 +113,8 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  font-size: 1rem;
+  gap: 4px;
+  font-size: 0.85rem;
   font-weight: 600;
   color: #2d2823;
   letter-spacing: 0.1px;
@@ -134,9 +134,9 @@
   display: flex;
   flex-direction: row;
   justify-content: center;
-  gap: 40px;
+  gap: 25px;
   width: 100%;
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   color: #6b6355;
   font-weight: 500;
   line-height: 1.2;
@@ -147,12 +147,12 @@
 
 .package-feature-badge {
   color: #ffffff;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 600;
   background: #d67d3e;
   border: 1px solid #c56d31;
   border-radius: 6px;
-  padding: 6px 12px;
+  padding: 4px 8px;
   display: inline-block;
   text-transform: uppercase;
   position: relative;
@@ -248,46 +248,30 @@
   backdrop-filter: blur(10px);
 }
 
-/* Responsive Adjustments */
-@media (max-width: 768px) {
+/* Progressive Enhancement - Mobile First */
+@media (min-width: 576px) {
   .package-card {
-    max-width: 98vw;
-    padding: 12px 6vw 10px 6vw;
-  }
-  
-  .package-provider-logo {
-    max-width: 40px;
-    max-height: 20px;
-    margin-bottom: 8px;
+    padding: 16px;
+    border-radius: 16px;
   }
   
   .package-provider-name {
-    font-size: 0.8rem;
-    margin-bottom: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 10px;
   }
   
   .package-price-badge {
-    font-size: 1.5rem;
-    padding: 4px 6px;
+    font-size: 1.6rem;
+    padding: 4px 7px;
   }
   
   .package-price-badge .currency {
     font-size: 1rem;
-    top: 1px;
-  }
-  
-  .package-price-badge small {
-    font-size: 0.6rem;
-    top: -3px;
-  }
-  
-  .package-speeds-row {
-    margin-bottom: 8px;
   }
   
   .speeds-inline {
     font-size: 0.9rem;
-    gap: 4px;
+    gap: 5px;
   }
   
   .speed-labels-inline {
@@ -297,37 +281,72 @@
   
   .package-feature-badge {
     font-size: 0.75rem;
-    padding: 3px 10px;
+    padding: 5px 10px;
   }
 }
 
-@media (max-width: 480px) {
+@media (min-width: 768px) {
   .package-card {
-    padding: 10px 2vw 8px 2vw;
+    padding: 20px;
+    border-radius: 18px;
   }
   
-  .speeds-inline {
-    font-size: 0.85rem;
-    gap: 3px;
-  }
-  
-  .speed-labels-inline {
-    font-size: 0.6rem;
-    gap: 25px;
+  .package-provider-name {
+    font-size: 0.9rem;
+    margin-bottom: 12px;
   }
   
   .package-price-badge {
-    font-size: 1.4rem;
-    padding: 3px 5px;
+    font-size: 1.7rem;
+    padding: 4px 8px;
+    margin-bottom: 10px;
   }
   
   .package-price-badge .currency {
-    font-size: 0.95rem;
-    top: 1px;
+    font-size: 1.1rem;
   }
   
-  .package-price-badge small {
-    font-size: 0.55rem;
-    top: -3px;
+  .speeds-inline {
+    font-size: 0.95rem;
+    gap: 6px;
+  }
+  
+  .speed-labels-inline {
+    font-size: 0.68rem;
+    gap: 35px;
+  }
+  
+  .package-feature-badge {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+}
+
+@media (min-width: 992px) {
+  .package-card {
+    padding: 24px;
+    border-radius: 20px;
+    max-width: 280px;
+  }
+  
+  .package-provider-name {
+    font-size: 0.9rem;
+  }
+  
+  .package-price-badge {
+    font-size: 1.8rem;
+  }
+  
+  .package-price-badge .currency {
+    font-size: 1.2rem;
+  }
+  
+  .speeds-inline {
+    font-size: 1rem;
+  }
+  
+  .speed-labels-inline {
+    font-size: 0.7rem;
+    gap: 40px;
   }
 } 
