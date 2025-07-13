@@ -1,0 +1,552 @@
+/* Reset and Base Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.fibre-page {
+  font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #faf7f4 0%, #f0ebe3 30%, #f7f2eb 70%, #faf7f4 100%);
+  background-attachment: fixed;
+  color: #4a453f;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  line-height: 1.6;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Header Styles */
+.fibre-page .fibre-header {
+  text-align: center;
+  padding: 140px 0 80px;
+  background: transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.fibre-page .fibre-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(214, 125, 62, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(242, 237, 230, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 60%, rgba(232, 227, 219, 0.2) 0%, transparent 50%);
+}
+
+.fibre-page .container {
+  position: relative;
+  z-index: 2;
+}
+
+.fibre-page .heading-gradient {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #2d2823;
+  margin-bottom: 32px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.fibre-page .heading-gradient span {
+  color: #d67d3e;
+}
+
+.fibre-page .subheading {
+  font-size: 1.25rem;
+  color: #6b6355;
+  max-width: 600px;
+  margin: 0 auto;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* Section Styles */
+.fibre-page .fibre-section {
+  padding: 80px 0 120px;
+  background: transparent;
+  position: relative;
+}
+
+.fibre-page .fibre-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 70% 30%, rgba(242, 237, 230, 0.4) 0%, transparent 50%),
+    radial-gradient(circle at 30% 70%, rgba(214, 125, 62, 0.05) 0%, transparent 50%);
+}
+
+.fibre-page .title-container {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 60px;
+  position: relative;
+  z-index: 2;
+}
+
+.fibre-page .section-title {
+  text-align: center;
+  color: #2d2823;
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0 auto;
+  display: inline-block;
+  position: relative;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.fibre-page .section-title::after {
+  content: "";
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: #d67d3e;
+  border-radius: 2px;
+}
+
+/* Provider Selector */
+.fibre-page .provider-selector {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  z-index: 2;
+}
+
+.fibre-page .provider-slider {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  margin: 0 60px;
+  padding: 20px 5px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  flex-grow: 1;
+}
+
+.fibre-page .provider-slider::-webkit-scrollbar {
+  display: none;
+}
+
+.fibre-page .provider-card {
+  scroll-snap-align: center;
+  flex: 0 0 auto;
+  width: 300px;
+  height: 140px;
+  border-radius: 20px;
+  background: rgba(250, 247, 244, 0.6);
+  backdrop-filter: blur(20px);
+  box-shadow: 
+    0 8px 32px rgba(74, 69, 63, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(232, 227, 219, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  padding: 24px;
+}
+
+.fibre-page .provider-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #d67d3e, #f0a876);
+  border-radius: 20px 20px 0 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.fibre-page .provider-card:hover::before {
+  opacity: 1;
+}
+
+.fibre-page .provider-logo {
+  max-width: 85%;
+  max-height: 85%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  z-index: 2;
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.fibre-page .provider-text {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2d2823;
+  text-align: center;
+  padding: 0 15px;
+  z-index: 2;
+  margin: 0;
+}
+
+.fibre-page .provider-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  background: rgba(250, 247, 244, 0.8);
+  box-shadow: 
+    0 20px 40px rgba(74, 69, 63, 0.12),
+    0 8px 16px rgba(214, 125, 62, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  border-color: rgba(214, 125, 62, 0.2);
+}
+
+.fibre-page .provider-card.active {
+  border-color: #d67d3e;
+  background: rgba(250, 247, 244, 0.9);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 
+    0 20px 40px rgba(74, 69, 63, 0.15),
+    0 8px 16px rgba(214, 125, 62, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.fibre-page .provider-card.active::before {
+  opacity: 1;
+}
+
+.fibre-page .provider-card.active .provider-text {
+  color: #d67d3e;
+  font-weight: 700;
+}
+
+.fibre-page .provider-card:hover .provider-logo {
+  transform: scale(1.02);
+  filter: brightness(1.1);
+}
+
+.fibre-page .provider-card.active .provider-logo {
+  transform: scale(1.05);
+  filter: brightness(1.2);
+}
+
+.fibre-page .nav-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(250, 247, 244, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(232, 227, 219, 0.3);
+  color: #6b6355;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(74, 69, 63, 0.1);
+  z-index: 5;
+  flex-shrink: 0;
+}
+
+.fibre-page .nav-arrow:hover {
+  background: #d67d3e;
+  color: white;
+  border-color: #c56d31;
+  box-shadow: 0 12px 40px rgba(214, 125, 62, 0.3);
+  transform: scale(1.1);
+}
+
+.fibre-page .nav-prev {
+  margin-right: 0;
+  position: absolute;
+  left: 0;
+}
+
+.fibre-page .nav-next {
+  margin-left: 0;
+  position: absolute;
+  right: 0;
+}
+
+.fibre-page .provider-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 35px;
+  position: relative;
+  z-index: 2;
+}
+
+.fibre-page .indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(107, 99, 85, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(232, 227, 219, 0.3);
+}
+
+.fibre-page .indicator.active {
+  background: #d67d3e;
+  transform: scale(1.3);
+  box-shadow: 0 4px 15px rgba(214, 125, 62, 0.4);
+  border-color: #c56d31;
+}
+
+/* Packages Grid */
+.fibre-page .packages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  margin-top: 10px;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  z-index: 2;
+}
+
+.fibre-page .no-packages {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  color: #6b6355;
+  background: rgba(250, 247, 244, 0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(232, 227, 219, 0.3);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(74, 69, 63, 0.08);
+}
+
+/* Loading and Error States */
+.fibre-page .loading-container,
+.fibre-page .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: 40px;
+}
+
+.fibre-page .loading-container p {
+  margin-top: 20px;
+  color: #6b6355;
+  font-size: 1.1rem;
+}
+
+.fibre-page .error-container h2 {
+  color: #d67d3e;
+  margin-bottom: 16px;
+  font-size: 2rem;
+}
+
+.fibre-page .error-container p {
+  color: #6b6355;
+  margin-bottom: 24px;
+  font-size: 1.1rem;
+}
+
+.fibre-page .retry-button {
+  background: #d67d3e;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.fibre-page .retry-button:hover {
+  background: #c56d31;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(214, 125, 62, 0.3);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+  .fibre-page .provider-card {
+    width: 312px;
+    height: 156px;
+    padding: 12px;
+  }
+  
+  .fibre-page .provider-logo {
+    max-width: calc(80% - 24px);
+    max-height: calc(80% - 24px);
+  }
+}
+
+@media (max-width: 992px) {
+  .fibre-page .fibre-header {
+    padding: 120px 0 60px;
+  }
+
+  .fibre-page .heading-gradient {
+    font-size: 3rem;
+  }
+  
+  .fibre-page .section-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .fibre-page .fibre-header {
+    padding: 100px 0 60px;
+  }
+
+  .fibre-page .heading-gradient {
+    font-size: 2.5rem;
+  }
+  
+  .fibre-page .section-title {
+    font-size: 1.8rem;
+  }
+  
+  .fibre-page .title-container {
+    margin-bottom: 40px;
+  }
+  
+  .fibre-page .provider-slider {
+    margin: 0 60px;
+    padding: 20px 20px;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .fibre-page .provider-card {
+    width: 280px;
+    min-width: 280px;
+    max-width: 280px;
+    height: 120px;
+    padding: 16px;
+    flex-shrink: 0;
+    scroll-snap-align: center;
+    margin: 0 10px;
+  }
+  
+  .fibre-page .provider-logo {
+    max-width: 70%;
+    max-height: 70%;
+    object-fit: contain;
+  }
+  
+  .fibre-page .provider-text {
+    font-size: 1.1rem;
+  }
+  
+  .fibre-page .nav-arrow {
+    width: 44px;
+    height: 44px;
+    position: absolute;
+    z-index: 10;
+  }
+  
+  .fibre-page .nav-prev {
+    left: 10px;
+  }
+  
+  .fibre-page .nav-next {
+    right: 10px;
+  }
+  
+  .fibre-page .packages-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+  }
+
+  .fibre-page .fibre-section {
+    padding: 60px 0 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 16px;
+  }
+
+  .fibre-page .fibre-header {
+    padding: 80px 0 40px;
+  }
+
+  .fibre-page .heading-gradient {
+    font-size: 2rem;
+  }
+
+  .fibre-page .subheading {
+    font-size: 1.125rem;
+  }
+  
+  .fibre-page .fibre-section {
+    padding: 40px 0 60px;
+  }
+  
+  .fibre-page .provider-slider {
+    margin: 0 40px;
+    padding: 16px 8px;
+  }
+  
+  .fibre-page .provider-card {
+    width: 85vw;
+    max-width: 260px;
+    height: 110px;
+    padding: 16px;
+  }
+  
+  .fibre-page .packages-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f4f1ec;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c9bbaa;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b3a596;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+} 

@@ -1,0 +1,60 @@
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.App main {
+  flex: 1;
+}
+
+/* Temporary styling for development */
+.home-page,
+.fibre-page,
+.lte-page,
+.booking-page,
+.admin-page,
+.signup-page,
+.package-selection-page,
+.promo-deals-page {
+  padding: 60px 20px;
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.home-page {
+  background: var(--bg-gradient);
+}
+
+.home-page h1 {
+  font-size: 3rem;
+  color: var(--text-dark);
+  margin-bottom: 1rem;
+}
+
+.home-page p {
+  font-size: 1.2rem;
+  color: var(--text-light);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Header and Footer placeholders */
+.header {
+  background: var(--white);
+  padding: 1rem 0;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.footer {
+  background: var(--text-dark);
+  color: var(--white);
+  padding: 2rem 0;
+  text-align: center;
+} 

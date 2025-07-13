@@ -1,0 +1,333 @@
+/* Package Card Styles */
+.package-card {
+  background: rgba(250, 247, 244, 0.6);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  box-shadow: 
+    0 8px 32px rgba(74, 69, 63, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(232, 227, 219, 0.3);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.package-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #d67d3e, #f0a876);
+  border-radius: 20px 20px 0 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.package-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  background: rgba(250, 247, 244, 0.8);
+  box-shadow: 
+    0 20px 40px rgba(74, 69, 63, 0.12),
+    0 8px 16px rgba(214, 125, 62, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  border-color: rgba(214, 125, 62, 0.2);
+}
+
+.package-card:hover::before {
+  opacity: 1;
+}
+
+.package-provider-logo {
+  max-width: 50px;
+  max-height: 25px;
+  margin-bottom: 10px;
+  object-fit: contain;
+}
+
+.package-provider-name {
+  font-size: 0.9rem;
+  color: #2d2823;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.package-price-badge {
+  font-size: 1.8rem;
+  font-weight: 700;
+  border-radius: 6px;
+  padding: 4px 8px;
+  margin-bottom: 10px;
+  display: inline-flex;
+  align-items: baseline;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  position: relative;
+  z-index: 2;
+}
+
+.package-price-badge .price-main {
+  color: #d67d3e;
+}
+
+.package-price-badge .currency {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #6b6355;
+  margin-right: 2px;
+  position: relative;
+  top: 2px;
+}
+
+.package-price-badge small {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: #6b6355;
+  margin-left: 4px;
+  position: relative;
+  top: -4px;
+}
+
+.package-speeds-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.speeds-inline {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2d2823;
+  letter-spacing: 0.1px;
+  flex-wrap: nowrap;
+  margin-bottom: 4px;
+  position: relative;
+  z-index: 2;
+}
+
+.speeds-inline .slash {
+  color: #6b6355;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.speed-labels-inline {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 40px;
+  width: 100%;
+  font-size: 0.7rem;
+  color: #6b6355;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.1px;
+  position: relative;
+  z-index: 2;
+}
+
+.package-feature-badge {
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #d67d3e;
+  border: 1px solid #c56d31;
+  border-radius: 6px;
+  padding: 6px 12px;
+  display: inline-block;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 2;
+}
+
+/* Promo Styles */
+.package-card.has-promo {
+  border: 2px solid #d67d3e;
+  box-shadow: 
+    0 20px 40px rgba(214, 125, 62, 0.2),
+    0 8px 16px rgba(214, 125, 62, 0.15);
+  overflow: visible;
+}
+
+.package-card.has-promo::before {
+  opacity: 1;
+  animation: promo-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes promo-glow {
+  0% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.promo-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 15;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes badge-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.promo-badge-promo {
+  background: #d67d3e;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  font-weight: 700;
+}
+
+.package-price-badge.promo-active {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.original-price {
+  font-size: 1rem;
+  text-decoration: line-through;
+  opacity: 0.6;
+  color: #6b6355;
+  font-weight: 400;
+}
+
+.promo-price {
+  font-size: 1.8rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: baseline;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.promo-price .price-main {
+  color: #d67d3e;
+}
+
+.fibre-promo-text {
+  background: rgba(214, 125, 62, 0.1);
+  color: #d67d3e;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-top: 8px;
+  text-align: center;
+  border: 1px solid rgba(214, 125, 62, 0.3);
+  position: relative;
+  z-index: 2;
+  backdrop-filter: blur(10px);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .package-card {
+    max-width: 98vw;
+    padding: 12px 6vw 10px 6vw;
+  }
+  
+  .package-provider-logo {
+    max-width: 40px;
+    max-height: 20px;
+    margin-bottom: 8px;
+  }
+  
+  .package-provider-name {
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+  }
+  
+  .package-price-badge {
+    font-size: 1.5rem;
+    padding: 4px 6px;
+  }
+  
+  .package-price-badge .currency {
+    font-size: 1rem;
+    top: 1px;
+  }
+  
+  .package-price-badge small {
+    font-size: 0.6rem;
+    top: -3px;
+  }
+  
+  .package-speeds-row {
+    margin-bottom: 8px;
+  }
+  
+  .speeds-inline {
+    font-size: 0.9rem;
+    gap: 4px;
+  }
+  
+  .speed-labels-inline {
+    font-size: 0.65rem;
+    gap: 30px;
+  }
+  
+  .package-feature-badge {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .package-card {
+    padding: 10px 2vw 8px 2vw;
+  }
+  
+  .speeds-inline {
+    font-size: 0.85rem;
+    gap: 3px;
+  }
+  
+  .speed-labels-inline {
+    font-size: 0.6rem;
+    gap: 25px;
+  }
+  
+  .package-price-badge {
+    font-size: 1.4rem;
+    padding: 3px 5px;
+  }
+  
+  .package-price-badge .currency {
+    font-size: 0.95rem;
+    top: 1px;
+  }
+  
+  .package-price-badge small {
+    font-size: 0.55rem;
+    top: -3px;
+  }
+} 

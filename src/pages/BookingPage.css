@@ -1,0 +1,121 @@
+/* Booking Page Styles */
+.booking-page {
+    background: linear-gradient(135deg, #faf7f4 0%, #f0ebe3 30%, #f7f2eb 70%, #faf7f4 100%);
+    background-attachment: fixed;
+    padding: 120px 20px;
+    font-family: 'Poppins', 'Inter', sans-serif;
+    color: #2d2823;
+    min-height: 100vh;
+}
+
+.booking-card {
+    background: rgba(250, 247, 244, 0.9);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 48px;
+    box-shadow: 0 8px 32px rgba(74, 69, 63, 0.1);
+    border: 1px solid rgba(232, 227, 219, 0.3);
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.booking-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.booking-title span {
+    color: #d67d3e;
+}
+
+.booking-description {
+    text-align: center;
+    color: #6b6355;
+    margin-bottom: 40px;
+    font-size: 1.2rem;
+    line-height: 1.6;
+}
+
+.booking-form .form-section {
+    margin-bottom: 32px;
+}
+
+.booking-form h4 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #d67d3e;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #ede8e1;
+}
+
+.booking-form .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.booking-form .form-group {
+    margin-bottom: 20px;
+}
+
+.booking-form label {
+    display: block;
+    font-weight: 600;
+    color: #6b6355;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.booking-form input,
+.booking-form select,
+.booking-form textarea {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid #ede8e1;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: 'Poppins', 'Inter', sans-serif;
+    transition: all 0.2s ease-in-out;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.booking-form input:focus,
+.booking-form select:focus,
+.booking-form textarea:focus {
+    outline: none;
+    border-color: #d67d3e;
+    box-shadow: 0 0 0 4px rgba(214, 125, 62, 0.2);
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: #d67d3e;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-submit:hover {
+    background: #c56d31;
+}
+
+.terms-note {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #6b6355;
+    margin-top: 24px;
+}
+
+.error-message {
+    color: #d32f2f;
+    font-size: 0.875rem;
+    margin-top: 4px;
+}

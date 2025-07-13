@@ -1,0 +1,70 @@
+/* Promo Deals Page Styles */
+.promo-deals-page .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.promo-deals-page h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #2d2823;
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.promo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.promo-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.promo-card:hover {
+    transform: translateY(-5px);
+}
+
+.promo-card-header {
+    background-color: #d67d3e;
+    color: white;
+    padding: 20px;
+}
+
+.promo-card-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.promo-card-header p {
+    margin: 4px 0 0;
+    opacity: 0.9;
+}
+
+.promo-card-body {
+    padding: 20px;
+}
+
+.original-price {
+    text-decoration: line-through;
+    color: #6b6355;
+    font-size: 1rem;
+}
+
+.promo-price {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #d67d3e;
+    margin: 4px 0 12px;
+}
+
+.promo-text {
+    font-size: 0.9rem;
+    color: #6b6355;
+}
