@@ -26,13 +26,6 @@ const FibrePage = () => {
       setLoading(true);
       console.log('Starting fibre packages fetch...'); // Debug log
       
-      // Always use fallback for now to test display
-      console.log('Using fallback providers for testing'); // Debug log
-      const fallbackProviders = createFallbackProviders();
-      setProviders(fallbackProviders);
-      
-      // Uncomment below when WordPress API is ready
-      /*
       const response = await packageService.getFibrePackages();
       
       console.log('API Response:', response.data); // Debug log
@@ -48,7 +41,6 @@ const FibrePage = () => {
         const fallbackProviders = createFallbackProviders();
         setProviders(fallbackProviders);
       }
-      */
     } catch (err) {
       console.error('Error fetching fibre packages:', err);
       console.log('API failed, using fallback providers'); // Debug log
