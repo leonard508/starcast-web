@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // WordPress REST API base URL - update this to your WordPress site URL
-const WP_API_BASE_URL = process.env.REACT_APP_WP_API_URL || 'https://your-wordpress-site.com/wp-json';
+const WP_API_BASE_URL = process.env.REACT_APP_WP_API_URL || 'https://starcast.co.za/wp-json';
 
 const wpApi = axios.create({
   baseURL: WP_API_BASE_URL,
