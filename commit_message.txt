@@ -1,5 +1,0 @@
-feat(fibre): replicate page-fibre.php card design
-
-- Replicated the exact HTML structure and CSS from page-fibre.php for Fibre package cards.
-- Ensured prominent price display, clear speed metrics, and unified information blocks.
-- Applied Material Design principles for an app-like look and feel.
