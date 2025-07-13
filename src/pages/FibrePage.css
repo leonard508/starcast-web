@@ -157,43 +157,52 @@ body {
   flex: 0 0 auto;
   width: 280px;
   height: 120px;
-  background: #ffffff;
-  border: 2px solid #e5e5e7;
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px) saturate(180%);
+  -webkit-backdrop-filter: blur(8px) saturate(180%);
+  border: 1px solid rgba(229, 231, 235, 0.3);
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   padding: 24px;
   min-width: 280px;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
 .provider-card::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #007AFF, #5856D6);
+  inset: 0;
+  background: linear-gradient(120deg, rgba(0, 122, 255, 0.1), rgba(88, 86, 214, 0.1));
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.4s ease;
+  z-index: -1;
 }
 
 .provider-card:hover {
-  transform: translateY(-4px);
-  border-color: #007AFF;
-  box-shadow: 0 12px 24px rgba(0, 122, 255, 0.1);
+  transform: translateY(-4px) scale(1.02);
+  border-color: rgba(0, 122, 255, 0.5);
+  box-shadow: 
+    0 12px 24px rgba(0, 122, 255, 0.1),
+    0 4px 8px rgba(0, 122, 255, 0.05);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .provider-card.active {
-  border-color: #007AFF;
-  background: rgba(0, 122, 255, 0.02);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(0, 122, 255, 0.15);
+  border-color: rgba(0, 122, 255, 0.8);
+  background: rgba(255, 255, 255, 0.95);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 
+    0 12px 24px rgba(0, 122, 255, 0.15),
+    0 4px 8px rgba(0, 122, 255, 0.1),
+    inset 0 0 20px rgba(0, 122, 255, 0.05);
 }
 
 .provider-card.active::before {
@@ -224,8 +233,10 @@ body {
   transform: translateY(-50%);
   width: 48px;
   height: 48px;
-  background: #ffffff;
-  border: 2px solid #e5e5e7;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(229, 231, 235, 0.4);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -234,12 +245,19 @@ body {
   transition: all 0.3s ease;
   color: #86868b;
   z-index: 10;
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.05),
+    0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .nav-arrow:hover {
-  border-color: #007AFF;
+  border-color: rgba(0, 122, 255, 0.5);
   color: #007AFF;
-  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 
+    0 8px 16px rgba(0, 122, 255, 0.15),
+    0 4px 8px rgba(0, 122, 255, 0.1);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .nav-prev {
