@@ -13,7 +13,7 @@ const ModernFibrePage = () => {
   const scrollTimeoutRef = useRef(null);
 
   // Define allowed providers in the exact order we want them displayed (matching PHP)
-  const allowedProviders = ['openserve', 'octotel', 'frogfoot', 'vuma', 'metrofibre'];
+  const allowedProviders = ['openserve', 'frogfoot', 'vumatel', 'octotel', 'metrofibre'];
 
   useEffect(() => {
     fetchFibreData();
@@ -22,21 +22,30 @@ const ModernFibrePage = () => {
   const fetchFibreData = async () => {
     try {
       setLoading(true);
-      const response = await packageService.getFibrePackages();
       
-      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-        const packages = response.data;
-        const groupedProviders = groupPackagesByProvider(packages);
-        setProviders(groupedProviders);
-      } else {
-        // Use fallback data if API returns no packages
-        const fallbackProviders = createFallbackProviders();
-        setProviders(fallbackProviders);
+      // For now, always use fallback providers since this is a demo/development version
+      // In production, this would connect to the WordPress REST API
+      const fallbackProviders = createFallbackProviders();
+      setProviders(fallbackProviders);
+      
+      // Optional: Try to fetch from API but don't fail if it doesn't work
+      try {
+        const response = await packageService.getFibrePackages();
+        if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+          const packages = response.data;
+          const groupedProviders = groupPackagesByProvider(packages);
+          if (groupedProviders.length > 0) {
+            setProviders(groupedProviders);
+          }
+        }
+      } catch (apiError) {
+        console.log('API not available, using fallback data');
+        // Keep using fallback data - no error state needed
       }
     } catch (err) {
-      console.error('Error fetching fibre data:', err);
+      console.error('Error loading fibre data:', err);
       setError('Failed to load fibre packages');
-      // Use fallback data
+      // Still provide fallback data even on error
       const fallbackProviders = createFallbackProviders();
       setProviders(fallbackProviders);
     } finally {
@@ -105,24 +114,62 @@ const ModernFibrePage = () => {
       {
         name: 'Openserve',
         slug: 'openserve',
-        logo: '/images/openserve-logo.png',
+        logo: null,
         packages: [
-          { id: 1, title: '10Mbps/5Mbps', price: 299, download: '10Mbps', upload: '5Mbps', provider: 'Openserve', download_speed: 10, has_promo: false },
-          { id: 2, title: '25Mbps/10Mbps', price: 399, download: '25Mbps', upload: '10Mbps', provider: 'Openserve', download_speed: 25, has_promo: false },
-          { id: 3, title: '50Mbps/25Mbps', price: 599, download: '50Mbps', upload: '25Mbps', provider: 'Openserve', download_speed: 50, has_promo: false }
+          { id: 1, title: '10Mbps/10Mbps', price: 299, download: '10Mbps', upload: '10Mbps', provider: 'Openserve', download_speed: 10, has_promo: false },
+          { id: 2, title: '25Mbps/25Mbps', price: 399, download: '25Mbps', upload: '25Mbps', provider: 'Openserve', download_speed: 25, has_promo: false },
+          { id: 3, title: '50Mbps/50Mbps', price: 599, download: '50Mbps', upload: '50Mbps', provider: 'Openserve', download_speed: 50, has_promo: false },
+          { id: 4, title: '100Mbps/100Mbps', price: 899, download: '100Mbps', upload: '100Mbps', provider: 'Openserve', download_speed: 100, has_promo: false }
         ],
         priority: 0
       },
       {
-        name: 'Vuma',
-        slug: 'vuma',
-        logo: '/images/vuma-logo.png',
+        name: 'Frogfoot',
+        slug: 'frogfoot',
+        logo: null,
         packages: [
-          { id: 4, title: '20Mbps/10Mbps', price: 349, download: '20Mbps', upload: '10Mbps', provider: 'Vuma', download_speed: 20, has_promo: false },
-          { id: 5, title: '50Mbps/25Mbps', price: 549, download: '50Mbps', upload: '25Mbps', provider: 'Vuma', download_speed: 50, has_promo: false },
-          { id: 6, title: '100Mbps/50Mbps', price: 799, download: '100Mbps', upload: '50Mbps', provider: 'Vuma', download_speed: 100, has_promo: false }
+          { id: 5, title: '10Mbps/10Mbps', price: 329, download: '10Mbps', upload: '10Mbps', provider: 'Frogfoot', download_speed: 10, has_promo: false },
+          { id: 6, title: '25Mbps/25Mbps', price: 449, download: '25Mbps', upload: '25Mbps', provider: 'Frogfoot', download_speed: 25, has_promo: false },
+          { id: 7, title: '50Mbps/50Mbps', price: 649, download: '50Mbps', upload: '50Mbps', provider: 'Frogfoot', download_speed: 50, has_promo: false },
+          { id: 8, title: '100Mbps/100Mbps', price: 949, download: '100Mbps', upload: '100Mbps', provider: 'Frogfoot', download_speed: 100, has_promo: false }
         ],
         priority: 1
+      },
+      {
+        name: 'Vumatel',
+        slug: 'vumatel',
+        logo: null,
+        packages: [
+          { id: 9, title: '10Mbps/10Mbps', price: 309, download: '10Mbps', upload: '10Mbps', provider: 'Vumatel', download_speed: 10, has_promo: false },
+          { id: 10, title: '25Mbps/25Mbps', price: 419, download: '25Mbps', upload: '25Mbps', provider: 'Vumatel', download_speed: 25, has_promo: false },
+          { id: 11, title: '50Mbps/50Mbps', price: 619, download: '50Mbps', upload: '50Mbps', provider: 'Vumatel', download_speed: 50, has_promo: false },
+          { id: 12, title: '100Mbps/100Mbps', price: 879, download: '100Mbps', upload: '100Mbps', provider: 'Vumatel', download_speed: 100, has_promo: false }
+        ],
+        priority: 2
+      },
+      {
+        name: 'Octotel',
+        slug: 'octotel',
+        logo: null,
+        packages: [
+          { id: 13, title: '10Mbps/10Mbps', price: 319, download: '10Mbps', upload: '10Mbps', provider: 'Octotel', download_speed: 10, has_promo: false },
+          { id: 14, title: '25Mbps/25Mbps', price: 439, download: '25Mbps', upload: '25Mbps', provider: 'Octotel', download_speed: 25, has_promo: false },
+          { id: 15, title: '50Mbps/50Mbps', price: 639, download: '50Mbps', upload: '50Mbps', provider: 'Octotel', download_speed: 50, has_promo: false },
+          { id: 16, title: '100Mbps/100Mbps', price: 919, download: '100Mbps', upload: '100Mbps', provider: 'Octotel', download_speed: 100, has_promo: false }
+        ],
+        priority: 3
+      },
+      {
+        name: 'MetroFibre',
+        slug: 'metrofibre',
+        logo: null,
+        packages: [
+          { id: 17, title: '10Mbps/10Mbps', price: 349, download: '10Mbps', upload: '10Mbps', provider: 'MetroFibre', download_speed: 10, has_promo: false },
+          { id: 18, title: '25Mbps/25Mbps', price: 469, download: '25Mbps', upload: '25Mbps', provider: 'MetroFibre', download_speed: 25, has_promo: false },
+          { id: 19, title: '50Mbps/50Mbps', price: 669, download: '50Mbps', upload: '50Mbps', provider: 'MetroFibre', download_speed: 50, has_promo: false },
+          { id: 20, title: '100Mbps/100Mbps', price: 969, download: '100Mbps', upload: '100Mbps', provider: 'MetroFibre', download_speed: 100, has_promo: false }
+        ],
+        priority: 4
       }
     ];
   };

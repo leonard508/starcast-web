@@ -14,7 +14,6 @@ import ModernHomePage from './pages/ModernHomePage';
 import FibrePage from './pages/FibrePage';
 import LTEPage from './pages/LTEPage';
 import BookingPage from './pages/BookingPage';
-import AdminPage from './pages/AdminPage';
 import SignupPage from './pages/SignupPage';
 import LTESignupPage from './pages/LTESignupPage';
 import PackageSelectionPage from './pages/PackageSelectionPage';
@@ -39,7 +38,6 @@ function App() {
             <Route path="/lte-5g" element={<LTEPage />} />
             <Route path="/lte" element={<LTEPage />} />
             <Route path="/booking" element={<BookingPage />} />
-            <Route path="/admin" element={<AdminPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/lte-signup" element={<LTESignupPage />} />
             <Route path="/package-selection" element={<PackageSelectionPage />} />
