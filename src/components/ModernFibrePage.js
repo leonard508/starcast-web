@@ -55,21 +55,31 @@ const ModernFibrePage = () => {
     }
   };
 
-  const groupPackagesByProvider = (packages) => {
+    const groupPackagesByProvider = (packages) => {
     const grouped = {};
     packages.forEach(pkg => {
-      const provider = pkg.provider || 'Unknown';
-      if (!grouped[provider]) {
-        grouped[provider] = {
-          id: provider.toLowerCase().replace(/\s+/g, ''),
-          name: provider,
+      // Extract provider from the embedded term
+      const providerTerm = pkg._embedded?.['wp:term']?.flat().find(term => term.taxonomy === 'fibre_provider');
+      const providerName = providerTerm?.name || 'Unknown';
+
+      if (!grouped[providerName]) {
+        grouped[providerName] = {
+          id: providerName.toLowerCase().replace(/\s+/g, ''),
+          name: providerName,
           packages: []
         };
       }
-      grouped[provider].packages.push({
+      grouped[providerName].packages.push({
         ...pkg,
-        type: getPackageType(pkg.price || 0),
-        popular: pkg.price && pkg.price > 800 && pkg.price < 1200
+        name: pkg.title.rendered,
+        download: pkg.acf?.download || 'N/A',
+        upload: pkg.acf?.upload || 'N/A',
+        price: pkg.acf?.price || 0,
+        promoPrice: pkg.acf?.promo_price || null,
+        hasPromo: !!pkg.acf?.promo_price,
+        type: getPackageType(pkg.acf?.price || 0),
+        popular: (pkg.acf?.price || 0) > 800 && (pkg.acf?.price || 0) < 1200,
+        features: pkg.acf?.features || []
       });
     });
     return Object.values(grouped);
