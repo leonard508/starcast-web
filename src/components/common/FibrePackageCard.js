@@ -1,10 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './PackageCard.css';
+import './PackageCard.css'; // This CSS will be heavily modified
 
 const FibrePackageCard = ({ package: pkg, provider, onSelect }) => {
   const navigate = useNavigate();
-  
+
   if (!pkg) return null;
 
   const handleClick = () => {
@@ -25,76 +25,58 @@ const FibrePackageCard = ({ package: pkg, provider, onSelect }) => {
 
   const originalPrice = pkg.price;
   const promoPrice = pkg.promo_price;
-  const effectivePrice = pkg.effective_price || promoPrice || originalPrice;
   const hasPromo = pkg.has_promo && promoPrice && promoPrice < originalPrice;
 
-  const renderPromoBadge = () => {
-    if (!hasPromo) return null;
-    
-    return (
+  // Directly construct elements as in PHP
+  let promoBadgeHtml = '';
+  if (hasPromo) {
+    promoBadgeHtml = (
       <div className="promo-badge promo-badge-promo">
         PROMO
       </div>
     );
-  };
+  }
 
-  const renderPriceBadge = () => {
-    if (hasPromo) {
-      return (
-        <div className="package-price-badge promo-active">
-          <div className="original-price">
-            R{originalPrice} <small>/pm</small>
-          </div>
-          <div className="promo-price">
-            <span className="currency">R</span>
-            <span className="price-main">{promoPrice}</span> <small>/pm</small>
-          </div>
-        </div>
-      );
-    }
-    
-    return (
-      <div className="package-price-badge">
-        <span className="currency">R</span>
-        <span className="price-main">{effectivePrice}</span> <small>/pm</small>
+  let priceBadgeHtml = '';
+  if (hasPromo) {
+    priceBadgeHtml = (
+      <div className="package-price-badge promo-active">
+        <div className="original-price">R{originalPrice} <small>/pm</small></div>
+        <div className="promo-price"><span className="currency">R</span><span className="price-main">{promoPrice}</span> <small>/pm</small></div>
       </div>
     );
-  };
+  } else {
+    priceBadgeHtml = (
+      <div className="package-price-badge">
+        <span className="currency">R</span>
+        <span className="price-main">{originalPrice}</span> <small>/pm</small>
+      </div>
+    );
+  }
 
-  const renderPromoText = () => {
-    if (!hasPromo) return null;
-    
+  let promoTextHtml = '';
+  if (hasPromo) {
     const savings = originalPrice - promoPrice;
     const promoText = pkg.promo_display_text || `Save R${savings}/month`;
-    
-    return (
+    promoTextHtml = (
       <div className="fibre-promo-text">
         {promoText}
       </div>
     );
-  };
+  }
 
   return (
-    <div 
+    <div
       className={`package-card ${hasPromo ? 'has-promo' : ''}`}
       onClick={handleClick}
     >
-      {renderPromoBadge()}
-      
+      {promoBadgeHtml}
       {provider && provider.logo ? (
-        <img 
-          src={provider.logo} 
-          alt={provider.name} 
-          className="package-provider-logo"
-        />
+        <img src={provider.logo} alt={provider.name} className="package-provider-logo" />
       ) : (
-        <div className="package-provider-name">
-          {provider?.name || 'Provider'}
-        </div>
+        <div className="package-provider-name">{provider?.name || 'Provider'}</div>
       )}
-      
-      {renderPriceBadge()}
-      
+      {priceBadgeHtml}
       <div className="package-speeds-row">
         <div className="speeds-inline">
           <span>{downloadSpeed} Mbps</span>
@@ -106,12 +88,8 @@ const FibrePackageCard = ({ package: pkg, provider, onSelect }) => {
           <span>Upload</span>
         </div>
       </div>
-      
-      <div className="package-feature-badge">
-        {pkg.data_display || pkg.data || 'Uncapped'}
-      </div>
-      
-      {renderPromoText()}
+      <div className="package-feature-badge">Uncapped</div>
+      {promoTextHtml}
     </div>
   );
 };
