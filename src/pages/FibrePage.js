@@ -14,8 +14,8 @@ const FibrePage = () => {
   const [, setIsScrolling] = useState(false);
   const providerSliderRef = useRef(null);
 
-  // Define allowed providers in the exact order we want them displayed
-  const allowedProviders = ['openserve', 'octotel', 'frogfoot', 'vuma', 'metrofibre', 'metrofibre-north', 'metrofibre-south', 'pphg', 'lightstruck'];
+  // Define allowed providers in the exact order we want them displayed (matching PHP)
+  const allowedProviders = ['openserve', 'octotel', 'frogfoot', 'vuma', 'metrofibre', 'metrofibre-north', 'metrofibre-south'];
 
   useEffect(() => {
     fetchFibrePackages();
@@ -30,7 +30,14 @@ const FibrePage = () => {
       
       console.log('API Response:', response.data); // Debug log
       
-      if (response.data && response.data.success && response.data.data) {
+      // Handle WordPress REST API response format (array of posts)
+      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+        const packages = response.data;
+        console.log('Packages received:', packages); // Debug log
+        const groupedProviders = groupPackagesByProvider(packages);
+        setProviders(groupedProviders);
+      } else if (response.data && response.data.success && response.data.data) {
+        // Handle custom API response format (fallback)
         const packages = response.data.data;
         console.log('Packages received:', packages); // Debug log
         const groupedProviders = groupPackagesByProvider(packages);
@@ -108,13 +115,27 @@ const FibrePage = () => {
   };
 
   const groupPackagesByProvider = (packages) => {
+    console.log('=== DEBUGGING PACKAGES ===');
+    console.log('Total packages received:', packages.length);
+    
+    // Debug: Show first 10 package titles
+    packages.slice(0, 10).forEach((pkg, index) => {
+      const title = typeof pkg.title === 'object' ? pkg.title.rendered : pkg.title;
+      console.log(`Package ${index + 1}: "${title}"`);
+    });
+    
     const grouped = {};
     
-    packages.forEach(pkg => {
-      console.log('Processing package:', pkg); // Debug log
+    packages.forEach((pkg, index) => {
+      const title = typeof pkg.title === 'object' ? pkg.title.rendered : pkg.title;
+      console.log(`Processing package ${index + 1}:`, title); // Debug log
       
       // Extract provider name from package title or use provider field directly
-      const providerName = pkg.provider || extractProviderName(pkg.title) || 'Other';
+      // Handle WordPress post format where title is an object
+      const packageTitle = typeof pkg.title === 'object' ? pkg.title.rendered : pkg.title;
+      
+      // Extract provider name from package title - this was working before
+      const providerName = extractProviderName(packageTitle) || 'Other';
       const providerSlug = providerName.toLowerCase().replace(/\s+/g, '-');
       
       if (!grouped[providerSlug]) {
@@ -129,17 +150,21 @@ const FibrePage = () => {
       // Map the package data with proper field names from WordPress API
       const mappedPackage = {
         ...pkg,
-        // Map speed fields - API returns 'speed' field which contains download speed
-        download_speed_value: extractSpeedValue(pkg.speed || pkg.download || '0'),
-        upload_speed_value: extractSpeedValue(pkg.upload_speed || pkg.upload || pkg.speed || '0'),
+        // Handle WordPress post title format
+        title: packageTitle,
+        // Map speed fields - WordPress ACF fields use 'download' and 'upload'
+        download_speed_value: extractSpeedValue(pkg.acf?.download || pkg.speed || pkg.download || '0'),
+        upload_speed_value: extractSpeedValue(pkg.acf?.upload || pkg.upload_speed || pkg.upload || '0'),
         // Keep original fields for display
-        download_display: pkg.speed || pkg.download || 'N/A',
-        upload_display: pkg.upload_speed || pkg.upload || pkg.speed || 'N/A',
-        // Handle pricing
-        has_promo: pkg.promo_price && pkg.promo_price !== pkg.price,
-        effective_price: pkg.promo_price || pkg.price,
+        download_display: pkg.acf?.download || pkg.speed || pkg.download || 'N/A',
+        upload_display: pkg.acf?.upload || pkg.upload_speed || pkg.upload || 'N/A',
+        // Handle pricing from ACF fields
+        price: pkg.acf?.price || pkg.price || 0,
+        promo_price: pkg.acf?.promo_price || pkg.promo_price,
+        has_promo: (pkg.acf?.promo_price || pkg.promo_price) && (pkg.acf?.promo_price || pkg.promo_price) !== (pkg.acf?.price || pkg.price),
+        effective_price: pkg.acf?.promo_price || pkg.promo_price || pkg.acf?.price || pkg.price,
         // Ensure we have the data field
-        data_display: pkg.data || 'Unlimited'
+        data_display: pkg.acf?.data || pkg.data || 'Unlimited'
       };
       
       console.log('Mapped package:', mappedPackage); // Debug log
@@ -152,43 +177,23 @@ const FibrePage = () => {
       provider.packages.sort((a, b) => a.download_speed_value - b.download_speed_value);
     });
 
-    // Filter and sort providers according to allowed list
-    const filteredProviders = [];
+    // Return all providers - this was working with 8 providers
+    const allProviders = Object.values(grouped).filter(provider => provider.packages.length > 0);
     
-    allowedProviders.forEach((allowedProvider, index) => {
-      const provider = Object.values(grouped).find(p => 
-        p.slug.includes(allowedProvider) || 
-        p.name.toLowerCase().includes(allowedProvider)
-      );
-      
-      if (provider && provider.packages.length > 0) {
-        filteredProviders.push({
-          ...provider,
-          priority: index
-        });
-      }
-    });
-
-    // Add any remaining providers not in the allowed list
-    Object.values(grouped).forEach(provider => {
-      if (!filteredProviders.find(p => p.slug === provider.slug) && provider.packages.length > 0) {
-        filteredProviders.push({
-          ...provider,
-          priority: 999
-        });
-      }
-    });
-
-    console.log('Final grouped providers:', filteredProviders); // Debug log
-    return filteredProviders.sort((a, b) => a.priority - b.priority);
+    console.log('Final grouped providers:', allProviders); // Debug log
+    return allProviders;
   };
 
   const extractProviderName = (title) => {
-    // Extract provider name from package title
-    const providers = ['Openserve', 'Octotel', 'Frogfoot', 'Vuma', 'MetroFibre', 'PPHG', 'Lightstruck'];
+    // Extract provider name from package title - working list from first 100 packages
+    const providers = [
+      'PPHG', 'Lightstruck', 'Netstream', 'Zoom Fibre', 'Steyn City', 
+      'Nova', 'Nexus', 'Link Layer'
+    ];
     
+    // Check for exact provider name at start of title
     for (const provider of providers) {
-      if (title.toLowerCase().includes(provider.toLowerCase())) {
+      if (title.toLowerCase().startsWith(provider.toLowerCase())) {
         return provider;
       }
     }
