@@ -31,6 +31,14 @@ class CacheService {
   }
 
   /**
+   * Force clear cache (useful for debugging API issues)
+   */
+  forceClearCache() {
+    console.log('Force clearing all cache data');
+    this.clearCache();
+  }
+
+  /**
    * Get cached data for a specific key
    */
   getCachedData(cacheKey) {

@@ -18,6 +18,7 @@ export const packageService = {
       // Try to get from cache first
       const cachedData = cacheService.getFibrePackages();
       if (cachedData) {
+        console.log('Using cached fibre packages');
         return { data: cachedData };
       }
 
@@ -25,7 +26,7 @@ export const packageService = {
       console.log('Fetching fresh fibre packages from API...');
       const response = await api.get('/wp/v2/fibre_packages?per_page=100&_embed');
       
-      // Cache the response data
+      // Cache the response data (WordPress returns array directly)
       if (response.data && Array.isArray(response.data)) {
         cacheService.setFibrePackages(response.data);
       }
@@ -48,6 +49,8 @@ export const packageService = {
       // Try to get from cache first
       const cachedData = cacheService.getLTEPackages();
       if (cachedData) {
+        console.log('Using cached LTE packages');
+        // Return in the same format as the original API response
         return { data: cachedData };
       }
 
@@ -55,14 +58,9 @@ export const packageService = {
       console.log('Fetching fresh LTE packages from API...');
       const response = await api.get('/starcast/v1/packages/lte');
       
-      // Cache the response data
+      // Cache the entire response.data to preserve the original structure
       if (response.data) {
-        const dataToCache = response.data.success ? response.data.data : response.data;
-        if (Array.isArray(dataToCache)) {
-          cacheService.setLTEPackages(dataToCache);
-        } else if (response.data.success && response.data.data) {
-          cacheService.setLTEPackages(response.data);
-        }
+        cacheService.setLTEPackages(response.data);
       }
       
       return response;
@@ -84,6 +82,10 @@ export const packageService = {
   // Cache management functions
   clearCache: () => cacheService.clearCache(),
   getCacheStatus: () => cacheService.getCacheStatus(),
+  
+  // Direct API calls (bypass cache for testing)
+  getLTEPackagesDirect: () => api.get('/starcast/v1/packages/lte'),
+  getFibrePackagesDirect: () => api.get('/wp/v2/fibre_packages?per_page=100&_embed'),
 };
 
 // Booking services using WordPress REST API
