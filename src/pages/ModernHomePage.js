@@ -242,22 +242,23 @@ const ModernHomePage = () => {
         </div>
       </section>
 
-          {/* Support CTA */}
-          <motion.div 
-            className="mt-12 p-6 bg-gradient-to-r from-stone-100 to-sand-100 rounded-3xl border border-stone-200/50"
-            variants={heroVariants}
-          >
-            <div className="text-center">
-              <div className="text-3xl mb-3">💬</div>
-              <h3 className="font-semibold text-stone-800 mb-2">Need Help Choosing?</h3>
-              <p className="text-stone-600 text-sm mb-4">
-                Our experts are here to help you find the perfect plan
-              </p>
-              <Button variant="outlined" className="border-stone-300 text-stone-700 hover:bg-stone-50">
-                Chat with Expert
-              </Button>
-            </div>
-          </motion.div>
+      {/* Support CTA */}
+      <section className="container mx-auto px-4 py-12">
+        <motion.div 
+          className="p-6 bg-gradient-to-r from-stone-100 to-sand-100 rounded-3xl border border-stone-200/50 text-center"
+          variants={heroVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.5 }}
+        >
+            <div className="text-3xl mb-3">💬</div>
+            <h3 className="font-semibold text-stone-800 mb-2">Need Help Choosing?</h3>
+            <p className="text-stone-600 text-sm mb-4">
+              Our experts are here to help you find the perfect plan
+            </p>
+            <Button variant="outlined" className="border-stone-300 text-stone-700 hover:bg-stone-50">
+              Chat with Expert
+            </Button>
         </motion.div>
       </section>
     </div>
