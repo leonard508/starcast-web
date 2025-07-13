@@ -7,9 +7,9 @@
 
 .fibre-page {
   font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #faf7f4 0%, #f0ebe3 30%, #f7f2eb 70%, #faf7f4 100%);
+  background: linear-gradient(135deg, var(--sand-50) 0%, var(--surface-warm) 30%, var(--stone-50) 70%, var(--sand-50) 100%);
   background-attachment: fixed;
-  color: #4a453f;
+  color: var(--on-surface);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -25,13 +25,13 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 8px;
+  padding: 0 16px; /* Consistent with global container */
 }
 
 /* Header Styles */
 .fibre-page .fibre-header {
   text-align: center;
-  padding: 8px 0 6px;
+  padding: 20px 0 15px; /* Adjusted padding */
   background: transparent;
   position: relative;
   overflow: hidden;
@@ -46,9 +46,9 @@
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(circle at 20% 20%, rgba(214, 125, 62, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(242, 237, 230, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 40% 60%, rgba(232, 227, 219, 0.2) 0%, transparent 50%);
+    radial-gradient(circle at 20% 20%, rgba(14, 165, 233, 0.1) 0%, transparent 50%), /* primary-500 */
+    radial-gradient(circle at 80% 80%, rgba(245, 245, 244, 0.3) 0%, transparent 50%), /* stone-100 */
+    radial-gradient(circle at 40% 60%, rgba(231, 229, 228, 0.2) 0%, transparent 50%); /* stone-200 */
 }
 
 .fibre-page .container {
@@ -57,30 +57,30 @@
 }
 
 .fibre-page .heading-gradient {
-  font-size: 1.1rem;
-  font-weight: 700; /* Reduced from 800 */
-  color: #2d2823;
-  margin-bottom: 4px;
-  line-height: 1.1;
+  font-size: 1.4rem; /* Adjusted font size */
+  font-weight: 700; /* Adjusted font-weight */
+  color: var(--on-surface);
+  margin-bottom: 8px; /* Adjusted margin */
+  line-height: 1.2;
   letter-spacing: -0.02em;
 }
 
 .fibre-page .heading-gradient span {
-  color: #d67d3e;
+  color: var(--primary-500); /* primary-500 */
 }
 
 .fibre-page .subheading {
-  font-size: 0.65rem;
-  color: #6b6355;
+  font-size: 0.875rem; /* Adjusted font size */
+  color: var(--on-surface-variant);
   max-width: 600px;
-  margin: 0 auto 3px auto;
+  margin: 0 auto 15px auto; /* Adjusted margin */
   font-weight: 400;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 /* Section Styles */
 .fibre-page .fibre-section {
-  padding: 6px 0 20px;
+  padding: 20px 0 40px; /* Adjusted padding */
   background: transparent;
   position: relative;
   flex: 1;
@@ -96,14 +96,14 @@
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(circle at 70% 30%, rgba(242, 237, 230, 0.4) 0%, transparent 50%),
-    radial-gradient(circle at 30% 70%, rgba(214, 125, 62, 0.05) 0%, transparent 50%);
+    radial-gradient(circle at 70% 30%, rgba(245, 245, 244, 0.4) 0%, transparent 50%), /* stone-100 */
+    radial-gradient(circle at 30% 70%, rgba(14, 165, 233, 0.05) 0%, transparent 50%); /* primary-500 */
 }
 
 .fibre-page .title-container {
   width: 100%;
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 25px; /* Adjusted margin */
   position: relative;
   z-index: 2;
   flex-shrink: 0;
@@ -111,9 +111,9 @@
 
 .fibre-page .section-title {
   text-align: center;
-  color: #2d2823;
-  font-size: 0.9rem;
-  font-weight: 700; /* Reduced from 800 */
+  color: var(--on-surface);
+  font-size: 1.3rem; /* Adjusted font size */
+  font-weight: 700; /* Adjusted font-weight */
   margin: 0 auto;
   display: inline-block;
   position: relative;
@@ -129,7 +129,7 @@
   transform: translateX(-50%);
   width: 80px;
   height: 4px;
-  background: #d67d3e;
+  background: var(--primary-500); /* primary-500 */
   border-radius: 2px;
 }
 
@@ -138,7 +138,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 20px; /* Adjusted margin */
   max-width: 100%;
   width: 100%;
   z-index: 2;
@@ -147,14 +147,14 @@
 
 .fibre-page .provider-slider {
   display: flex;
-  gap: 8px;
+  gap: 16px; /* Adjusted gap */
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
   scrollbar-width: none; /* For Firefox */
   -ms-overflow-style: none; /* For Internet Explorer and Edge */
-  margin: 0 35px;
-  padding: 6px 3px;
+  margin: 0 40px; /* Adjusted margin for arrows */
+  padding: 10px 5px; /* Adjusted padding */
   scroll-behavior: smooth;
   flex-grow: 1;
   width: 100%;
@@ -167,24 +167,22 @@
 .fibre-page .provider-card {
   scroll-snap-align: center;
   flex: 0 0 auto;
-  width: 100px;
-  height: 55px;
+  width: 140px; /* Adjusted width */
+  height: 80px; /* Adjusted height */
   border-radius: 12px;
-  background: rgba(250, 247, 244, 0.6);
-  backdrop-filter: blur(20px);
-  box-shadow: 
-    0 4px 16px rgba(74, 69, 63, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  border: 1px solid rgba(232, 227, 219, 0.3);
+  background: var(--surface);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--stone-200);
   display: flex;
+  flex-direction: column; /* Changed to column for text below logo */
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  padding: 6px;
-  min-width: 100px;
+  padding: 10px;
+  min-width: 140px; /* Adjusted min-width */
   touch-action: manipulation;
 }
 
@@ -195,8 +193,8 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #d67d3e, #f0a876);
-  border-radius: 20px 20px 0 0;
+  background: linear-gradient(90deg, var(--primary-500), var(--primary-600));
+  border-radius: 12px 12px 0 0;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -206,44 +204,38 @@
 }
 
 .fibre-page .provider-logo {
-  max-width: 85%;
-  max-height: 85%;
+  max-width: 80%;
+  max-height: 60%;
   width: auto;
   height: auto;
   object-fit: contain;
   z-index: 2;
   transition: all 0.3s ease;
   display: block;
+  margin-bottom: 5px; /* Added margin */
 }
 
 .fibre-page .provider-text {
-  font-size: 0.75rem;
+  font-size: 0.85rem; /* Adjusted font size */
   font-weight: 600;
-  color: #2d2823;
+  color: var(--on-surface);
   text-align: center;
-  padding: 0 6px;
+  padding: 0 5px;
   z-index: 2;
   margin: 0;
 }
 
 .fibre-page .provider-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  background: rgba(250, 247, 244, 0.8);
-  box-shadow: 
-    0 20px 40px rgba(74, 69, 63, 0.12),
-    0 8px 16px rgba(214, 125, 62, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  border-color: rgba(214, 125, 62, 0.2);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.07), 0 3px 6px rgba(0, 0, 0, 0.07);
+  border-color: var(--primary-500);
 }
 
 .fibre-page .provider-card.active {
-  border-color: #d67d3e;
-  background: rgba(250, 247, 244, 0.9);
-  transform: translateY(-4px) scale(1.05);
-  box-shadow: 
-    0 20px 40px rgba(74, 69, 63, 0.15),
-    0 8px 16px rgba(214, 125, 62, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  border-color: var(--primary-500);
+  background: var(--primary-50);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 16px rgba(14, 165, 233, 0.2);
 }
 
 .fibre-page .provider-card.active::before {
@@ -251,17 +243,17 @@
 }
 
 .fibre-page .provider-card.active .provider-text {
-  color: #d67d3e;
+  color: var(--primary-600);
   font-weight: 700;
 }
 
 .fibre-page .provider-card:hover .provider-logo {
-  transform: scale(1.02);
+  transform: scale(1.05);
   filter: brightness(1.1);
 }
 
 .fibre-page .provider-card.active .provider-logo {
-  transform: scale(1.05);
+  transform: scale(1.1);
   filter: brightness(1.2);
 }
 
@@ -269,28 +261,27 @@
   display: flex; /* Ensure arrows are visible */
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 40px; /* Adjusted size */
+  height: 40px; /* Adjusted size */
   border-radius: 50%;
-  background: rgba(250, 247, 244, 0.8);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(232, 227, 219, 0.3);
-  color: #6b6355;
+  background: var(--surface);
+  border: 1px solid var(--stone-200);
+  color: var(--on-surface-variant);
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 32px rgba(74, 69, 63, 0.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   z-index: 5;
   flex-shrink: 0;
-  min-width: 32px;
+  min-width: 40px;
   touch-action: manipulation;
 }
 
 .fibre-page .nav-arrow:hover {
-  background: #d67d3e;
+  background: var(--primary-500);
   color: white;
-  border-color: #c56d31;
-  box-shadow: 0 12px 40px rgba(214, 125, 62, 0.3);
-  transform: scale(1.1);
+  border-color: var(--primary-600);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+  transform: scale(1.05);
 }
 
 .fibre-page .nav-prev {
@@ -308,36 +299,34 @@
 .fibre-page .provider-indicators {
   display: flex;
   justify-content: center;
-  gap: 6px;
-  margin-bottom: 8px;
-  position: relative;
-  z-index: 2;
+  gap: 8px; /* Adjusted gap */
+  margin-bottom: 20px; /* Adjusted margin */
   flex-shrink: 0;
 }
 
 .fibre-page .indicator {
-  width: 12px;
-  height: 12px;
+  width: 10px; /* Adjusted size */
+  height: 10px; /* Adjusted size */
   border-radius: 50%;
-  background-color: rgba(107, 99, 85, 0.3);
+  background-color: var(--stone-300);
   cursor: pointer;
   transition: all 0.3s ease;
-  border: 1px solid rgba(232, 227, 219, 0.3);
+  border: 1px solid var(--stone-200);
 }
 
 .fibre-page .indicator.active {
-  background: #d67d3e;
-  transform: scale(1.3);
-  box-shadow: 0 4px 15px rgba(214, 125, 62, 0.4);
-  border-color: #c56d31;
+  background: var(--primary-500);
+  transform: scale(1.2);
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.2);
+  border-color: var(--primary-600);
 }
 
 /* Packages Grid */
 .fibre-page .packages-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 6px;
+  display: grid; /* Changed to grid for better layout control */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid */
+  gap: 20px; /* Adjusted gap */
+  margin-top: 20px; /* Adjusted margin */
   width: 100%;
   max-width: 100%;
   margin-left: auto;
@@ -346,78 +335,72 @@
   z-index: 2;
   flex: 1;
   align-content: start;
-  padding: 0 8px;
+  padding: 0 16px; /* Consistent with global container */
 }
 
 .fibre-page .package-card {
-  background: rgba(250, 247, 244, 0.9);
-  border-radius: 12px;
-  box-shadow: 
-    0 4px 20px rgba(74, 69, 63, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  border: 1px solid rgba(232, 227, 219, 0.3);
-  padding: 16px;
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--stone-200);
+  padding: 24px; /* Adjusted padding */
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
-  text-align: center;
-  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  height: 100%;
   touch-action: manipulation;
-  backdrop-filter: blur(10px);
   position: relative;
 }
 
 .fibre-page .package-card:hover {
-  transform: translateY(-6px);
-  background: rgba(250, 247, 244, 0.9);
-  box-shadow: 
-    0 20px 40px rgba(74, 69, 63, 0.12),
-    0 8px 16px rgba(214, 125, 62, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  border-color: rgba(214, 125, 62, 0.3);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.07), 0 3px 6px rgba(0, 0, 0, 0.07);
+  border-color: var(--primary-500);
 }
 
 .fibre-page .package-name {
-  font-size: 1.1rem;
+  font-size: 1.25rem; /* Adjusted font size */
   font-weight: 700;
-  color: #2d2823;
-  margin-bottom: 8px;
+  color: var(--on-surface);
+  margin-bottom: 12px; /* Adjusted margin */
   line-height: 1.3;
-  text-align: center;
+  min-height: 4.8rem; /* Approx 3 lines of text */
 }
 
 .fibre-page .package-provider {
-  font-size: 0.85rem;
+  font-size: 0.9rem; /* Adjusted font size */
   font-weight: 500;
-  color: #6b6355;
-  margin-bottom: 12px;
-  text-align: center;
+  color: var(--on-surface-variant);
+  margin-bottom: 16px; /* Adjusted margin */
+  text-align: left;
 }
 
 .fibre-page .package-price {
-  font-size: 2.2rem;
+  font-size: 2.5rem; /* Adjusted font size */
   font-weight: 800;
-  color: #d67d3e;
+  color: var(--primary-500);
   line-height: 1;
   margin-bottom: 16px;
-  text-align: center;
+  text-align: left;
   display: flex;
   align-items: baseline;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 4px;
 }
 
 .fibre-page .package-price .currency {
-  font-size: 1rem;
+  font-size: 1.5rem; /* Adjusted font size */
   font-weight: 600;
   vertical-align: super;
   margin-right: 2px;
 }
 
 .fibre-page .package-price .period {
-  font-size: 0.9rem;
+  font-size: 1rem; /* Adjusted font size */
   font-weight: 500;
-  color: #6b6355;
+  color: var(--on-surface-variant);
   margin-left: 4px;
 }
 
@@ -426,9 +409,10 @@
   margin-bottom: 20px;
   text-align: left;
   flex-grow: 1;
-  padding: 12px;
-  background: rgba(214, 125, 62, 0.05);
-  border-radius: 8px;
+  padding: 0;
+  background: transparent; /* Removed background */
+  border-radius: 0; /* Removed border-radius */
+  padding: 0; /* Removed padding */
 }
 
 .fibre-page .package-features li {
@@ -436,51 +420,50 @@
   align-items: center;
   margin-bottom: 8px;
   font-size: 0.9rem;
-  color: #2d2823;
+  color: var(--on-surface);
   line-height: 1.4;
 }
 
 .fibre-page .package-features li svg {
-  width: 12px;
-  height: 12px;
-  margin-right: 6px;
-  color: #d67d3e;
+  width: 18px; /* Adjusted size */
+  height: 18px; /* Adjusted size */
+  margin-right: 8px; /* Adjusted margin */
+  color: var(--sage-500); /* Changed color */
   flex-shrink: 0;
 }
 
 .fibre-page .package-select-btn {
-  background: #d67d3e;
-  color: #ffffff;
+  background: var(--primary-500);
+  color: var(--white);
   border: none;
-  padding: 14px 20px;
-  border-radius: 25px;
-  font-size: 1rem;
+  padding: 14px 24px; /* Adjusted padding */
+  border-radius: 12px; /* Adjusted border-radius */
+  font-size: 1rem; /* Adjusted font size */
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   width: 100%;
   margin-top: auto;
-  box-shadow: 0 4px 12px rgba(214, 125, 62, 0.3);
-  min-height: 48px;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2); /* Updated shadow color */
+  min-height: 50px; /* Increased min-height */
   touch-action: manipulation;
 }
 
 .fibre-page .package-select-btn:hover {
-  background: #c56d31;
+  background: var(--primary-600);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(214, 125, 62, 0.4);
+  box-shadow: 0 6px 16px rgba(14, 165, 233, 0.3); /* Updated shadow color */
 }
 
 .fibre-page .no-packages {
   grid-column: 1 / -1;
   text-align: center;
   padding: 40px;
-  color: #6b6355;
-  background: rgba(250, 247, 244, 0.6);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(232, 227, 219, 0.3);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(74, 69, 63, 0.08);
+  color: var(--on-surface-variant);
+  background: var(--surface-warm);
+  border: 1px solid var(--stone-200);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 /* Loading and Error States */
@@ -512,24 +495,24 @@
 
 .fibre-page .loading-container p {
   margin-top: 20px;
-  color: #6b6355;
+  color: var(--on-surface-variant);
   font-size: 1.1rem;
 }
 
 .fibre-page .error-container h2 {
-  color: #d67d3e;
+  color: var(--primary-500);
   margin-bottom: 16px;
   font-size: 2rem;
 }
 
 .fibre-page .error-container p {
-  color: #6b6355;
+  color: var(--on-surface-variant);
   margin-bottom: 24px;
   font-size: 1.1rem;
 }
 
 .fibre-page .retry-button {
-  background: #d67d3e;
+  background: var(--primary-500);
   color: white;
   border: none;
   padding: 12px 24px;
@@ -541,241 +524,203 @@
 }
 
 .fibre-page .retry-button:hover {
-  background: #c56d31;
+  background: var(--primary-600);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(214, 125, 62, 0.3);
+  box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3); /* Updated shadow color */
 }
 
-/* Progressive Enhancement - Mobile First */
+/* Responsive Adjustments */
 @media (min-width: 481px) {
-  .fibre-page .nav-arrow {
-    display: flex;
+  .container {
+    padding: 0 20px;
   }
-  
-  .fibre-page .provider-card {
-    width: 140px;
-    height: 80px;
-    padding: 10px;
+  .fibre-page .fibre-header {
+    padding: 25px 0 20px;
   }
-  
-  .fibre-page .provider-text {
+  .fibre-page .heading-gradient {
+    font-size: 1.6rem;
+  }
+  .fibre-page .subheading {
     font-size: 0.9rem;
   }
-  
-  .fibre-page .heading-gradient {
+  .fibre-page .section-title {
     font-size: 1.4rem;
   }
-  
-  .fibre-page .subheading {
-    font-size: 0.8rem;
+  .fibre-page .provider-slider {
+    margin: 0 50px;
+    gap: 20px;
+    padding: 15px 5px;
   }
-  
-  .fibre-page .section-title {
-    font-size: 1.1rem;
+  .fibre-page .nav-arrow {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
   }
-  
-  .fibre-page .fibre-header {
-    padding: 20px 0 15px;
-  }
-}
-
-@media (min-width: 576px) {
-  .fibre-page .packages-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    padding: 0 8px;
-  }
-  
-  .fibre-page .package-card {
-    padding: 18px;
-  }
-  
   .fibre-page .provider-card {
     width: 160px;
     height: 90px;
+    min-width: 160px;
     padding: 12px;
   }
-  
   .fibre-page .provider-text {
+    font-size: 0.95rem;
+  }
+  .fibre-page .packages-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    padding: 0 20px;
+  }
+  .fibre-page .package-card {
+    padding: 28px;
+  }
+  .fibre-page .package-name {
+    font-size: 1.35rem;
+  }
+  .fibre-page .package-price .price-main {
+    font-size: 2.8rem;
+  }
+  .fibre-page .package-price .currency {
+    font-size: 1.6rem;
+  }
+  .fibre-page .package-price .period {
     font-size: 1.1rem;
+  }
+  .fibre-page .package-features li {
+    font-size: 0.95rem;
+  }
+  .fibre-page .package-select-btn {
+    font-size: 1.05rem;
+    padding: 16px 28px;
   }
 }
 
 @media (min-width: 768px) {
-  .fibre-page .fibre-header {
-    padding: 25px 0 20px;
+  .container {
+    padding: 0 24px;
   }
-  
+  .fibre-page .fibre-header {
+    padding: 30px 0 25px;
+  }
   .fibre-page .heading-gradient {
+    font-size: 1.8rem;
+  }
+  .fibre-page .subheading {
+    font-size: 1rem;
+  }
+  .fibre-page .section-title {
     font-size: 1.6rem;
   }
-  
-  .fibre-page .subheading {
-    font-size: 0.875rem;
-  }
-  
-  .fibre-page .section-title {
-    font-size: 1.3rem;
-  }
-  
-  .fibre-page .title-container {
-    margin-bottom: 25px;
-  }
-  
   .fibre-page .provider-selector {
-    margin-bottom: 20px;
-    justify-content: center;
+    margin-bottom: 30px;
   }
-  
   .fibre-page .provider-slider {
-    overflow: visible;
-    scroll-snap-type: none;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin: 0;
-    padding: 0;
-    gap: 16px;
+    margin: 0 60px;
+    gap: 24px;
+    padding: 20px 5px;
   }
-  
   .fibre-page .nav-arrow {
-    display: none !important;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
   }
-  
-  .fibre-page .provider-indicators {
-    display: none;
-  }
-  
   .fibre-page .provider-card {
-    width: 160px;
-    height: 90px;
-    padding: 12px;
+    width: 180px;
+    height: 100px;
+    min-width: 180px;
+    padding: 15px;
   }
-  
   .fibre-page .provider-text {
     font-size: 1rem;
+  }
+  .fibre-page .packages-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+    padding: 0 24px;
+  }
+  .fibre-page .package-card {
+    padding: 32px;
+  }
+  .fibre-page .package-name {
+    font-size: 1.4rem;
+  }
+  .fibre-page .package-price .price-main {
+    font-size: 3rem;
+  }
+  .fibre-page .package-price .currency {
+    font-size: 1.8rem;
+  }
+  .fibre-page .package-price .period {
+    font-size: 1.2rem;
+  }
+  .fibre-page .package-features li {
+    font-size: 1rem;
+  }
+  .fibre-page .package-select-btn {
+    font-size: 1.1rem;
+    padding: 18px 32px;
   }
 }
 
 @media (min-width: 992px) {
   .fibre-page .fibre-header {
-    padding: 30px 0 25px;
-  }
-  
-  .fibre-page .heading-gradient {
-    font-size: 1.8rem;
-  }
-  
-  .fibre-page .subheading {
-    font-size: 0.9rem;
-  }
-  
-  .fibre-page .section-title {
-    font-size: 1.5rem;
-  }
-  
-  .fibre-page .title-container {
-    margin-bottom: 30px;
-  }
-  
-  .fibre-page .provider-selector {
-    margin-bottom: 25px;
-    justify-content: center;
-  }
-  
-  .fibre-page .provider-slider {
-    gap: 20px;
-  }
-  
-  .fibre-page .provider-indicators {
-    display: none;
-  }
-  
-  .fibre-page .packages-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-  }
-  
-  .fibre-page .provider-card {
-    width: 180px;
-    height: 100px;
-    padding: 14px;
-  }
-  
-  .fibre-page .provider-text {
-    font-size: 1.1rem;
-    padding: 0 12px;
-  }
-  
-  .fibre-page .package-card {
-    padding: 20px;
-  }
-  
-  .fibre-page .package-name {
-    font-size: 1.2rem;
-  }
-  
-  .fibre-page .package-price {
-    font-size: 2.4rem;
-  }
-  
-  .fibre-page .package-select-btn {
-    font-size: 1.1rem;
-    padding: 16px 24px;
-  }
-}
-
-@media (min-width: 1200px) {
-  .fibre-page .fibre-header {
     padding: 40px 0 30px;
   }
-  
   .fibre-page .heading-gradient {
     font-size: 2rem;
   }
-  
   .fibre-page .subheading {
-    font-size: 1rem;
+    font-size: 1.1rem;
   }
-  
   .fibre-page .section-title {
-    font-size: 1.7rem;
+    font-size: 1.8rem;
   }
-  
-  .fibre-page .title-container {
-    margin-bottom: 35px;
-  }
-  
-  .fibre-page .provider-selector {
-    margin-bottom: 30px;
-    justify-content: center;
-  }
-  
   .fibre-page .provider-slider {
-    gap: 24px;
+    margin: 0 80px;
+    gap: 30px;
+    padding: 25px 5px;
   }
-  
-  .fibre-page .provider-indicators {
-    display: none;
+  .fibre-page .nav-arrow {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
   }
-  
-  .fibre-page .packages-grid {
-    gap: 22px;
-  }
-  
   .fibre-page .provider-card {
     width: 200px;
     height: 110px;
-    padding: 16px;
+    min-width: 200px;
+    padding: 18px;
   }
-  
   .fibre-page .provider-text {
-    font-size: 1.2rem;
-    padding: 0 15px;
+    font-size: 1.1rem;
+  }
+  .fibre-page .packages-grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 40px;
+    padding: 0 30px;
+  }
+  .fibre-page .package-card {
+    padding: 36px;
+  }
+  .fibre-page .package-name {
+    font-size: 1.5rem;
+  }
+  .fibre-page .package-price .price-main {
+    font-size: 3.2rem;
+  }
+  .fibre-page .package-price .currency {
+    font-size: 2rem;
+  }
+  .fibre-page .package-price .period {
+    font-size: 1.3rem;
+  }
+  .fibre-page .package-features li {
+    font-size: 1.05rem;
+  }
+  .fibre-page .package-select-btn {
+    font-size: 1.15rem;
+    padding: 20px 36px;
   }
 }
-
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
@@ -783,16 +728,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #f4f1ec;
+  background: var(--stone-100);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c9bbaa;
+  background: var(--stone-300);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #b3a596;
+  background: var(--stone-500);
 }
 
 /* Smooth scrolling */
