@@ -21,6 +21,7 @@ import PromoDealsPage from './pages/PromoDealsPage';
 
 // New Design System Components
 import BottomNavigation from './components/design-system/BottomNavigation';
+import ModernFibrePage from './components/ModernFibrePage';
 
 function App() {
   return (
@@ -31,7 +32,8 @@ function App() {
           <Routes>
             <Route path="/" element={<ModernHomePage />} />
             <Route path="/old-home" element={<HomePage />} />
-            <Route path="/fibre" element={<FibrePage />} />
+            <Route path="/fibre" element={<ModernFibrePage />} />
+            <Route path="/old-fibre" element={<FibrePage />} />
             <Route path="/lte-5g" element={<LTEPage />} />
             <Route path="/lte" element={<LTEPage />} />
             <Route path="/booking" element={<BookingPage />} />
