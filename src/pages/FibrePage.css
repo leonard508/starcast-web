@@ -334,9 +334,9 @@
 
 /* Packages Grid */
 .fibre-page .packages-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   margin-top: 6px;
   width: 100%;
   max-width: 100%;
@@ -346,17 +346,17 @@
   z-index: 2;
   flex: 1;
   align-content: start;
-  padding: 0 4px;
+  padding: 0 8px;
 }
 
 .fibre-page .package-card {
-  background: rgba(250, 247, 244, 0.8);
+  background: rgba(250, 247, 244, 0.9);
   border-radius: 12px;
   box-shadow: 
-    0 4px 16px rgba(74, 69, 63, 0.08),
+    0 4px 20px rgba(74, 69, 63, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
   border: 1px solid rgba(232, 227, 219, 0.3);
-  padding: 10px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
@@ -364,7 +364,7 @@
   width: 100%;
   touch-action: manipulation;
   backdrop-filter: blur(10px);
-  min-height: 140px;
+  position: relative;
 }
 
 .fibre-page .package-card:hover {
@@ -378,27 +378,33 @@
 }
 
 .fibre-page .package-name {
-  font-size: 0.8rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: #2d2823;
-  margin-bottom: 3px;
-  line-height: 1.2;
+  margin-bottom: 8px;
+  line-height: 1.3;
+  text-align: center;
 }
 
 .fibre-page .package-provider {
-  font-size: 0.7rem;
+  font-size: 0.85rem;
   font-weight: 500;
   color: #6b6355;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  text-align: center;
 }
 
 .fibre-page .package-price {
-  font-size: 1.6rem;
+  font-size: 2.2rem;
   font-weight: 800;
   color: #d67d3e;
   line-height: 1;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
   text-align: center;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
 }
 
 .fibre-page .package-price .currency {
@@ -417,20 +423,21 @@
 
 .fibre-page .package-features {
   list-style: none;
-  margin-bottom: 12px;
-  text-align: center;
+  margin-bottom: 20px;
+  text-align: left;
   flex-grow: 1;
-  padding: 0;
+  padding: 12px;
+  background: rgba(214, 125, 62, 0.05);
+  border-radius: 8px;
 }
 
 .fibre-page .package-features li {
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-bottom: 4px;
-  font-size: 0.7rem;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
   color: #2d2823;
-  line-height: 1.2;
+  line-height: 1.4;
 }
 
 .fibre-page .package-features li svg {
@@ -445,16 +452,16 @@
   background: #d67d3e;
   color: #ffffff;
   border: none;
-  padding: 8px 10px;
-  border-radius: 16px;
-  font-size: 0.7rem;
+  padding: 14px 20px;
+  border-radius: 25px;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   width: 100%;
   margin-top: auto;
   box-shadow: 0 4px 12px rgba(214, 125, 62, 0.3);
-  min-height: 36px;
+  min-height: 48px;
   touch-action: manipulation;
 }
 
@@ -574,10 +581,16 @@
 
 @media (min-width: 576px) {
   .fibre-page .packages-grid {
+    display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 16px;
     padding: 0 8px;
   }
+  
+  .fibre-page .package-card {
+    padding: 18px;
+  }
+}
   
   .fibre-page .provider-card {
     width: 160px;
@@ -680,8 +693,9 @@
   }
   
   .fibre-page .packages-grid {
+    display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
+    gap: 20px;
   }
   
   .fibre-page .provider-card {
@@ -693,6 +707,23 @@
   .fibre-page .provider-text {
     font-size: 1.1rem;
     padding: 0 12px;
+  }
+  
+  .fibre-page .package-card {
+    padding: 20px;
+  }
+  
+  .fibre-page .package-name {
+    font-size: 1.2rem;
+  }
+  
+  .fibre-page .package-price {
+    font-size: 2.4rem;
+  }
+  
+  .fibre-page .package-select-btn {
+    font-size: 1.1rem;
+    padding: 16px 24px;
   }
 }
 
