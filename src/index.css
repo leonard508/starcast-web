@@ -39,29 +39,31 @@ code {
   --card-border: 1px solid rgba(232, 227, 219, 0.3);
 }
 
-/* Global Styles */
+/* Global Styles - Mobile First */
 .container {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 12px;
 }
 
-/* Button Styles */
+/* Button Styles - Mobile First */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 16px 32px;
+  padding: 12px 20px;
   border-radius: 8px;
   font-weight: 600;
   text-decoration: none;
   transition: all 0.2s ease;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.875rem;
   line-height: 1.5;
   border: none;
   outline: none;
+  min-height: 44px;
+  touch-action: manipulation;
 }
 
 .btn-primary {
@@ -111,20 +113,8 @@ code {
   100% { transform: rotate(360deg); }
 }
 
-/* Mobile-First Responsive Design */
-@media (max-width: 480px) {
-  .container {
-    padding: 0 12px;
-  }
-  
-  .btn {
-    padding: 12px 20px;
-    font-size: 0.875rem;
-    min-height: 44px;
-  }
-}
-
-@media (min-width: 481px) and (max-width: 768px) {
+/* Mobile-First Progressive Enhancement */
+@media (min-width: 481px) {
   .container {
     padding: 0 16px;
   }
@@ -132,7 +122,6 @@ code {
   .btn {
     padding: 14px 24px;
     font-size: 0.9rem;
-    min-height: 44px;
   }
 }
 

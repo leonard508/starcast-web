@@ -31,11 +31,11 @@
 
 .lte-header {
   text-align: center;
-  padding: 40px 12px 30px;
+  padding: 20px 0 15px;
 }
 
 .heading-gradient {
-  font-size: 2rem;
+  font-size: 1.4rem;
   font-weight: 800;
   line-height: 1.2;
   margin-bottom: 15px;
@@ -46,7 +46,7 @@
 }
 
 .subheading {
-  font-size: 1rem;
+  font-size: 0.8rem;
   color: var(--text-light);
   font-weight: 400;
   max-width: 600px;
@@ -68,7 +68,7 @@
 .section-title {
   text-align: center;
   color: var(--text-dark);
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 800;
   margin: 0 auto;
   display: inline-block;
@@ -123,8 +123,8 @@
 .provider-card {
   scroll-snap-align: center;
   flex: 0 0 auto;
-  width: 140px;
-  height: 80px;
+  width: 80px;
+  height: 50px;
   border-radius: 12px;
   background: var(--white);
   box-shadow: 0 8px 32px rgba(74, 69, 63, 0.08);
@@ -134,8 +134,9 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 10px;
-  min-width: 140px;
+  padding: 4px;
+  min-width: 80px;
+  touch-action: manipulation;
 }
 
 .provider-card:hover {
@@ -166,17 +167,18 @@
 }
 
 .provider-text {
-  font-size: 1.2rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: var(--text-dark);
+  text-align: center;
 }
 
 .nav-arrow {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--white);
   border: 1px solid var(--border-color);
@@ -186,7 +188,8 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   z-index: 5;
   flex-shrink: 0;
-  min-width: 36px;
+  min-width: 32px;
+  touch-action: manipulation;
 }
 
 .nav-arrow:hover {
@@ -220,21 +223,22 @@
 .packages-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
 }
 
 .package-card {
   background: var(--white);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(74, 69, 63, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(74, 69, 63, 0.08);
   border: 1px solid var(--border-color);
-  padding: 20px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
   text-align: left;
   width: 100%;
+  touch-action: manipulation;
 }
 
 .package-card:hover {
@@ -244,10 +248,10 @@
 }
 
 .package-name {
-  font-size: 1.2rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--text-dark);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   line-height: 1.3;
 }
 
@@ -259,15 +263,15 @@
 }
 
 .package-price {
-  font-size: 2.5rem;
+  font-size: 1.6rem;
   font-weight: 800;
   color: var(--primary-color);
   line-height: 1;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .package-price .currency {
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: 600;
   vertical-align: super;
   margin-right: 2px;
@@ -291,15 +295,15 @@
 .package-features li {
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
-  font-size: 0.95rem;
+  margin-bottom: 8px;
+  font-size: 0.75rem;
   color: var(--text-dark);
 }
 
 .package-features li svg {
-  width: 20px;
-  height: 20px;
-  margin-right: 10px;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
   color: var(--primary-color);
   flex-shrink: 0;
 }
@@ -308,15 +312,17 @@
   background: var(--primary-color);
   color: var(--white);
   border: none;
-  padding: 14px 24px;
-  border-radius: 28px;
-  font-size: 1rem;
+  padding: 10px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   width: 100%;
   margin-top: auto;
   box-shadow: 0 4px 12px rgba(214, 125, 62, 0.3);
+  min-height: 40px;
+  touch-action: manipulation;
 }
 
 .package-select-btn:hover {
@@ -370,29 +376,133 @@
   transform: translateY(-2px);
 }
 
-/* Responsive Styles */
-@media (min-width: 576px) {
-  .container {
-    padding: 0 16px;
-  }
-  
-  .packages-grid {
-    grid-template-columns: repeat(2, 1fr);
+/* Progressive Enhancement - Mobile First */
+@media (min-width: 481px) {
+  .nav-arrow {
+    display: flex;
   }
   
   .provider-card {
-    width: 180px;
-    height: 100px;
+    width: 100px;
+    height: 60px;
+    padding: 6px;
+  }
+  
+  .provider-text {
+    font-size: 0.8rem;
+  }
+  
+  .heading-gradient {
+    font-size: 1.6rem;
+  }
+  
+  .subheading {
+    font-size: 0.875rem;
+  }
+  
+  .section-title {
+    font-size: 1.3rem;
+  }
+}
+
+@media (min-width: 576px) {
+  .packages-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .provider-card {
+    width: 120px;
+    height: 70px;
+    padding: 8px;
+  }
+  
+  .provider-text {
+    font-size: 0.875rem;
+  }
+  
+  .package-card {
+    padding: 14px;
+  }
+  
+  .package-name {
+    font-size: 1rem;
+  }
+  
+  .package-price {
+    font-size: 1.8rem;
+  }
+  
+  .package-price .currency {
+    font-size: 1.2rem;
+  }
+  
+  .package-features li {
+    font-size: 0.8rem;
+  }
+  
+  .package-select-btn {
+    font-size: 0.85rem;
+    padding: 12px 16px;
   }
 }
 
 @media (min-width: 768px) {
-  .container {
-    padding: 0 20px;
+  .lte-header {
+    padding: 40px 0 30px;
   }
   
+  .heading-gradient {
+    font-size: 1.8rem;
+  }
+  
+  .subheading {
+    font-size: 0.875rem;
+  }
+  
+  .section-title {
+    font-size: 1.4rem;
+  }
+  
+  .provider-card {
+    width: 160px;
+    height: 80px;
+    padding: 12px;
+  }
+  
+  .provider-text {
+    font-size: 1.1rem;
+  }
+  
+  .package-card {
+    padding: 16px;
+  }
+  
+  .package-name {
+    font-size: 1.1rem;
+  }
+  
+  .package-price {
+    font-size: 2rem;
+  }
+  
+  .package-price .currency {
+    font-size: 1.3rem;
+  }
+  
+  .package-features li {
+    font-size: 0.9rem;
+  }
+  
+  .package-select-btn {
+    font-size: 0.9rem;
+    padding: 12px 20px;
+  }
+}
+
+@media (min-width: 992px) {
   .lte-header {
-    padding: 50px 20px 35px;
+    padding: 50px 0 35px;
   }
   
   .heading-gradient {
@@ -407,227 +517,57 @@
     font-size: 1.7rem;
   }
   
+  .packages-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  
   .provider-card {
     width: 200px;
     height: 110px;
-  }
-}
-
-@media (min-width: 992px) {
-  .container {
-    padding: 0 24px;
-  }
-  
-  .lte-header {
-    padding: 60px 20px 40px;
-  }
-  
-  .heading-gradient {
-    font-size: 2.8rem;
-  }
-  
-  .subheading {
-    font-size: 1.1rem;
-  }
-  
-  .section-title {
-    font-size: 2rem;
-  }
-  
-  .packages-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
-  }
-  
-  .provider-card {
-    width: 220px;
-    height: 110px;
-  }
-}
-
-@media (max-width: 768px) {
-  .container {
-    padding: 0 12px;
-  }
-  
-  .lte-header {
-    padding: 25px 12px 20px;
-  }
-  
-  .heading-gradient {
-    font-size: 1.6rem;
-  }
-  
-  .subheading {
-    font-size: 0.875rem;
-  }
-  
-  .section-title {
-    font-size: 1.3rem;
-  }
-  
-  .provider-selector {
-    margin-bottom: 12px;
-    gap: 4px;
-  }
-  
-  .nav-arrow {
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-  }
-  
-  .provider-slider {
-    gap: 6px;
-    padding: 6px 2px;
-  }
-  
-  .provider-card {
-    width: 120px;
-    height: 70px;
-    padding: 8px;
-    min-width: 120px;
+    padding: 16px;
   }
   
   .provider-text {
-    font-size: 0.875rem;
+    font-size: 1.2rem;
   }
   
   .package-card {
-    padding: 14px;
+    padding: 20px;
+  }
+  
+  .package-name {
+    font-size: 1.2rem;
   }
   
   .package-price {
-    font-size: 1.4rem;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
   }
   
   .package-price .currency {
-    font-size: 1rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .container {
-    padding: 0 8px;
+    font-size: 1.5rem;
   }
   
-  .lte-header {
-    padding: 20px 8px 15px;
+  .package-features {
+    margin-bottom: 25px;
   }
   
-  .heading-gradient {
-    font-size: 1.4rem;
-  }
-  
-  .subheading {
-    font-size: 0.8rem;
-  }
-  
-  .section-title {
-    font-size: 1.2rem;
-  }
-  
-  .provider-selector {
-    justify-content: center;
-    margin-bottom: 8px;
-    gap: 2px;
-  }
-
-  .nav-arrow {
-    display: none;
-  }
-
-  .provider-slider {
-    padding: 4px 1px;
-    gap: 4px;
-  }
-  
-  .provider-card {
-    width: 100px;
-    height: 60px;
-    padding: 6px;
-    min-width: 100px;
-  }
-  
-  .provider-text {
-    font-size: 0.8rem;
-  }
-  
-  .package-card {
-    padding: 12px;
-  }
-  
-  .package-name {
+  .package-features li {
     font-size: 0.95rem;
+    margin-bottom: 12px;
   }
   
-  .package-price {
-    font-size: 1.3rem;
-  }
-  
-  .package-features li {
-    font-size: 0.8rem;
+  .package-features li svg {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
   }
   
   .package-select-btn {
-    padding: 10px 12px;
-    font-size: 0.8rem;
-    min-height: 40px;
+    font-size: 1rem;
+    padding: 14px 24px;
   }
 }
 
-@media (max-width: 320px) {
-  .container {
-    padding: 0 4px;
-  }
-  
-  .lte-header {
-    padding: 15px 4px 10px;
-  }
-  
-  .heading-gradient {
-    font-size: 1.2rem;
-  }
-  
-  .subheading {
-    font-size: 0.75rem;
-  }
-  
-  .section-title {
-    font-size: 1.1rem;
-  }
-  
-  .provider-card {
-    width: 80px;
-    height: 50px;
-    padding: 4px;
-    min-width: 80px;
-  }
-  
-  .provider-text {
-    font-size: 0.7rem;
-  }
-  
-  .package-card {
-    padding: 10px;
-  }
-  
-  .package-name {
-    font-size: 0.9rem;
-  }
-  
-  .package-price {
-    font-size: 1.1rem;
-  }
-  
-  .package-features li {
-    font-size: 0.75rem;
-  }
-  
-  .package-select-btn {
-    padding: 8px 10px;
-    font-size: 0.75rem;
-    min-height: 36px;
-  }
-}
  
