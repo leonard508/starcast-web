@@ -1,1 +1,0 @@
-fix(css): improve mobile responsiveness of LTE page
