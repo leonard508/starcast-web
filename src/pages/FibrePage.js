@@ -111,8 +111,8 @@ const FibrePage = () => {
     packages.forEach(pkg => {
       console.log('Processing package:', pkg); // Debug log
       
-      // Extract provider name from package title or use a default grouping logic
-      const providerName = extractProviderName(pkg.title) || 'Other';
+      // Extract provider name from package title or use provider field directly
+      const providerName = pkg.provider || extractProviderName(pkg.title) || 'Other';
       const providerSlug = providerName.toLowerCase().replace(/\s+/g, '-');
       
       if (!grouped[providerSlug]) {
