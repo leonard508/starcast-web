@@ -1,7 +1,5 @@
-feat(fibre): improve design of fibre package cards
+feat(fibre): improve fibre page design and functionality
 
-- Restructured the card layout for better readability and visual hierarchy.
-- Updated typography to emphasize package name and price.
-- Enhanced the price display to be more prominent.
-- Added icons for download and upload speeds for better scannability.
-- Refined card styling with updated background, border, and shadow.
+- Adjusted font weights for better readability.
+- Enabled horizontal scrolling for provider selection.
+- Redesigned fibre package cards with a cleaner, Google-inspired aesthetic.
