@@ -15,6 +15,190 @@ const ModernFibrePage = () => {
   // Define allowed providers in the exact order we want them displayed (matching PHP)
   const allowedProviders = ['openserve', 'frogfoot', 'vumatel', 'octotel', 'metrofibre'];
 
+  // WordPress REST API base URL - update this to match your WordPress site
+  const WORDPRESS_BASE_URL = process.env.REACT_APP_WORDPRESS_URL || 'https://starcast.co.za';
+
+  // Promo system functions matching PHP implementation
+  const isPromoActive = (postId, acf) => {
+    const promoActive = acf.promo_active || false;
+    const promoPrice = acf.promo_price;
+    const price = acf.price;
+    
+    return promoActive && promoPrice && promoPrice !== price;
+  };
+
+  const getPromoPrice = (postId, acf) => {
+    return isPromoActive(postId, acf) ? parseInt(acf.promo_price) : null;
+  };
+
+  const getEffectivePrice = (postId, acf, basePrice) => {
+    const promoPrice = getPromoPrice(postId, acf);
+    return promoPrice || parseInt(basePrice) || 0;
+  };
+
+  const getPromoSavings = (postId, acf, basePrice) => {
+    const promoPrice = getPromoPrice(postId, acf);
+    if (!promoPrice || !basePrice) return null;
+    return parseInt(basePrice) - promoPrice;
+  };
+
+  const getPromoDisplayText = (postId, acf) => {
+    if (!isPromoActive(postId, acf)) return null;
+    
+    const savings = getPromoSavings(postId, acf, acf.price);
+    const duration = acf.promo_duration || 1;
+    
+    if (savings) {
+      return `Save R${savings} for ${duration} month${duration > 1 ? 's' : ''}!`;
+    }
+    
+    return acf.promo_text || null;
+  };
+
+  const getPromoBadgeHtml = (postId, acf) => {
+    if (!isPromoActive(postId, acf)) return null;
+    
+    const badge = acf.promo_badge || 'special-offer';
+    const badgeClasses = {
+      'hot-deal': 'promo-badge hot-deal',
+      'limited-time': 'promo-badge limited-time',
+      'best-value': 'promo-badge best-value',
+      'new-customer': 'promo-badge new-customer',
+      'special-offer': 'promo-badge special-offer'
+    };
+    
+    return `<span class="${badgeClasses[badge] || badgeClasses['special-offer']}">${badge.replace('-', ' ').toUpperCase()}</span>`;
+  };
+
+  const getPromoDuration = (postId, acf) => {
+    return isPromoActive(postId, acf) ? parseInt(acf.promo_duration) || 1 : null;
+  };
+
+  const getPromoType = (postId, acf) => {
+    return isPromoActive(postId, acf) ? acf.promo_type || 'general' : null;
+  };
+
+  // Fetch providers and packages from WordPress REST API
+  const fetchWordPressProviders = async () => {
+    try {
+      // First, get providers from the fibre_provider taxonomy
+      const providersResponse = await fetch(`${WORDPRESS_BASE_URL}/wp-json/wp/v2/fibre_provider?hide_empty=false`);
+      if (!providersResponse.ok) {
+        throw new Error(`Providers API responded with status: ${providersResponse.status}`);
+      }
+      const providers = await providersResponse.json();
+
+      // Filter and prioritize providers matching PHP logic
+      const filteredProviders = providers.filter(provider => {
+        const providerSlug = provider.slug.toLowerCase();
+        const providerName = provider.name.toLowerCase();
+        
+        return allowedProviders.some(allowed => 
+          providerSlug === allowed || 
+          providerName === allowed ||
+          providerSlug.includes(allowed) ||
+          providerName.includes(allowed)
+        );
+      });
+
+      // Get packages for each provider
+      const providerData = [];
+      
+      for (const provider of filteredProviders) {
+        try {
+          // Fetch packages for this provider using tax_query
+          const packagesResponse = await fetch(
+            `${WORDPRESS_BASE_URL}/wp-json/wp/v2/fibre_packages?` +
+            `fibre_provider=${provider.id}&per_page=100&_embed`
+          );
+          
+          if (!packagesResponse.ok) {
+            console.log(`Failed to fetch packages for ${provider.name}`);
+            continue;
+          }
+          
+          const packages = await packagesResponse.json();
+          
+          if (!packages || packages.length === 0) {
+            console.log(`No packages found for ${provider.name}`);
+            continue;
+          }
+
+          // Process packages matching PHP structure
+          const processedPackages = packages.map(post => {
+            // Get ACF fields from the post meta or embedded data
+            const acf = post.acf || {};
+            
+            // Extract pricing with fallback to meta fields
+            const price = acf.price || post.meta?.price?.[0] || 0;
+            const download = acf.download || post.meta?.download?.[0] || 'N/A';
+            const upload = acf.upload || post.meta?.upload?.[0] || 'N/A';
+            
+            // Calculate promo information matching PHP functions
+            const hasPromo = isPromoActive(post.id, acf);
+            const promoPrice = getPromoPrice(post.id, acf);
+            const effectivePrice = getEffectivePrice(post.id, acf, price);
+            const promoSavings = getPromoSavings(post.id, acf, price);
+            
+            return {
+              id: post.id,
+              title: post.title?.rendered || 'Fibre Package',
+              price: price ? parseInt(price) : 0,
+              download: download,
+              upload: upload,
+              provider: provider.name,
+              download_speed: parseInt(download?.toString().replace(/[^0-9]/g, '') || '0'),
+              has_promo: hasPromo,
+              promo_price: promoPrice,
+              effective_price: effectivePrice,
+              promo_savings: promoSavings,
+              promo_display_text: getPromoDisplayText(post.id, acf),
+              promo_badge_html: getPromoBadgeHtml(post.id, acf),
+              promo_duration: getPromoDuration(post.id, acf),
+              promo_type: getPromoType(post.id, acf)
+            };
+          });
+
+          // Sort packages by download speed (matching PHP logic)
+          processedPackages.sort((a, b) => a.download_speed - b.download_speed);
+
+          // Get provider priority based on allowed providers order
+          const priority = allowedProviders.findIndex(allowed => 
+            provider.slug.toLowerCase() === allowed || 
+            provider.name.toLowerCase() === allowed ||
+            provider.slug.toLowerCase().includes(allowed) ||
+            provider.name.toLowerCase().includes(allowed)
+          );
+
+          if (processedPackages.length > 0) {
+            // Get provider logo from ACF fields if available
+            const providerLogo = provider.acf?.logo || provider.meta?.logo?.[0] || null;
+            
+            providerData.push({
+              name: provider.name,
+              slug: provider.slug,
+              logo: providerLogo,
+              packages: processedPackages,
+              priority: priority !== -1 ? priority : 999
+            });
+          }
+        } catch (packageError) {
+          console.error(`Error fetching packages for ${provider.name}:`, packageError);
+        }
+      }
+
+      // Sort providers by priority (matching PHP logic)
+      providerData.sort((a, b) => a.priority - b.priority);
+      
+      console.log('WordPress providers data:', providerData);
+      return providerData;
+      
+    } catch (error) {
+      console.error('Error fetching WordPress providers:', error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
     fetchFibreData();
   }, []);
@@ -23,25 +207,36 @@ const ModernFibrePage = () => {
     try {
       setLoading(true);
       
-      // For now, always use fallback providers since this is a demo/development version
-      // In production, this would connect to the WordPress REST API
+      // Try to fetch from WordPress REST API first
+      try {
+        const providersData = await fetchWordPressProviders();
+        if (providersData && providersData.length > 0) {
+          setProviders(providersData);
+          return;
+        }
+      } catch (apiError) {
+        console.log('WordPress API not available, trying legacy API...');
+        
+        // Fallback to legacy API
+        try {
+          const response = await packageService.getFibrePackages();
+          if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+            const packages = response.data;
+            const groupedProviders = groupPackagesByProvider(packages);
+            if (groupedProviders.length > 0) {
+              setProviders(groupedProviders);
+              return;
+            }
+          }
+        } catch (legacyApiError) {
+          console.log('Legacy API also not available, using fallback data');
+        }
+      }
+      
+      // Use fallback data if all APIs fail
       const fallbackProviders = createFallbackProviders();
       setProviders(fallbackProviders);
       
-      // Optional: Try to fetch from API but don't fail if it doesn't work
-      try {
-        const response = await packageService.getFibrePackages();
-        if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-          const packages = response.data;
-          const groupedProviders = groupPackagesByProvider(packages);
-          if (groupedProviders.length > 0) {
-            setProviders(groupedProviders);
-          }
-        }
-      } catch (apiError) {
-        console.log('API not available, using fallback data');
-        // Keep using fallback data - no error state needed
-      }
     } catch (err) {
       console.error('Error loading fibre data:', err);
       setError('Failed to load fibre packages');
