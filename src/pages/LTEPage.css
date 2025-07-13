@@ -29,20 +29,20 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 12px;
+  padding: 0 8px;
 }
 
 .lte-header {
   text-align: center;
-  padding: 15px 0 10px;
+  padding: 8px 0 6px;
   flex-shrink: 0;
 }
 
 .heading-gradient {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 800;
   line-height: 1.1;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   background: linear-gradient(135deg, var(--primary-color) 0%, #f0a876 50%, var(--text-light) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -50,15 +50,15 @@
 }
 
 .subheading {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: var(--text-light);
   font-weight: 400;
   max-width: 600px;
-  margin: 0 auto 5px auto;
+  margin: 0 auto 3px auto;
 }
 
 .lte-section {
-  padding: 10px 0 30px;
+  padding: 6px 0 20px;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -67,7 +67,7 @@
 .title-container {
   width: 100%;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   position: relative;
   z-index: 2;
   flex-shrink: 0;
@@ -76,7 +76,7 @@
 .section-title {
   text-align: center;
   color: var(--text-dark);
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 800;
   margin: 0 auto;
   display: inline-block;
@@ -100,23 +100,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 15px;
+  margin-bottom: 8px;
   width: 100%;
   max-width: 100%;
   overflow: hidden;
   position: relative;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
 .provider-slider {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 8px 4px;
+  padding: 4px 2px;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   flex-grow: 1;
@@ -132,19 +132,19 @@
 .provider-card {
   scroll-snap-align: center;
   flex: 0 0 auto;
-  width: 80px;
-  height: 50px;
-  border-radius: 12px;
+  width: 70px;
+  height: 42px;
+  border-radius: 10px;
   background: var(--white);
-  box-shadow: 0 8px 32px rgba(74, 69, 63, 0.08);
+  box-shadow: 0 4px 16px rgba(74, 69, 63, 0.06);
   border: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 4px;
-  min-width: 80px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 3px;
+  min-width: 70px;
   touch-action: manipulation;
 }
 
@@ -211,8 +211,8 @@
 .provider-indicators {
   display: flex;
   justify-content: center;
-  gap: 6px;
-  margin-bottom: 15px;
+  gap: 4px;
+  margin-bottom: 8px;
   flex-shrink: 0;
 }
 
@@ -233,7 +233,7 @@
 .packages-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
   max-width: 100%;
   margin: 0 auto;
@@ -243,10 +243,10 @@
 
 .package-card {
   background: var(--white);
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(74, 69, 63, 0.08);
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(74, 69, 63, 0.06);
   border: 1px solid var(--border-color);
-  padding: 12px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
@@ -262,26 +262,26 @@
 }
 
 .package-name {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--text-dark);
-  margin-bottom: 6px;
-  line-height: 1.3;
+  margin-bottom: 3px;
+  line-height: 1.2;
 }
 
 .package-provider {
-  font-size: 0.9rem;
+  font-size: 0.7rem;
   font-weight: 500;
   color: var(--text-light);
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .package-price {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 800;
   color: var(--primary-color);
   line-height: 1;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .package-price .currency {
@@ -300,7 +300,7 @@
 
 .package-features {
   list-style: none;
-  margin-bottom: 25px;
+  margin-bottom: 12px;
   text-align: left;
   flex-grow: 1;
   padding: 0;
@@ -309,15 +309,16 @@
 .package-features li {
   display: flex;
   align-items: center;
-  margin-bottom: 8px;
-  font-size: 0.75rem;
+  margin-bottom: 4px;
+  font-size: 0.65rem;
   color: var(--text-dark);
+  line-height: 1.2;
 }
 
 .package-features li svg {
-  width: 16px;
-  height: 16px;
-  margin-right: 8px;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
   color: var(--primary-color);
   flex-shrink: 0;
 }
@@ -326,16 +327,16 @@
   background: var(--primary-color);
   color: var(--white);
   border: none;
-  padding: 10px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
+  padding: 8px 10px;
+  border-radius: 16px;
+  font-size: 0.7rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   width: 100%;
   margin-top: auto;
-  box-shadow: 0 4px 12px rgba(214, 125, 62, 0.3);
-  min-height: 40px;
+  box-shadow: 0 2px 8px rgba(214, 125, 62, 0.2);
+  min-height: 36px;
   touch-action: manipulation;
 }
 
@@ -438,7 +439,7 @@
 @media (min-width: 576px) {
   .packages-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    gap: 10px;
   }
   
   .provider-card {
@@ -452,7 +453,7 @@
   }
   
   .package-card {
-    padding: 14px;
+    padding: 10px;
   }
   
   .package-name {

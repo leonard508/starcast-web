@@ -1,6 +1,7 @@
 {
   "short_name": "Starcast",
-  "name": "Starcast Technologies",
+  "name": "Starcast Technologies ISP",
+  "description": "Fast, reliable fibre and LTE internet packages for home and business",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,16 +11,24 @@
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "theme_color": "#d67d3e",
-  "background_color": "#faf7f4"
+  "background_color": "#faf7f4",
+  "categories": ["business", "utilities", "productivity"],
+  "lang": "en",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false
 } 

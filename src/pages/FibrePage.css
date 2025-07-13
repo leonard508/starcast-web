@@ -25,13 +25,13 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 12px;
+  padding: 0 8px;
 }
 
 /* Header Styles */
 .fibre-page .fibre-header {
   text-align: center;
-  padding: 15px 0 10px;
+  padding: 8px 0 6px;
   background: transparent;
   position: relative;
   overflow: hidden;
@@ -57,10 +57,10 @@
 }
 
 .fibre-page .heading-gradient {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 800;
   color: #2d2823;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   line-height: 1.1;
   letter-spacing: -0.02em;
 }
@@ -70,17 +70,17 @@
 }
 
 .fibre-page .subheading {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: #6b6355;
   max-width: 600px;
-  margin: 0 auto 5px auto;
+  margin: 0 auto 3px auto;
   font-weight: 400;
-  line-height: 1.6;
+  line-height: 1.4;
 }
 
 /* Section Styles */
 .fibre-page .fibre-section {
-  padding: 10px 0 30px;
+  padding: 6px 0 20px;
   background: transparent;
   position: relative;
   flex: 1;
@@ -103,7 +103,7 @@
 .fibre-page .title-container {
   width: 100%;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   position: relative;
   z-index: 2;
   flex-shrink: 0;
@@ -112,7 +112,7 @@
 .fibre-page .section-title {
   text-align: center;
   color: #2d2823;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 800;
   margin: 0 auto;
   display: inline-block;
@@ -138,7 +138,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 8px;
   max-width: 100%;
   width: 100%;
   z-index: 2;
@@ -147,13 +147,13 @@
 
 .fibre-page .provider-slider {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  margin: 0 40px;
-  padding: 12px 5px;
+  margin: 0 35px;
+  padding: 6px 3px;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   flex-grow: 1;
@@ -167,24 +167,24 @@
 .fibre-page .provider-card {
   scroll-snap-align: center;
   flex: 0 0 auto;
-  width: 120px;
-  height: 70px;
-  border-radius: 16px;
+  width: 100px;
+  height: 55px;
+  border-radius: 12px;
   background: rgba(250, 247, 244, 0.6);
   backdrop-filter: blur(20px);
   box-shadow: 
-    0 8px 32px rgba(74, 69, 63, 0.08),
+    0 4px 16px rgba(74, 69, 63, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
   border: 1px solid rgba(232, 227, 219, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  padding: 8px;
-  min-width: 120px;
+  padding: 6px;
+  min-width: 100px;
   touch-action: manipulation;
 }
 
@@ -217,11 +217,11 @@
 }
 
 .fibre-page .provider-text {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #2d2823;
   text-align: center;
-  padding: 0 8px;
+  padding: 0 6px;
   z-index: 2;
   margin: 0;
 }
@@ -308,8 +308,8 @@
 .fibre-page .provider-indicators {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 15px;
+  gap: 6px;
+  margin-bottom: 8px;
   position: relative;
   z-index: 2;
   flex-shrink: 0;
@@ -336,8 +336,8 @@
 .fibre-page .packages-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
-  margin-top: 10px;
+  gap: 8px;
+  margin-top: 6px;
   width: 100%;
   max-width: 100%;
   margin-left: auto;
@@ -459,6 +459,7 @@
 @media (min-width: 576px) {
   .fibre-page .packages-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
   
   .fibre-page .provider-card {

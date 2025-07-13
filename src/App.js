@@ -9,6 +9,7 @@ import CacheStatus from './components/common/CacheStatus';
 
 // Page Components
 import HomePage from './pages/HomePage';
+import ModernHomePage from './pages/ModernHomePage';
 import FibrePage from './pages/FibrePage';
 import LTEPage from './pages/LTEPage';
 import BookingPage from './pages/BookingPage';
@@ -18,6 +19,9 @@ import LTESignupPage from './pages/LTESignupPage';
 import PackageSelectionPage from './pages/PackageSelectionPage';
 import PromoDealsPage from './pages/PromoDealsPage';
 
+// New Design System Components
+import BottomNavigation from './components/design-system/BottomNavigation';
+
 function App() {
   return (
     <Router>
@@ -25,7 +29,8 @@ function App() {
         <Header />
         <main>
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<ModernHomePage />} />
+            <Route path="/old-home" element={<HomePage />} />
             <Route path="/fibre" element={<FibrePage />} />
             <Route path="/lte-5g" element={<LTEPage />} />
             <Route path="/lte" element={<LTEPage />} />
@@ -38,6 +43,7 @@ function App() {
           </Routes>
         </main>
         <Footer />
+        <BottomNavigation />
         <CacheStatus />
       </div>
     </Router>
