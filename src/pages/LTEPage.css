@@ -97,21 +97,23 @@
   max-width: 100%;
   overflow: hidden;
   position: relative;
+  gap: 8px;
 }
 
 .provider-slider {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 10px 5px;
+  padding: 8px 4px;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   flex-grow: 1;
   justify-content: flex-start;
   width: 100%;
+  min-width: 0;
 }
 
 .provider-slider::-webkit-scrollbar { 
@@ -121,9 +123,9 @@
 .provider-card {
   scroll-snap-align: center;
   flex: 0 0 auto;
-  width: 160px;
-  height: 90px;
-  border-radius: 16px;
+  width: 140px;
+  height: 80px;
+  border-radius: 12px;
   background: var(--white);
   box-shadow: 0 8px 32px rgba(74, 69, 63, 0.08);
   border: 1px solid var(--border-color);
@@ -132,8 +134,8 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 12px;
-  min-width: 160px;
+  padding: 10px;
+  min-width: 140px;
 }
 
 .provider-card:hover {
@@ -173,8 +175,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: var(--white);
   border: 1px solid var(--border-color);
@@ -184,7 +186,7 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   z-index: 5;
   flex-shrink: 0;
-  min-width: 40px;
+  min-width: 36px;
 }
 
 .nav-arrow:hover {
@@ -197,13 +199,13 @@
 .provider-indicators {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin-bottom: 40px;
+  gap: 6px;
+  margin-bottom: 30px;
 }
 
 .indicator {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background-color: var(--border-color);
   cursor: pointer;
@@ -445,59 +447,6 @@
 
 @media (max-width: 768px) {
   .container {
-    padding: 0 16px;
-  }
-  
-  .lte-header {
-    padding: 30px 16px 20px;
-  }
-  
-  .heading-gradient {
-    font-size: 1.8rem;
-  }
-  
-  .subheading {
-    font-size: 0.95rem;
-  }
-  
-  .section-title {
-    font-size: 1.4rem;
-  }
-  
-  .provider-selector {
-    margin-bottom: 15px;
-  }
-  
-  .nav-arrow {
-    width: 36px;
-    height: 36px;
-  }
-  
-  .provider-card {
-    width: 140px;
-    height: 80px;
-    padding: 10px;
-  }
-  
-  .provider-text {
-    font-size: 1rem;
-  }
-  
-  .package-card {
-    padding: 16px;
-  }
-  
-  .package-price {
-    font-size: 1.6rem;
-  }
-  
-  .package-price .currency {
-    font-size: 1.1rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .container {
     padding: 0 12px;
   }
   
@@ -518,23 +467,26 @@
   }
   
   .provider-selector {
-    justify-content: center;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    gap: 4px;
   }
-
+  
   .nav-arrow {
-    display: none;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
   }
-
+  
   .provider-slider {
-    padding: 8px 5px;
-    gap: 8px;
+    gap: 6px;
+    padding: 6px 2px;
   }
   
   .provider-card {
     width: 120px;
     height: 70px;
     padding: 8px;
+    min-width: 120px;
   }
   
   .provider-text {
@@ -542,25 +494,140 @@
   }
   
   .package-card {
-    padding: 16px;
-  }
-  
-  .package-name {
-    font-size: 1rem;
+    padding: 14px;
   }
   
   .package-price {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+  }
+  
+  .package-price .currency {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 8px;
+  }
+  
+  .lte-header {
+    padding: 20px 8px 15px;
+  }
+  
+  .heading-gradient {
+    font-size: 1.4rem;
+  }
+  
+  .subheading {
+    font-size: 0.8rem;
+  }
+  
+  .section-title {
+    font-size: 1.2rem;
+  }
+  
+  .provider-selector {
+    justify-content: center;
+    margin-bottom: 8px;
+    gap: 2px;
+  }
+
+  .nav-arrow {
+    display: none;
+  }
+
+  .provider-slider {
+    padding: 4px 1px;
+    gap: 4px;
+  }
+  
+  .provider-card {
+    width: 100px;
+    height: 60px;
+    padding: 6px;
+    min-width: 100px;
+  }
+  
+  .provider-text {
+    font-size: 0.8rem;
+  }
+  
+  .package-card {
+    padding: 12px;
+  }
+  
+  .package-name {
+    font-size: 0.95rem;
+  }
+  
+  .package-price {
+    font-size: 1.3rem;
   }
   
   .package-features li {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
   }
   
   .package-select-btn {
-    padding: 12px 16px;
-    font-size: 0.875rem;
-    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 0.8rem;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 320px) {
+  .container {
+    padding: 0 4px;
+  }
+  
+  .lte-header {
+    padding: 15px 4px 10px;
+  }
+  
+  .heading-gradient {
+    font-size: 1.2rem;
+  }
+  
+  .subheading {
+    font-size: 0.75rem;
+  }
+  
+  .section-title {
+    font-size: 1.1rem;
+  }
+  
+  .provider-card {
+    width: 80px;
+    height: 50px;
+    padding: 4px;
+    min-width: 80px;
+  }
+  
+  .provider-text {
+    font-size: 0.7rem;
+  }
+  
+  .package-card {
+    padding: 10px;
+  }
+  
+  .package-name {
+    font-size: 0.9rem;
+  }
+  
+  .package-price {
+    font-size: 1.1rem;
+  }
+  
+  .package-features li {
+    font-size: 0.75rem;
+  }
+  
+  .package-select-btn {
+    padding: 8px 10px;
+    font-size: 0.75rem;
+    min-height: 36px;
   }
 }
  
