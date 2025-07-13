@@ -1,0 +1,206 @@
+.package-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 2rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.package-card:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.package-card.has-promo {
+  border: 2px solid #2193b0;
+}
+
+.promo-badge {
+  position: absolute;
+  top: 1rem;
+  right: -2rem;
+  background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+  color: white;
+  padding: 0.5rem 3rem;
+  transform: rotate(45deg);
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.package-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.package-header h3 {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.speed-info {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
+  border-radius: 15px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.speed {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2193b0;
+  margin-bottom: 0.5rem;
+}
+
+.speed-label {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.package-body {
+  margin-bottom: 2rem;
+}
+
+.features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.features-list li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  color: #444;
+  font-size: 1rem;
+}
+
+.feature-icon {
+  margin-right: 0.8rem;
+  color: #2193b0;
+}
+
+.package-footer {
+  text-align: center;
+}
+
+.price-section {
+  margin-bottom: 1.5rem;
+}
+
+.currency {
+  font-size: 1.5rem;
+  color: #333;
+  vertical-align: top;
+}
+
+.amount {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0.2rem;
+}
+
+.period {
+  font-size: 1rem;
+  color: #666;
+}
+
+.select-button {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.select-button::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+  transform: rotate(45deg);
+  transition: all 0.3s ease;
+}
+
+.select-button:hover::after {
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) rotate(45deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .package-card {
+    padding: 1.5rem;
+  }
+
+  .package-header h3 {
+    font-size: 1.5rem;
+  }
+
+  .speed {
+    font-size: 1.3rem;
+  }
+
+  .amount {
+    font-size: 2.5rem;
+  }
+
+  .select-button {
+    padding: 0.8rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .package-card {
+    padding: 1rem;
+  }
+
+  .promo-badge {
+    font-size: 0.8rem;
+    padding: 0.4rem 2.5rem;
+  }
+
+  .package-header h3 {
+    font-size: 1.3rem;
+  }
+
+  .speed {
+    font-size: 1.2rem;
+  }
+
+  .features-list li {
+    font-size: 0.9rem;
+  }
+
+  .amount {
+    font-size: 2rem;
+  }
+}

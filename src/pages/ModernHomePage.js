@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import ServiceCard from '../components/design-system/ServiceCard';
 import Button from '../components/design-system/Button';
+import FibrePackageCard from '../components/common/FibrePackageCard';
+import './FibrePage.css';
 
 /**
  * Modern Homepage - Light Earthy Theme
@@ -10,6 +12,53 @@ import Button from '../components/design-system/Button';
  */
 const ModernHomePage = () => {
   const navigate = useNavigate();
+  const [activeProvider, setActiveProvider] = useState(0);
+
+  // Mock data for providers and packages
+  const providers = [
+    {
+      id: 1,
+      name: 'Openserve',
+      logo: '/assets/providers/openserve.svg'
+    },
+    {
+      id: 2,
+      name: 'Vumatel',
+      logo: '/assets/providers/vumatel.svg'
+    },
+    {
+      id: 3,
+      name: 'Frogfoot',
+      logo: '/assets/providers/frogfoot.svg'
+    }
+  ];
+
+  const packages = [
+    {
+      id: 1,
+      title: 'Basic Fibre',
+      download: '20',
+      upload: '10',
+      price: 499,
+      features: ['No throttling', 'No shaping', '24/7 Support']
+    },
+    {
+      id: 2,
+      title: 'Premium Fibre',
+      download: '50',
+      upload: '25',
+      price: 799,
+      features: ['No throttling', 'No shaping', '24/7 Support']
+    },
+    {
+      id: 3,
+      title: 'Ultimate Fibre',
+      download: '100',
+      upload: '50',
+      price: 999,
+      features: ['No throttling', 'No shaping', '24/7 Support']
+    }
+  ];
 
   const heroVariants = {
     hidden: { opacity: 0, y: 30 },
@@ -87,61 +136,111 @@ const ModernHomePage = () => {
         </motion.div>
       </section>
 
-      {/* Services Section */}
-      <section className="px-4 pb-20">
-        <motion.div 
-          className="max-w-md mx-auto"
-          variants={staggerContainer}
-          initial="hidden"
-          animate="visible"
-          viewport={{ once: true }}
-        >
-          <motion.h2 
-            className="text-2xl font-bold text-stone-800 text-center mb-8"
+      {/* Provider Section */}
+      <section className="provider-section">
+        <div className="container">
+          <motion.div 
+            className="section-header"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+            viewport={{ once: true }}
+          >
+            <motion.h2 
+              className="section-title"
+              variants={heroVariants}
+            >
+              Choose Your Provider
+            </motion.h2>
+            <motion.p 
+              className="section-subtitle"
+              variants={heroVariants}
+            >
+              Select from South Africa's leading fibre providers
+            </motion.p>
+          </motion.div>
+
+          <motion.div 
+            className="provider-selector"
             variants={heroVariants}
           >
-            Choose Your Connection
-          </motion.h2>
+            <button 
+              className="nav-arrow nav-prev" 
+              aria-label="Previous provider"
+              onClick={() => setActiveProvider(prev => (prev > 0 ? prev - 1 : providers.length - 1))}
+            >
+              ←
+            </button>
+            <div className="provider-slider">
+              {providers.map((provider, index) => (
+                <motion.div 
+                  key={provider.id} 
+                  className={`provider-card ${index === activeProvider ? 'active' : ''}`}
+                  onClick={() => setActiveProvider(index)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <img src={provider.logo} alt={provider.name} className="provider-logo" />
+                  <span className="provider-text">{provider.name}</span>
+                </motion.div>
+              ))}
+            </div>
+            <button 
+              className="nav-arrow nav-next" 
+              aria-label="Next provider"
+              onClick={() => setActiveProvider(prev => (prev < providers.length - 1 ? prev + 1 : 0))}
+            >
+              →
+            </button>
+          </motion.div>
+        </div>
+      </section>
 
-          <div className="space-y-6">
-            {/* Fibre Card */}
-            <motion.div variants={heroVariants}>
-              <ServiceCard
-                icon="🏠"
-                title="Fibre Internet"
-                subtitle="Ultra-fast home & business connections"
-                price="299"
-                features={[
-                  "Speeds up to 1Gbps",
-                  "Unlimited data",
-                  "Free installation",
-                  "24/7 technical support"
-                ]}
-                ctaText="View Fibre Plans"
-                onCTAClick={() => navigate('/fibre')}
-                highlight={true}
-                badge="Most Popular"
-              />
-            </motion.div>
+      {/* Packages Section */}
+      <section className="packages-section">
+        <div className="container">
+          <motion.div 
+            className="packages-header"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+            viewport={{ once: true }}
+          >
+            <motion.h2 
+              className="packages-title"
+              variants={heroVariants}
+            >
+              Popular Packages
+            </motion.h2>
+            <motion.p 
+              className="packages-subtitle"
+              variants={heroVariants}
+            >
+              Find the perfect fibre package for your needs
+            </motion.p>
+          </motion.div>
 
-            {/* LTE Card */}
-            <motion.div variants={heroVariants}>
-              <ServiceCard
-                icon="📶"
-                title="LTE & 5G"
-                subtitle="Mobile data, SIMs & router deals"
-                price="99"
-                features={[
-                  "5G ready networks",
-                  "Data & voice bundles",
-                  "Router packages",
-                  "Flexible contracts"
-                ]}
-                ctaText="Shop LTE Plans"
-                onCTAClick={() => navigate('/lte-5g')}
-              />
-            </motion.div>
-          </div>
+          <motion.div 
+            className="packages-grid"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+            viewport={{ once: true }}
+          >
+            {packages.map((pkg) => (
+              <motion.div 
+                key={pkg.id}
+                variants={heroVariants}
+              >
+                <FibrePackageCard 
+                  package={pkg} 
+                  provider={providers[activeProvider]}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
 
           {/* Support CTA */}
           <motion.div 
