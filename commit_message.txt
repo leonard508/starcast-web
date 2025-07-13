@@ -1,7 +1,5 @@
-feat(design): implement drastic design changes for fibre and LTE cards
+feat(fibre): replicate page-fibre.php card design
 
-- Replicated the design of fibre package cards from page-fibre.php.
-- Applied bold Google Material Design elements for an app-like look.
-- Ensured prominent price display and clear speed metrics.
-- Unified information blocks and enhanced visual cues.
-- Optimized responsive scaling for mobile screens.
+- Replicated the exact HTML structure and CSS from page-fibre.php for Fibre package cards.
+- Ensured prominent price display, clear speed metrics, and unified information blocks.
+- Applied Material Design principles for an app-like look and feel.

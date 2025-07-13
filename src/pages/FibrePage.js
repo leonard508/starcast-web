@@ -306,19 +306,42 @@ const FibrePage = () => {
 
   return (
     <div className="fibre-page">
-      <header className="fibre-header">
+      {/* Hero Section */}
+      <section className="hero-section">
         <div className="container">
-          <h1 className="heading-gradient">
-            Uncapped Fibre. <span>Installed Within 7 Days.</span>
-          </h1>
-          <p className="subheading">For Home and Business. Pro Rata Rates Apply.</p>
+          <div className="hero-content">
+            <h1 className="hero-title">
+              Lightning-Fast Fibre
+              <span className="hero-accent">Internet</span>
+            </h1>
+            <p className="hero-subtitle">
+              Experience seamless connectivity with uncapped fibre packages. 
+              Professional installation within 7 days.
+            </p>
+            <div className="hero-features">
+              <div className="feature-item">
+                <div className="feature-icon">⚡</div>
+                <span>Uncapped Data</span>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">🏠</div>
+                <span>Home & Business</span>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">📅</div>
+                <span>7-Day Installation</span>
+              </div>
+            </div>
+          </div>
         </div>
-      </header>
+      </section>
 
-      <section className="fibre-section">
+      {/* Provider Selection */}
+      <section className="provider-section">
         <div className="container">
-          <div className="title-container">
-            <h2 className="section-title">Choose a Fibre Network</h2>
+          <div className="section-header">
+            <h2 className="section-title">Choose Your Network</h2>
+            <p className="section-subtitle">Select from our trusted fibre network providers</p>
           </div>
           
           {providers.length > 0 ? (
@@ -329,8 +352,8 @@ const FibrePage = () => {
                   onClick={handlePrevProvider}
                   aria-label="Previous provider"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                    <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </button>
                 
@@ -359,8 +382,8 @@ const FibrePage = () => {
                   onClick={handleNextProvider}
                   aria-label="Next provider"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                    <path fill="currentColor" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </button>
               </div>
@@ -374,26 +397,37 @@ const FibrePage = () => {
                   />
                 ))}
               </div>
-              
-              <div className="packages-grid">
-                {currentProvider && currentProvider.packages.length > 0 ? (
-                  currentProvider.packages.map((pkg) => (
-                    <FibrePackageCard key={pkg.id} package={pkg} provider={currentProvider} onSelect={handlePackageSelect} />
-                  ))
-                ) : (
-                  <div className="no-packages">
-                    No packages found for this provider.
-                  </div>
-                )}
-              </div>
             </>
           ) : (
-            <div className="no-packages">
-              No providers available at the moment.
+            <div className="no-providers">
+              <p>No providers available at the moment.</p>
             </div>
           )}
         </div>
       </section>
+
+      {/* Packages Grid */}
+      {currentProvider && currentProvider.packages.length > 0 && (
+        <section className="packages-section">
+          <div className="container">
+            <div className="packages-header">
+              <h3 className="packages-title">{currentProvider.name} Packages</h3>
+              <p className="packages-subtitle">Select the perfect plan for your needs</p>
+            </div>
+            
+            <div className="packages-grid">
+              {currentProvider.packages.map((pkg) => (
+                <FibrePackageCard 
+                  key={pkg.id} 
+                  package={pkg} 
+                  provider={currentProvider} 
+                  onSelect={handlePackageSelect} 
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 };
