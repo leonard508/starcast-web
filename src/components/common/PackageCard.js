@@ -28,68 +28,128 @@ const PackageCard = ({ package: pkg, provider, onSelect }) => {
   const effectivePrice = pkg.effective_price || promoPrice || originalPrice;
   const hasPromo = pkg.has_promo && promoPrice && promoPrice < originalPrice;
 
-  const renderPrice = () => (
-    <div className="package-price">
-      <div className="price-main">
-        <span className="currency">R</span>
-        {effectivePrice}
-        <span className="period">/pm</span>
-      </div>
-      {hasPromo && (
-        <div className="original-price">R{originalPrice}</div>
-      )}
-    </div>
-  );
-
   return (
     <div 
       className={`package-card ${hasPromo ? 'has-promo' : ''}`}
       onClick={handleClick}
     >
-      <div className="package-header">
-        {provider && provider.logo ? (
-          <img 
-            src={provider.logo} 
-            alt={provider.name} 
-            className="package-provider-logo"
-          />
-        ) : (
-          <div className="package-provider-name">
-            {provider?.name || 'Provider'}
-          </div>
-        )}
-        {hasPromo && <div className="package-badge">Promo</div>}
+      {/* Promo Badge */}
+      {hasPromo && (
+        <div className="promo-badge">
+          <span>SAVE R{originalPrice - promoPrice}</span>
+        </div>
+      )}
+
+      {/* Card Header */}
+      <div className="card-header">
+        <div className="provider-info">
+          {provider && provider.logo ? (
+            <img 
+              src={provider.logo} 
+              alt={provider.name} 
+              className="provider-logo"
+            />
+          ) : (
+            <div className="provider-name">
+              {provider?.name || 'Provider'}
+            </div>
+          )}
+        </div>
+        
+        <div className="package-type">
+          <span>Uncapped Fibre</span>
+        </div>
       </div>
 
-      <div className="package-body">
-        <h3 className="package-name">{pkg.title || pkg.name}</h3>
+      {/* Card Body */}
+      <div className="card-body">
+        <h3 className="package-title">{pkg.title || pkg.name}</h3>
         
-        <div className="package-speeds">
+        {/* Speed Information */}
+        <div className="speed-info">
           <div className="speed-item">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 15.586l-4.293-4.293-1.414 1.414L12 18.414l5.707-5.707-1.414-1.414z"/><path d="M12 5.586l-4.293 4.293-1.414-1.414L12 2.586l5.707 5.707-1.414 1.414z"/></svg>
+            <div className="speed-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="currentColor"/>
+              </svg>
+            </div>
             <div className="speed-details">
-              <div className="speed-value">{downloadSpeed} Mbps</div>
+              <div className="speed-value">{downloadSpeed}</div>
+              <div className="speed-unit">Mbps</div>
               <div className="speed-label">Download</div>
             </div>
           </div>
+          
+          <div className="speed-divider"></div>
+          
           <div className="speed-item">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8.414l4.293 4.293 1.414-1.414L12 5.586 6.293 11.293l1.414 1.414z"/><path d="M12 18.414l4.293-4.293 1.414 1.414L12 21.414l-5.707-5.707 1.414-1.414z"/></svg>
+            <div className="speed-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 22L10.91 15.74L4 15L10.91 14.26L12 8L13.09 14.26L20 15L13.09 15.74L12 22Z" fill="currentColor"/>
+              </svg>
+            </div>
             <div className="speed-details">
-              <div className="speed-value">{uploadSpeed} Mbps</div>
+              <div className="speed-value">{uploadSpeed}</div>
+              <div className="speed-unit">Mbps</div>
               <div className="speed-label">Upload</div>
             </div>
           </div>
         </div>
 
-        <div className="package-price-container">
-          {renderPrice()}
-          {hasPromo && (
-            <p className="promo-text">{pkg.promo_display_text || `Save R${originalPrice - promoPrice}/month`}</p>
-          )}
-          <div className="package-cta">
-            <button className="btn btn-primary">Choose Plan</button>
+        {/* Features */}
+        <div className="features">
+          <div className="feature">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 12L11 14L15 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2"/>
+            </svg>
+            <span>Unlimited Data</span>
+          </div>
+          <div className="feature">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 12L11 14L15 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2"/>
+            </svg>
+            <span>7-Day Installation</span>
+          </div>
+          <div className="feature">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 12L11 14L15 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2"/>
+            </svg>
+            <span>24/7 Support</span>
           </div>
         </div>
+      </div>
+
+      {/* Card Footer */}
+      <div className="card-footer">
+        <div className="price-section">
+          {hasPromo ? (
+            <div className="price-promo">
+              <div className="current-price">
+                <span className="currency">R</span>
+                {promoPrice}
+                <span className="period">/month</span>
+              </div>
+              <div className="original-price">
+                <span className="currency">R</span>
+                {originalPrice}
+                <span className="period">/month</span>
+              </div>
+            </div>
+          ) : (
+            <div className="price-regular">
+              <span className="currency">R</span>
+              {effectivePrice}
+              <span className="period">/month</span>
+            </div>
+          )}
+        </div>
+        
+        <button className="select-button">
+          Choose Plan
+        </button>
       </div>
     </div>
   );
