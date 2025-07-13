@@ -12,7 +12,7 @@ const api = axios.create({
 
 // Package services using WordPress REST API
 export const packageService = {
-  getFibrePackages: () => api.get('/starcast/v1/packages/fibre'),
+  getFibrePackages: () => api.get('/wp/v2/fibre_packages?per_page=100&_embed'),
   getLTEPackages: () => api.get('/starcast/v1/packages/lte'),
   getPackageById: (id) => api.get(`/wp/v2/fibre_packages/${id}`), // WordPress default endpoint
   getLTEPackageById: (id) => api.get(`/wp/v2/lte_packages/${id}`), // WordPress LTE endpoint
