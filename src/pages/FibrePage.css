@@ -335,7 +335,7 @@
 /* Packages Grid */
 .fibre-page .packages-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
   margin-top: 6px;
   width: 100%;
@@ -346,6 +346,7 @@
   z-index: 2;
   flex: 1;
   align-content: start;
+  padding: 0 4px;
 }
 
 .fibre-page .package-card {
@@ -355,14 +356,15 @@
     0 4px 16px rgba(74, 69, 63, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
   border: 1px solid rgba(232, 227, 219, 0.3);
-  padding: 8px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
-  text-align: left;
+  text-align: center;
   width: 100%;
   touch-action: manipulation;
   backdrop-filter: blur(10px);
+  min-height: 140px;
 }
 
 .fibre-page .package-card:hover {
@@ -391,11 +393,12 @@
 }
 
 .fibre-page .package-price {
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   font-weight: 800;
   color: #d67d3e;
   line-height: 1;
   margin-bottom: 8px;
+  text-align: center;
 }
 
 .fibre-page .package-price .currency {
@@ -415,7 +418,7 @@
 .fibre-page .package-features {
   list-style: none;
   margin-bottom: 12px;
-  text-align: left;
+  text-align: center;
   flex-grow: 1;
   padding: 0;
 }
@@ -423,8 +426,9 @@
 .fibre-page .package-features li {
   display: flex;
   align-items: center;
+  justify-content: center;
   margin-bottom: 4px;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   color: #2d2823;
   line-height: 1.2;
 }
@@ -571,7 +575,8 @@
 @media (min-width: 576px) {
   .fibre-page .packages-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    gap: 12px;
+    padding: 0 8px;
   }
   
   .fibre-page .provider-card {
