@@ -1,4 +1,5 @@
 import React from 'react';
+import { PackageProvider } from './context/PackageContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 
@@ -25,7 +26,8 @@ import ModernFibrePage from './components/ModernFibrePage';
 
 function App() {
   return (
-    <Router>
+    <PackageProvider>
+      <Router>
       <div className="App">
         <Header />
         <main>
@@ -49,7 +51,8 @@ function App() {
         <CacheStatus />
       </div>
     </Router>
+    </PackageProvider>
   );
 }
 
-export default App; 
+export default App;

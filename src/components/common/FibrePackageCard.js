@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './PackageCard.css';
+import styles from './FibrePackageCard.module.css';
 
 const FibrePackageCard = ({ package: pkg, provider, onSelect }) => {
   const navigate = useNavigate();
@@ -30,57 +30,57 @@ const FibrePackageCard = ({ package: pkg, provider, onSelect }) => {
 
   return (
     <div 
-      className={`package-card ${hasPromo ? 'has-promo' : ''}`}
+      className={`${styles.packageCard} ${hasPromo ? styles.hasPromo : ''}`
       onClick={handleClick}
     >
       {/* Promo Badge */}
       {hasPromo && (
-        <div className="promo-badge">
+        <div className={styles.promoBadge}>
           <span>SAVE R{originalPrice - promoPrice}</span>
         </div>
       )}
 
       {/* Card Header */}
-      <div className="card-header">
-        <div className="provider-info">
+      <div className={styles.cardHeader}>
+        <div className={styles.providerInfo}>
           {provider && provider.logo ? (
             <img 
               src={provider.logo} 
               alt={provider.name} 
-              className="provider-logo"
+              className={styles.providerLogo}
             />
           ) : (
-            <div className="provider-name">
+            <div className={styles.providerName}>
               {provider?.name || 'Provider'}
             </div>
           )}
         </div>
         
-        <div className="package-type">
+        <div className={styles.packageType}>
           <span>Uncapped Fibre</span>
         </div>
       </div>
 
       {/* Card Body */}
-      <div className="card-body">
-        <h3 className="package-title">{pkg.title || pkg.name}</h3>
+      <div className={styles.cardBody}>
+        <h3 className={styles.packageTitle}>{pkg.title || pkg.name}</h3>
         
         {/* Speed Information */}
-        <div className="speed-info">
-          <div className="speed-item">
-            <div className="speed-icon">
+        <div className={styles.speedInfo}>
+          <div className={styles.speedItem}>
+            <div className={styles.speedIcon}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="currentColor"/>
               </svg>
             </div>
-            <div className="speed-details">
-              <div className="speed-value">{downloadSpeed}</div>
-              <div className="speed-unit">Mbps</div>
-              <div className="speed-label">Download</div>
+            <div className={styles.speedDetails}>
+              <div className={styles.speedValue}>{downloadSpeed}</div>
+              <div className={styles.speedUnit}>Mbps</div>
+              <div className={styles.speedLabel}>Download</div>
             </div>
           </div>
           
-          <div className="speed-divider"></div>
+          <div className={styles.speedDivider}></div>
           
           <div className="speed-item">
             <div className="speed-icon">
@@ -97,8 +97,8 @@ const FibrePackageCard = ({ package: pkg, provider, onSelect }) => {
         </div>
 
         {/* Features */}
-        <div className="features">
-          <div className="feature">
+        <div className={styles.features}>
+          <div className={styles.feature}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M9 12L11 14L15 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2"/>
@@ -123,23 +123,23 @@ const FibrePackageCard = ({ package: pkg, provider, onSelect }) => {
       </div>
 
       {/* Card Footer */}
-      <div className="card-footer">
-        <div className="price-section">
+      <div className={styles.cardFooter}>
+        <div className={styles.priceSection}>
           {hasPromo ? (
-            <div className="price-promo">
-              <div className="current-price">
-                <span className="currency">R</span>
+            <div className={styles.pricePromo}>
+              <div className={styles.currentPrice}>
+                <span className={styles.currency}>R</span>
                 {promoPrice}
-                <span className="period">/month</span>
+                <span className={styles.period}>/month</span>
               </div>
-              <div className="original-price">
+              <div className={styles.originalPrice}>
                 <span className="currency">R</span>
                 {originalPrice}
                 <span className="period">/month</span>
               </div>
             </div>
           ) : (
-            <div className="price-regular">
+            <div className={styles.priceRegular}>
               <span className="currency">R</span>
               {effectivePrice}
               <span className="period">/month</span>
@@ -147,7 +147,7 @@ const FibrePackageCard = ({ package: pkg, provider, onSelect }) => {
           )}
         </div>
         
-        <button className="select-button">
+        <button className={styles.selectButton}>
           Choose Plan
         </button>
       </div>

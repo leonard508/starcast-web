@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
+import { usePackages } from '../context/PackageContext';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import ServiceCard from '../components/design-system/ServiceCard';
 import Button from '../components/design-system/Button';
 import FibrePackageCard from '../components/common/FibrePackageCard';
-import './FibrePage.css';
+import styles from './ModernHomePage.module.css';
 
 /**
  * Modern Homepage - Light Earthy Theme
@@ -12,53 +13,8 @@ import './FibrePage.css';
  */
 const ModernHomePage = () => {
   const navigate = useNavigate();
+  const { providers, packages, loading, error } = usePackages();
   const [activeProvider, setActiveProvider] = useState(0);
-
-  // Mock data for providers and packages
-  const providers = [
-    {
-      id: 1,
-      name: 'Openserve',
-      logo: '/assets/providers/openserve.svg'
-    },
-    {
-      id: 2,
-      name: 'Vumatel',
-      logo: '/assets/providers/vumatel.svg'
-    },
-    {
-      id: 3,
-      name: 'Frogfoot',
-      logo: '/assets/providers/frogfoot.svg'
-    }
-  ];
-
-  const packages = [
-    {
-      id: 1,
-      title: 'Basic Fibre',
-      download: '20',
-      upload: '10',
-      price: 499,
-      features: ['No throttling', 'No shaping', '24/7 Support']
-    },
-    {
-      id: 2,
-      title: 'Premium Fibre',
-      download: '50',
-      upload: '25',
-      price: 799,
-      features: ['No throttling', 'No shaping', '24/7 Support']
-    },
-    {
-      id: 3,
-      title: 'Ultimate Fibre',
-      download: '100',
-      upload: '50',
-      price: 999,
-      features: ['No throttling', 'No shaping', '24/7 Support']
-    }
-  ];
 
   const heroVariants = {
     hidden: { opacity: 0, y: 30 },
@@ -68,6 +24,14 @@ const ModernHomePage = () => {
       transition: { duration: 0.6, ease: "easeOut" }
     }
   };
+
+  if (loading) {
+    return <div>Loading...</div>; // Or a more sophisticated loading spinner
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   const staggerContainer = {
     hidden: { opacity: 0 },
@@ -137,23 +101,23 @@ const ModernHomePage = () => {
       </section>
 
       {/* Provider Section */}
-      <section className="provider-section">
+      <section className={styles.providerSection}>
         <div className="container">
           <motion.div 
-            className="section-header"
+            className={styles.sectionHeader}
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
             viewport={{ once: true }}
           >
             <motion.h2 
-              className="section-title"
+              className={styles.sectionTitle}
               variants={heroVariants}
             >
               Choose Your Provider
             </motion.h2>
             <motion.p 
-              className="section-subtitle"
+              className={styles.sectionSubtitle}
               variants={heroVariants}
             >
               Select from South Africa's leading fibre providers
@@ -161,32 +125,32 @@ const ModernHomePage = () => {
           </motion.div>
 
           <motion.div 
-            className="provider-selector"
+            className={styles.providerSelector}
             variants={heroVariants}
           >
             <button 
-              className="nav-arrow nav-prev" 
+              className={`${styles.navArrow} ${styles.navPrev}`} 
               aria-label="Previous provider"
               onClick={() => setActiveProvider(prev => (prev > 0 ? prev - 1 : providers.length - 1))}
             >
               ←
             </button>
-            <div className="provider-slider">
+            <div className={styles.providerSlider}>
               {providers.map((provider, index) => (
                 <motion.div 
                   key={provider.id} 
-                  className={`provider-card ${index === activeProvider ? 'active' : ''}`}
+                  className={`${styles.providerCard} ${index === activeProvider ? styles.active : ''}`}
                   onClick={() => setActiveProvider(index)}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <img src={provider.logo} alt={provider.name} className="provider-logo" />
-                  <span className="provider-text">{provider.name}</span>
+                  <img src={provider.logo} alt={provider.name} className={styles.providerLogo} />
+                  <span className={styles.providerText}>{provider.name}</span>
                 </motion.div>
               ))}
             </div>
             <button 
-              className="nav-arrow nav-next" 
+              className={`${styles.navArrow} ${styles.navNext}`} 
               aria-label="Next provider"
               onClick={() => setActiveProvider(prev => (prev < providers.length - 1 ? prev + 1 : 0))}
             >
@@ -197,23 +161,23 @@ const ModernHomePage = () => {
       </section>
 
       {/* Packages Section */}
-      <section className="packages-section">
+      <section className={styles.packagesSection}>
         <div className="container">
           <motion.div 
-            className="packages-header"
+            className={styles.packagesHeader}
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
             viewport={{ once: true }}
           >
             <motion.h2 
-              className="packages-title"
+              className={styles.packagesTitle}
               variants={heroVariants}
             >
               Popular Packages
             </motion.h2>
             <motion.p 
-              className="packages-subtitle"
+              className={styles.packagesSubtitle}
               variants={heroVariants}
             >
               Find the perfect fibre package for your needs
@@ -221,7 +185,7 @@ const ModernHomePage = () => {
           </motion.div>
 
           <motion.div 
-            className="packages-grid"
+            className={styles.packagesGrid}
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
