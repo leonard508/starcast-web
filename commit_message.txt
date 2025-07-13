@@ -1,1 +1,7 @@
-fix(css): improve mobile responsiveness of LTE page
+feat(fibre): improve design of fibre package cards
+
+- Restructured the card layout for better readability and visual hierarchy.
+- Updated typography to emphasize package name and price.
+- Enhanced the price display to be more prominent.
+- Added icons for download and upload speeds for better scannability.
+- Refined card styling with updated background, border, and shadow.

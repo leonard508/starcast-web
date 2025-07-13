@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { packageService } from '../services/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import FibrePackageCard from '../components/common/FibrePackageCard';
 import './FibrePage.css';
 
 const FibrePage = () => {
@@ -276,67 +277,6 @@ const FibrePage = () => {
     }
   };
 
-  const renderPackageFeatures = (pkg) => {
-    const features = [];
-    
-    if (pkg.speed && pkg.speed !== '0' && pkg.speed !== '') {
-      const speedText = pkg.speed.includes('Mbps') ? pkg.speed : `${pkg.speed}Mbps`;
-      features.push(
-        <li key="speed">
-          <CheckIcon />
-          <strong>Speed:</strong> {speedText}
-        </li>
-      );
-    }
-    
-    if (pkg.download && pkg.download !== '0' && pkg.download !== '') {
-      const downloadText = pkg.download.includes('Mbps') ? pkg.download : `${pkg.download}Mbps`;
-      features.push(
-        <li key="download">
-          <CheckIcon />
-          <strong>Download:</strong> {downloadText}
-        </li>
-      );
-    }
-    
-    if (pkg.upload_speed && pkg.upload_speed !== '0' && pkg.upload_speed !== '') {
-      const uploadText = pkg.upload_speed.includes('Mbps') ? pkg.upload_speed : `${pkg.upload_speed}Mbps`;
-      features.push(
-        <li key="upload">
-          <CheckIcon />
-          <strong>Upload:</strong> {uploadText}
-        </li>
-      );
-    }
-    
-    if (pkg.data && pkg.data !== '') {
-      let dataValue = pkg.data.replace(/unlimited/gi, 'Uncapped').replace(/Unlimited/g, 'Uncapped');
-      features.push(
-        <li key="data">
-          <CheckIcon />
-          <strong>Data:</strong> {dataValue}
-        </li>
-      );
-    }
-    
-    if (features.length === 0) {
-      features.push(
-        <li key="type">
-          <CheckIcon />
-          <strong>Type:</strong> Fibre Connection
-        </li>
-      );
-    }
-    
-    return features;
-  };
-
-  const CheckIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  );
-
   if (loading) {
     return (
       <div className="fibre-page">
@@ -438,24 +378,7 @@ const FibrePage = () => {
               <div className="packages-grid">
                 {currentProvider && currentProvider.packages.length > 0 ? (
                   currentProvider.packages.map((pkg) => (
-                    <div key={pkg.id} className="package-card">
-                      <h3 className="package-name">{pkg.title || pkg.name}</h3>
-                      <p className="package-provider">{currentProvider.name}</p>
-                      <div className="package-price">
-                        <span className="currency">R</span>
-                        {pkg.promo_price || pkg.price}
-                        <span className="period">/pm</span>
-                      </div>
-                      <ul className="package-features">
-                        {renderPackageFeatures(pkg)}
-                      </ul>
-                      <button 
-                        className="package-select-btn"
-                        onClick={() => handlePackageSelect(pkg)}
-                      >
-                        Choose Plan
-                      </button>
-                    </div>
+                    <FibrePackageCard key={pkg.id} package={pkg} provider={currentProvider} onSelect={handlePackageSelect} />
                   ))
                 ) : (
                   <div className="no-packages">
@@ -475,4 +398,4 @@ const FibrePage = () => {
   );
 };
 
-export default FibrePage; 
+export default FibrePage;

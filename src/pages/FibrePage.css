@@ -58,7 +58,7 @@
 
 .fibre-page .heading-gradient {
   font-size: 1.1rem;
-  font-weight: 800;
+  font-weight: 700; /* Reduced from 800 */
   color: #2d2823;
   margin-bottom: 4px;
   line-height: 1.1;
@@ -113,7 +113,7 @@
   text-align: center;
   color: #2d2823;
   font-size: 0.9rem;
-  font-weight: 800;
+  font-weight: 700; /* Reduced from 800 */
   margin: 0 auto;
   display: inline-block;
   position: relative;
@@ -150,18 +150,18 @@
   gap: 8px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
+  scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none; /* For Internet Explorer and Edge */
   margin: 0 35px;
   padding: 6px 3px;
   scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
   flex-grow: 1;
   width: 100%;
 }
 
 .fibre-page .provider-slider::-webkit-scrollbar {
-  display: none;
+  display: none; /* For Chrome, Safari, and Opera */
 }
 
 .fibre-page .provider-card {
@@ -266,7 +266,7 @@
 }
 
 .fibre-page .nav-arrow {
-  display: none;
+  display: flex; /* Ensure arrows are visible */
   align-items: center;
   justify-content: center;
   width: 32px;
@@ -590,7 +590,6 @@
   .fibre-page .package-card {
     padding: 18px;
   }
-}
   
   .fibre-page .provider-card {
     width: 160px;
@@ -601,6 +600,7 @@
   .fibre-page .provider-text {
     font-size: 1.1rem;
   }
+}
 
 @media (min-width: 768px) {
   .fibre-page .fibre-header {
@@ -798,4 +798,4 @@
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
-} 
+}
