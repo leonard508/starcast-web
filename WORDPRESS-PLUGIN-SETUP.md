@@ -1,20 +1,31 @@
-# WordPress Plugin Setup Instructions
+# WordPress Complete API Plugin Setup
 
 ## Overview
-The React application requires a WordPress plugin to properly expose fibre package data via the REST API. The current WordPress site has custom post types but they are not properly registered for REST API access.
+This is a unified WordPress plugin that combines all functionality needed for the Starcast Technologies React frontend. It replaces both the old plugins and provides complete REST API integration.
 
-## Problem Identified
-- ✅ WordPress has fibre package data
-- ❌ Custom post types not registered with `show_in_rest => true`
-- ❌ Taxonomies not exposed to REST API
-- ❌ ACF fields not accessible via REST API
-- ❌ Missing providers: Openserve, Vumatel, Octotel
+## What This Plugin Provides
+✅ **Native WordPress REST API** support for packages and providers  
+✅ **Custom endpoints** for bookings, applications, and contact forms  
+✅ **Database tables** for customer data management  
+✅ **Email notifications** for all customer interactions  
+✅ **ACF field groups** automatically created  
+✅ **Promo code system** with validation  
+✅ **CORS headers** for React frontend  
 
-## Solution: Install the Starcast Fibre API Plugin
+## Replace Old Plugins
+This single plugin replaces:
+- `wordpress-rest-api-extension.php` 
+- `starcast-fibre-api-plugin.php`
+- Any other custom REST API plugins
+
+## Installation: Starcast Complete API Plugin
 
 ### Step 1: Install the Plugin
-1. Upload `starcast-fibre-api-plugin.php` to your WordPress `/wp-content/plugins/` directory
-2. Activate the plugin in WordPress Admin > Plugins
+1. **Remove old plugins** if they exist:
+   - Deactivate and delete `wordpress-rest-api-extension.php`
+   - Deactivate and delete `starcast-fibre-api-plugin.php`
+2. Upload `starcast-complete-api-plugin.php` to your WordPress `/wp-content/plugins/` directory
+3. Activate the plugin in WordPress Admin > Plugins
 
 ### Step 2: Verify Installation
 After activation, you should see:
@@ -109,20 +120,46 @@ React app looks for these exact provider names:
 
 Provider names should match (case insensitive) or contain these keywords.
 
-## WordPress REST API Endpoints
+## Complete API Endpoints
 
-### Providers
-```
+### Native WordPress REST API (Primary)
+```bash
+# Providers
 GET /wp-json/wp/v2/fibre_provider
-GET /wp-json/wp/v2/fibre_provider/{id}
+GET /wp-json/wp/v2/lte_provider
+
+# Packages  
+GET /wp-json/wp/v2/fibre_packages
+GET /wp-json/wp/v2/lte_packages
+GET /wp-json/wp/v2/fibre_packages?fibre_provider={provider_id}
 ```
 
-### Packages  
+### Custom REST API Endpoints
+```bash
+# Legacy package endpoints (backward compatibility)
+GET /wp-json/starcast/v1/packages/fibre
+GET /wp-json/starcast/v1/packages/lte
+
+# Bookings
+POST /wp-json/starcast/v1/bookings
+GET /wp-json/starcast/v1/bookings/availability/{date}
+
+# Applications
+POST /wp-json/starcast/v1/fibre-application
+POST /wp-json/starcast/v1/lte-application
+
+# Contact & Signup
+POST /wp-json/starcast/v1/contact
+POST /wp-json/starcast/v1/signup
+
+# Promo validation
+POST /wp-json/starcast/v1/validate-promo
 ```
-GET /wp-json/wp/v2/fibre_packages
-GET /wp-json/wp/v2/fibre_packages?fibre_provider={provider_id}
-GET /wp-json/wp/v2/fibre_packages/{id}
-```
+
+### Database Tables Created
+- `wp_starcast_bookings` - Technician bookings
+- `wp_starcast_signups` - General signups  
+- `wp_starcast_applications` - Package applications
 
 ### Example Response
 ```json
@@ -139,3 +176,22 @@ GET /wp-json/wp/v2/fibre_packages/{id}
   }
 }
 ```
+
+## Benefits of Unified Plugin
+
+### Single Plugin Management
+- ✅ One plugin to install and maintain
+- ✅ Consistent versioning and updates  
+- ✅ No conflicts between multiple plugins
+
+### Complete Functionality
+- ✅ WordPress native REST API integration
+- ✅ Custom business logic endpoints
+- ✅ Database management for customer data
+- ✅ Email notification system
+- ✅ Promo code validation
+
+### Backward Compatibility
+- ✅ Legacy `/starcast/v1/` endpoints preserved
+- ✅ Existing React code continues working
+- ✅ Gradual migration to native WordPress endpoints possible
