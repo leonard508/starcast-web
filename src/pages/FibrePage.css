@@ -348,6 +348,118 @@
   align-content: start;
 }
 
+.fibre-page .package-card {
+  background: rgba(250, 247, 244, 0.8);
+  border-radius: 12px;
+  box-shadow: 
+    0 4px 16px rgba(74, 69, 63, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(232, 227, 219, 0.3);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  text-align: left;
+  width: 100%;
+  touch-action: manipulation;
+  backdrop-filter: blur(10px);
+}
+
+.fibre-page .package-card:hover {
+  transform: translateY(-6px);
+  background: rgba(250, 247, 244, 0.9);
+  box-shadow: 
+    0 20px 40px rgba(74, 69, 63, 0.12),
+    0 8px 16px rgba(214, 125, 62, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  border-color: rgba(214, 125, 62, 0.3);
+}
+
+.fibre-page .package-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #2d2823;
+  margin-bottom: 3px;
+  line-height: 1.2;
+}
+
+.fibre-page .package-provider {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #6b6355;
+  margin-bottom: 8px;
+}
+
+.fibre-page .package-price {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #d67d3e;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.fibre-page .package-price .currency {
+  font-size: 1rem;
+  font-weight: 600;
+  vertical-align: super;
+  margin-right: 2px;
+}
+
+.fibre-page .package-price .period {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #6b6355;
+  margin-left: 4px;
+}
+
+.fibre-page .package-features {
+  list-style: none;
+  margin-bottom: 12px;
+  text-align: left;
+  flex-grow: 1;
+  padding: 0;
+}
+
+.fibre-page .package-features li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 0.65rem;
+  color: #2d2823;
+  line-height: 1.2;
+}
+
+.fibre-page .package-features li svg {
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  color: #d67d3e;
+  flex-shrink: 0;
+}
+
+.fibre-page .package-select-btn {
+  background: #d67d3e;
+  color: #ffffff;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 16px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: auto;
+  box-shadow: 0 4px 12px rgba(214, 125, 62, 0.3);
+  min-height: 36px;
+  touch-action: manipulation;
+}
+
+.fibre-page .package-select-btn:hover {
+  background: #c56d31;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(214, 125, 62, 0.4);
+}
+
 .fibre-page .no-packages {
   grid-column: 1 / -1;
   text-align: center;
@@ -496,10 +608,25 @@
   
   .fibre-page .provider-selector {
     margin-bottom: 20px;
+    justify-content: center;
+  }
+  
+  .fibre-page .provider-slider {
+    overflow: visible;
+    scroll-snap-type: none;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    gap: 16px;
+  }
+  
+  .fibre-page .nav-arrow {
+    display: none !important;
   }
   
   .fibre-page .provider-indicators {
-    margin-bottom: 20px;
+    display: none;
   }
   
   .fibre-page .provider-card {
@@ -536,10 +663,15 @@
   
   .fibre-page .provider-selector {
     margin-bottom: 25px;
+    justify-content: center;
+  }
+  
+  .fibre-page .provider-slider {
+    gap: 20px;
   }
   
   .fibre-page .provider-indicators {
-    margin-bottom: 25px;
+    display: none;
   }
   
   .fibre-page .packages-grid {
@@ -582,10 +714,15 @@
   
   .fibre-page .provider-selector {
     margin-bottom: 30px;
+    justify-content: center;
+  }
+  
+  .fibre-page .provider-slider {
+    gap: 24px;
   }
   
   .fibre-page .provider-indicators {
-    margin-bottom: 30px;
+    display: none;
   }
   
   .fibre-page .packages-grid {

@@ -501,10 +501,25 @@
   
   .provider-selector {
     margin-bottom: 20px;
+    justify-content: center;
+  }
+  
+  .provider-slider {
+    overflow: visible;
+    scroll-snap-type: none;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    gap: 16px;
+  }
+  
+  .nav-arrow {
+    display: none !important;
   }
   
   .provider-indicators {
-    margin-bottom: 20px;
+    display: none;
   }
   
   .provider-card {
@@ -568,10 +583,15 @@
   
   .provider-selector {
     margin-bottom: 25px;
+    justify-content: center;
+  }
+  
+  .provider-slider {
+    gap: 20px;
   }
   
   .provider-indicators {
-    margin-bottom: 25px;
+    display: none;
   }
   
   .packages-grid {
@@ -650,10 +670,15 @@
   
   .provider-selector {
     margin-bottom: 30px;
+    justify-content: center;
+  }
+  
+  .provider-slider {
+    gap: 24px;
   }
   
   .provider-indicators {
-    margin-bottom: 30px;
+    display: none;
   }
   
   .packages-grid {
