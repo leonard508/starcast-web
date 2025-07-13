@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { cacheService } from './cache';
 
 // WordPress REST API base URL - update this to your WordPress site URL
 const WP_API_BASE_URL = process.env.REACT_APP_WP_API_URL || 'https://starcast.co.za/wp-json';
@@ -10,12 +11,79 @@ const api = axios.create({
   },
 });
 
-// Package services using WordPress REST API
+// Package services using WordPress REST API with caching
 export const packageService = {
-  getFibrePackages: () => api.get('/wp/v2/fibre_packages?per_page=100&_embed'),
-  getLTEPackages: () => api.get('/starcast/v1/packages/lte'),
+  getFibrePackages: async () => {
+    try {
+      // Try to get from cache first
+      const cachedData = cacheService.getFibrePackages();
+      if (cachedData) {
+        return { data: cachedData };
+      }
+
+      // If no cache, fetch from API
+      console.log('Fetching fresh fibre packages from API...');
+      const response = await api.get('/wp/v2/fibre_packages?per_page=100&_embed');
+      
+      // Cache the response data
+      if (response.data && Array.isArray(response.data)) {
+        cacheService.setFibrePackages(response.data);
+      }
+      
+      return response;
+    } catch (error) {
+      console.error('Error fetching fibre packages:', error);
+      // Try to return cached data even if API fails
+      const cachedData = cacheService.getFibrePackages();
+      if (cachedData) {
+        console.log('API failed, using cached fibre packages');
+        return { data: cachedData };
+      }
+      throw error;
+    }
+  },
+  
+  getLTEPackages: async () => {
+    try {
+      // Try to get from cache first
+      const cachedData = cacheService.getLTEPackages();
+      if (cachedData) {
+        return { data: cachedData };
+      }
+
+      // If no cache, fetch from API
+      console.log('Fetching fresh LTE packages from API...');
+      const response = await api.get('/starcast/v1/packages/lte');
+      
+      // Cache the response data
+      if (response.data) {
+        const dataToCache = response.data.success ? response.data.data : response.data;
+        if (Array.isArray(dataToCache)) {
+          cacheService.setLTEPackages(dataToCache);
+        } else if (response.data.success && response.data.data) {
+          cacheService.setLTEPackages(response.data);
+        }
+      }
+      
+      return response;
+    } catch (error) {
+      console.error('Error fetching LTE packages:', error);
+      // Try to return cached data even if API fails
+      const cachedData = cacheService.getLTEPackages();
+      if (cachedData) {
+        console.log('API failed, using cached LTE packages');
+        return { data: cachedData };
+      }
+      throw error;
+    }
+  },
+  
   getPackageById: (id) => api.get(`/wp/v2/fibre_packages/${id}`), // WordPress default endpoint
   getLTEPackageById: (id) => api.get(`/wp/v2/lte_packages/${id}`), // WordPress LTE endpoint
+  
+  // Cache management functions
+  clearCache: () => cacheService.clearCache(),
+  getCacheStatus: () => cacheService.getCacheStatus(),
 };
 
 // Booking services using WordPress REST API
