@@ -1,5 +1,7 @@
-feat(fibre): improve fibre page design and functionality
+feat(mobile): enhance mobile responsiveness and unify card design
 
-- Adjusted font weights for better readability.
-- Enabled horizontal scrolling for provider selection.
-- Redesigned fibre package cards with a cleaner, Google-inspired aesthetic.
+- Implemented a unified mobile-first layout for Fibre and LTE package cards.
+- Enhanced UX with improved touch-friendly elements and clear information hierarchy.
+- Adjusted font weights and sizes for optimal mobile readability.
+- Ensured smooth horizontal scrolling for provider selection on mobile.
+- Applied Google Material Design principles for a cleaner, app-like aesthetic.
