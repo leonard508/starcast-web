@@ -1,4 +1,4 @@
-feat(mobile): enhance mobile responsiveness and unify card design
+feat(mobile): unify mobile card design and enhance UX
 
 - Implemented a unified mobile-first layout for Fibre and LTE package cards.
 - Enhanced UX with improved touch-friendly elements and clear information hierarchy.

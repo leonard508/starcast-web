@@ -5,7 +5,7 @@
   padding: 0;
 }
 
-.fibre-page {
+body {
   font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: linear-gradient(135deg, var(--sand-50) 0%, var(--surface-warm) 30%, var(--stone-50) 70%, var(--sand-50) 100%);
   background-attachment: fixed;
@@ -31,7 +31,7 @@
 /* Header Styles */
 .fibre-page .fibre-header {
   text-align: center;
-  padding: 20px 0 15px; /* Adjusted padding */
+  padding: 80px 0 40px; /* Adjusted for mobile-first */
   background: transparent;
   position: relative;
   overflow: hidden;
@@ -57,11 +57,11 @@
 }
 
 .fibre-page .heading-gradient {
-  font-size: 1.4rem; /* Adjusted font size */
-  font-weight: 700; /* Adjusted font-weight */
+  font-size: 2rem; /* Adjusted for mobile-first */
+  font-weight: 800;
   color: var(--on-surface);
-  margin-bottom: 8px; /* Adjusted margin */
-  line-height: 1.2;
+  margin-bottom: 16px; /* Adjusted margin */
+  line-height: 1.1;
   letter-spacing: -0.02em;
 }
 
@@ -70,17 +70,17 @@
 }
 
 .fibre-page .subheading {
-  font-size: 0.875rem; /* Adjusted font size */
+  font-size: 1.125rem; /* Adjusted for mobile-first */
   color: var(--on-surface-variant);
   max-width: 600px;
-  margin: 0 auto 15px auto; /* Adjusted margin */
+  margin: 0 auto 20px auto; /* Adjusted margin */
   font-weight: 400;
   line-height: 1.5;
 }
 
 /* Section Styles */
 .fibre-page .fibre-section {
-  padding: 20px 0 40px; /* Adjusted padding */
+  padding: 40px 0 60px; /* Adjusted for mobile-first */
   background: transparent;
   position: relative;
   flex: 1;
@@ -103,7 +103,7 @@
 .fibre-page .title-container {
   width: 100%;
   text-align: center;
-  margin-bottom: 25px; /* Adjusted margin */
+  margin-bottom: 40px; /* Adjusted margin */
   position: relative;
   z-index: 2;
   flex-shrink: 0;
@@ -112,8 +112,8 @@
 .fibre-page .section-title {
   text-align: center;
   color: var(--on-surface);
-  font-size: 1.3rem; /* Adjusted font size */
-  font-weight: 700; /* Adjusted font-weight */
+  font-size: 1.8rem; /* Adjusted for mobile-first */
+  font-weight: 800;
   margin: 0 auto;
   display: inline-block;
   position: relative;
@@ -138,7 +138,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  margin-bottom: 20px; /* Adjusted margin */
+  margin-bottom: 30px; /* Adjusted margin */
   max-width: 100%;
   width: 100%;
   z-index: 2;
@@ -154,7 +154,7 @@
   scrollbar-width: none; /* For Firefox */
   -ms-overflow-style: none; /* For Internet Explorer and Edge */
   margin: 0 40px; /* Adjusted margin for arrows */
-  padding: 10px 5px; /* Adjusted padding */
+  padding: 16px 8px; /* Adjusted padding */
   scroll-behavior: smooth;
   flex-grow: 1;
   width: 100%;
@@ -167,9 +167,9 @@
 .fibre-page .provider-card {
   scroll-snap-align: center;
   flex: 0 0 auto;
-  width: 140px; /* Adjusted width */
-  height: 80px; /* Adjusted height */
-  border-radius: 12px;
+  width: 250px; /* Adjusted width for mobile */
+  height: 110px; /* Adjusted height */
+  border-radius: 16px; /* Adjusted border-radius */
   background: var(--surface);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.05);
   border: 1px solid var(--stone-200);
@@ -181,8 +181,8 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  padding: 10px;
-  min-width: 140px; /* Adjusted min-width */
+  padding: 16px; /* Adjusted padding */
+  min-width: 250px; /* Adjusted min-width */
   touch-action: manipulation;
 }
 
@@ -194,7 +194,7 @@
   right: 0;
   height: 4px;
   background: linear-gradient(90deg, var(--primary-500), var(--primary-600));
-  border-radius: 12px 12px 0 0;
+  border-radius: 16px 16px 0 0;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -204,19 +204,19 @@
 }
 
 .fibre-page .provider-logo {
-  max-width: 80%;
-  max-height: 60%;
+  max-width: 70%; /* Adjusted size */
+  max-height: 70%; /* Adjusted size */
   width: auto;
   height: auto;
   object-fit: contain;
   z-index: 2;
   transition: all 0.3s ease;
   display: block;
-  margin-bottom: 5px; /* Added margin */
+  margin-bottom: 8px; /* Added margin */
 }
 
 .fibre-page .provider-text {
-  font-size: 0.85rem; /* Adjusted font size */
+  font-size: 1rem; /* Adjusted font size */
   font-weight: 600;
   color: var(--on-surface);
   text-align: center;
@@ -261,8 +261,8 @@
   display: flex; /* Ensure arrows are visible */
   align-items: center;
   justify-content: center;
-  width: 40px; /* Adjusted size */
-  height: 40px; /* Adjusted size */
+  width: 48px; /* Adjusted size */
+  height: 48px; /* Adjusted size */
   border-radius: 50%;
   background: var(--surface);
   border: 1px solid var(--stone-200);
@@ -272,7 +272,7 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   z-index: 5;
   flex-shrink: 0;
-  min-width: 40px;
+  min-width: 48px;
   touch-action: manipulation;
 }
 
@@ -299,14 +299,14 @@
 .fibre-page .provider-indicators {
   display: flex;
   justify-content: center;
-  gap: 8px; /* Adjusted gap */
-  margin-bottom: 20px; /* Adjusted margin */
+  gap: 10px; /* Adjusted gap */
+  margin-bottom: 35px; /* Adjusted margin */
   flex-shrink: 0;
 }
 
 .fibre-page .indicator {
-  width: 10px; /* Adjusted size */
-  height: 10px; /* Adjusted size */
+  width: 12px; /* Adjusted size */
+  height: 12px; /* Adjusted size */
   border-radius: 50%;
   background-color: var(--stone-300);
   cursor: pointer;
@@ -485,8 +485,8 @@
 .fibre-page .error-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   min-height: 50vh;
   width: 100%;
   text-align: center;
