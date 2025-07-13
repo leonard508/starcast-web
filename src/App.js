@@ -5,6 +5,7 @@ import './App.css';
 // Layout Components
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
+import CacheStatus from './components/common/CacheStatus';
 
 // Page Components
 import HomePage from './pages/HomePage';
@@ -37,6 +38,7 @@ function App() {
           </Routes>
         </main>
         <Footer />
+        <CacheStatus />
       </div>
     </Router>
   );
