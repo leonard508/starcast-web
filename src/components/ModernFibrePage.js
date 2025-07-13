@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { packageService } from '../services/api';
 
 const ModernFibrePage = () => {
   const navigate = useNavigate();
@@ -207,167 +206,24 @@ const ModernFibrePage = () => {
     try {
       setLoading(true);
       
-      // Try to fetch from WordPress REST API first
-      try {
-        const providersData = await fetchWordPressProviders();
-        if (providersData && providersData.length > 0) {
-          setProviders(providersData);
-          return;
-        }
-      } catch (apiError) {
-        console.log('WordPress API not available, trying legacy API...');
-        
-        // Fallback to legacy API
-        try {
-          const response = await packageService.getFibrePackages();
-          if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-            const packages = response.data;
-            const groupedProviders = groupPackagesByProvider(packages);
-            if (groupedProviders.length > 0) {
-              setProviders(groupedProviders);
-              return;
-            }
-          }
-        } catch (legacyApiError) {
-          console.log('Legacy API also not available, using fallback data');
-        }
+      // Fetch from WordPress REST API only - no fallbacks
+      const providersData = await fetchWordPressProviders();
+      if (providersData && providersData.length > 0) {
+        setProviders(providersData);
+      } else {
+        setError('No fibre packages found. Please ensure the WordPress plugin is installed and providers are configured.');
+        setProviders([]);
       }
-      
-      // Use fallback data if all APIs fail
-      const fallbackProviders = createFallbackProviders();
-      setProviders(fallbackProviders);
       
     } catch (err) {
       console.error('Error loading fibre data:', err);
-      setError('Failed to load fibre packages');
-      // Still provide fallback data even on error
-      const fallbackProviders = createFallbackProviders();
-      setProviders(fallbackProviders);
+      setError(`Failed to load fibre packages: ${err.message}. Please check WordPress configuration.`);
+      setProviders([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const groupPackagesByProvider = (packages) => {
-    const grouped = {};
-    const providerData = [];
-
-    packages.forEach(pkg => {
-      if (!pkg.acf) return; // Skip packages without ACF data
-
-      const providerName = pkg.acf.provider || 'Unknown Provider';
-      const providerSlug = providerName.toLowerCase().replace(/\s+/g, '');
-
-      // Check if this provider is in our allowed list
-      const isAllowed = allowedProviders.some(allowed => 
-        providerSlug.includes(allowed) || providerName.toLowerCase().includes(allowed)
-      );
-
-      if (!isAllowed) return; // Skip providers not in our allowed list
-
-      if (!grouped[providerSlug]) {
-        grouped[providerSlug] = {
-          name: providerName,
-          slug: providerSlug,
-          logo: pkg.acf.provider_logo || null,
-          packages: [],
-          priority: allowedProviders.findIndex(allowed => 
-            providerSlug.includes(allowed) || providerName.toLowerCase().includes(allowed)
-          )
-        };
-      }
-
-      const packageData = {
-        id: pkg.id,
-        title: pkg.title?.rendered || 'Fibre Package',
-        price: pkg.acf.price ? parseInt(pkg.acf.price) : 999,
-        download: pkg.acf.download || 'N/A',
-        upload: pkg.acf.upload || 'N/A',
-        provider: providerName,
-        download_speed: parseInt(pkg.acf.download?.replace(/[^0-9]/g, '') || '0'),
-        has_promo: false,
-        promo_price: null,
-        effective_price: pkg.acf.price ? parseInt(pkg.acf.price) : 999
-      };
-
-      grouped[providerSlug].packages.push(packageData);
-    });
-
-    // Convert to array and sort packages by download speed
-    Object.values(grouped).forEach(provider => {
-      provider.packages.sort((a, b) => a.download_speed - b.download_speed);
-    });
-
-    // Sort providers by priority
-    const sortedProviders = Object.values(grouped).sort((a, b) => a.priority - b.priority);
-
-    return sortedProviders;
-  };
-
-  const createFallbackProviders = () => {
-    return [
-      {
-        name: 'Openserve',
-        slug: 'openserve',
-        logo: null,
-        packages: [
-          { id: 1, title: '10Mbps/10Mbps', price: 299, download: '10Mbps', upload: '10Mbps', provider: 'Openserve', download_speed: 10, has_promo: false },
-          { id: 2, title: '25Mbps/25Mbps', price: 399, download: '25Mbps', upload: '25Mbps', provider: 'Openserve', download_speed: 25, has_promo: false },
-          { id: 3, title: '50Mbps/50Mbps', price: 599, download: '50Mbps', upload: '50Mbps', provider: 'Openserve', download_speed: 50, has_promo: false },
-          { id: 4, title: '100Mbps/100Mbps', price: 899, download: '100Mbps', upload: '100Mbps', provider: 'Openserve', download_speed: 100, has_promo: false }
-        ],
-        priority: 0
-      },
-      {
-        name: 'Frogfoot',
-        slug: 'frogfoot',
-        logo: null,
-        packages: [
-          { id: 5, title: '10Mbps/10Mbps', price: 329, download: '10Mbps', upload: '10Mbps', provider: 'Frogfoot', download_speed: 10, has_promo: false },
-          { id: 6, title: '25Mbps/25Mbps', price: 449, download: '25Mbps', upload: '25Mbps', provider: 'Frogfoot', download_speed: 25, has_promo: false },
-          { id: 7, title: '50Mbps/50Mbps', price: 649, download: '50Mbps', upload: '50Mbps', provider: 'Frogfoot', download_speed: 50, has_promo: false },
-          { id: 8, title: '100Mbps/100Mbps', price: 949, download: '100Mbps', upload: '100Mbps', provider: 'Frogfoot', download_speed: 100, has_promo: false }
-        ],
-        priority: 1
-      },
-      {
-        name: 'Vumatel',
-        slug: 'vumatel',
-        logo: null,
-        packages: [
-          { id: 9, title: '10Mbps/10Mbps', price: 309, download: '10Mbps', upload: '10Mbps', provider: 'Vumatel', download_speed: 10, has_promo: false },
-          { id: 10, title: '25Mbps/25Mbps', price: 419, download: '25Mbps', upload: '25Mbps', provider: 'Vumatel', download_speed: 25, has_promo: false },
-          { id: 11, title: '50Mbps/50Mbps', price: 619, download: '50Mbps', upload: '50Mbps', provider: 'Vumatel', download_speed: 50, has_promo: false },
-          { id: 12, title: '100Mbps/100Mbps', price: 879, download: '100Mbps', upload: '100Mbps', provider: 'Vumatel', download_speed: 100, has_promo: false }
-        ],
-        priority: 2
-      },
-      {
-        name: 'Octotel',
-        slug: 'octotel',
-        logo: null,
-        packages: [
-          { id: 13, title: '10Mbps/10Mbps', price: 319, download: '10Mbps', upload: '10Mbps', provider: 'Octotel', download_speed: 10, has_promo: false },
-          { id: 14, title: '25Mbps/25Mbps', price: 439, download: '25Mbps', upload: '25Mbps', provider: 'Octotel', download_speed: 25, has_promo: false },
-          { id: 15, title: '50Mbps/50Mbps', price: 639, download: '50Mbps', upload: '50Mbps', provider: 'Octotel', download_speed: 50, has_promo: false },
-          { id: 16, title: '100Mbps/100Mbps', price: 919, download: '100Mbps', upload: '100Mbps', provider: 'Octotel', download_speed: 100, has_promo: false }
-        ],
-        priority: 3
-      },
-      {
-        name: 'MetroFibre',
-        slug: 'metrofibre',
-        logo: null,
-        packages: [
-          { id: 17, title: '10Mbps/10Mbps', price: 349, download: '10Mbps', upload: '10Mbps', provider: 'MetroFibre', download_speed: 10, has_promo: false },
-          { id: 18, title: '25Mbps/25Mbps', price: 469, download: '25Mbps', upload: '25Mbps', provider: 'MetroFibre', download_speed: 25, has_promo: false },
-          { id: 19, title: '50Mbps/50Mbps', price: 669, download: '50Mbps', upload: '50Mbps', provider: 'MetroFibre', download_speed: 50, has_promo: false },
-          { id: 20, title: '100Mbps/100Mbps', price: 969, download: '100Mbps', upload: '100Mbps', provider: 'MetroFibre', download_speed: 100, has_promo: false }
-        ],
-        priority: 4
-      }
-    ];
-  };
 
   const scrollToProvider = (index) => {
     if (!providerSliderRef.current || !providerSliderRef.current.children[index]) return;
@@ -475,6 +331,29 @@ const ModernFibrePage = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="fibre-page">
+        <div className="error-container">
+          <h2>Configuration Required</h2>
+          <p>{error}</p>
+          <div className="error-help">
+            <h3>Setup Instructions:</h3>
+            <ol>
+              <li>Install the Starcast Fibre API WordPress plugin</li>
+              <li>Add fibre providers (Openserve, Frogfoot, Vumatel, Octotel, MetroFibre)</li>
+              <li>Create fibre packages with ACF fields (download, upload, price)</li>
+              <li>Ensure WordPress REST API is enabled</li>
+            </ol>
+          </div>
+          <button onClick={fetchFibreData} className="retry-button">
+            Retry Loading
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const currentProvider = providers[currentProviderIndex];
 
   return (
@@ -505,6 +384,84 @@ const ModernFibrePage = () => {
           max-width: 1200px;
           margin: 0 auto;
           padding: 0 24px;
+        }
+
+        /* Error and Loading Styles */
+        .loading-container, .error-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 60vh;
+          text-align: center;
+          padding: 60px 24px;
+        }
+
+        .loading-spinner {
+          width: 48px;
+          height: 48px;
+          border: 4px solid rgba(214, 125, 62, 0.2);
+          border-left: 4px solid #d67d3e;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin-bottom: 24px;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        .error-container h2 {
+          color: #d67d3e;
+          font-size: 2rem;
+          margin-bottom: 16px;
+        }
+
+        .error-container p {
+          color: #6b6355;
+          font-size: 1.1rem;
+          margin-bottom: 32px;
+          max-width: 600px;
+        }
+
+        .error-help {
+          background: rgba(255, 255, 255, 0.6);
+          padding: 24px;
+          border-radius: 12px;
+          margin-bottom: 32px;
+          text-align: left;
+          max-width: 500px;
+        }
+
+        .error-help h3 {
+          color: #2d2823;
+          margin-bottom: 16px;
+        }
+
+        .error-help ol {
+          color: #6b6355;
+          padding-left: 20px;
+        }
+
+        .error-help li {
+          margin-bottom: 8px;
+        }
+
+        .retry-button {
+          background: #d67d3e;
+          color: white;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 8px;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+        }
+
+        .retry-button:hover {
+          background: #c16835;
         }
         
         /* Header Styles */
