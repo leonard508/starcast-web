@@ -80,20 +80,11 @@ export async function POST(request: NextRequest) {
 async function handleSuccessfulPayment(payment: any) {
   console.log('Payment completed successfully:', payment.id)
   
-  // If this is for an application, update the application status
+  // If this is for an application, log the successful payment
   if (payment.applicationId) {
-    try {
-      await db.application.update({
-        where: { id: payment.applicationId },
-        data: { 
-          paymentStatus: 'paid',
-          updatedAt: new Date(),
-        },
-      })
-      console.log('Application payment status updated:', payment.applicationId)
-    } catch (error) {
-      console.error('Failed to update application payment status:', error)
-    }
+    console.log('Payment completed for application:', payment.applicationId)
+    // Payment status is tracked in the Payment model
+    // Application status updates can be handled separately if needed
   }
 
   // TODO: Send payment confirmation email
