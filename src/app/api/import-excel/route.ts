@@ -1,22 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import * as XLSX from 'xlsx'
-import { z } from 'zod'
-
-// Validation schema for import request
-const ImportRequestSchema = z.object({
-  data: z.string(), // Base64 encoded Excel file
-  filename: z.string().optional(),
-  sheetName: z.string().optional()
-})
+import { requireAdmin, rateLimit, securityHeaders, corsHeaders } from '@/lib/auth/middleware'
+import { importExcelSchema } from '@/lib/validation/schemas'
 
 export async function POST(request: NextRequest) {
   try {
+    // Add security headers
+    const headers = {
+      ...securityHeaders(),
+      ...corsHeaders(request.headers.get('origin') || undefined)
+    };
+
+    // Strict rate limiting for imports - only 2 per hour
+    const rateLimitResult = rateLimit(2, 3600000, (req) => `admin_import_${req.headers.get('x-forwarded-for') || 'unknown'}`)(request);
+    if (rateLimitResult) {
+      return rateLimitResult;
+    }
+
+    // Require admin authentication
+    const authResult = await requireAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+    const { user } = authResult;
+
     const body = await request.json()
-    const validatedBody = ImportRequestSchema.parse(body)
+    const validatedBody = importExcelSchema.parse(body)
     
-    // Decode base64 Excel data
-    const excelBuffer = Buffer.from(validatedBody.data, 'base64')
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (validatedBody.data.length > maxSize) {
+      return NextResponse.json(
+        { success: false, error: 'File too large. Maximum size is 10MB.' },
+        { status: 400, headers }
+      );
+    }
+
+    // Decode base64 Excel data with error handling
+    let excelBuffer: Buffer;
+    try {
+      excelBuffer = Buffer.from(validatedBody.data, 'base64');
+    } catch (error) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid file format' },
+        { status: 400, headers }
+      );
+    }
     
     // Read Excel file
     const workbook = XLSX.read(excelBuffer, { type: 'buffer' })
@@ -142,8 +172,8 @@ export async function POST(request: NextRequest) {
               packageId: packageData.id,
               oldPrice: 0,
               newPrice: numericPrice,
-              changedBy: 'excel_import',
-              reason: 'Initial import from Excel pricing sheet'
+              changedBy: user.id, // Use authenticated admin ID
+              reason: `Excel import by ${user.email} - ${validatedBody.filename || 'unknown file'}`
             }
           })
         }
@@ -161,31 +191,68 @@ export async function POST(request: NextRequest) {
       results: {
         ...results,
         totalProcessed: jsonData.length,
-        sheetName: targetSheetName
+        sheetName: targetSheetName,
+        importedBy: user.email,
+        importedAt: new Date().toISOString()
       }
-    })
+    }, { headers })
     
   } catch (error) {
     console.error('Error importing Excel data:', error)
+    
+    // Don't expose internal error details
+    const errorMessage = error instanceof Error && error.message.includes('validation') 
+      ? error.message 
+      : 'Failed to import Excel data';
+      
     return NextResponse.json({
       success: false,
-      error: 'Failed to import Excel data',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 })
+      error: errorMessage
+    }, { 
+      status: error instanceof Error && error.message.includes('validation') ? 400 : 500,
+      headers: {
+        ...securityHeaders(),
+        ...corsHeaders()
+      }
+    })
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Require admin authentication even for GET
+  const authResult = await requireAdmin(request);
+  if (authResult instanceof NextResponse) {
+    return authResult;
+  }
+
   return NextResponse.json({
     success: true,
     message: 'Excel import endpoint is ready',
     usage: {
       method: 'POST',
+      authentication: 'Admin role required',
+      rateLimit: '2 requests per hour',
+      maxFileSize: '10MB',
       body: {
         data: 'Base64 encoded Excel file content',
         filename: 'Optional filename',
         sheetName: 'Optional specific sheet name'
       }
     }
+  }, {
+    headers: {
+      ...securityHeaders(),
+      ...corsHeaders(request.headers.get('origin') || undefined)
+    }
   })
+}
+
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      ...corsHeaders(request.headers.get('origin') || undefined),
+      ...securityHeaders()
+    }
+  });
 } 

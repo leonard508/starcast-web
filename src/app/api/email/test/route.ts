@@ -1,14 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { emailService } from '@/lib/email';
+import { requireAdmin, securityHeaders, corsHeaders } from '@/lib/auth/middleware';
+import { isDevelopment } from '@/lib/env';
 
 export async function POST(request: NextRequest) {
   try {
-    // For development testing only
-    if (process.env.NODE_ENV === 'production') {
-      return NextResponse.json(
-        { error: 'Test endpoint not available in production' },
-        { status: 403 }
-      );
+    const headers = {
+      ...securityHeaders(),
+      ...corsHeaders(request.headers.get('origin') || undefined)
+    };
+
+    // For development testing only or require admin
+    if (!isDevelopment()) {
+      const authResult = await requireAdmin(request);
+      if (authResult instanceof NextResponse) {
+        return authResult;
+      }
     }
 
     const body = await request.json();
@@ -67,11 +74,11 @@ export async function POST(request: NextRequest) {
         success: true,
         message: `${type} email sent successfully`,
         data: result.data
-      });
+      }, { headers });
     } else {
       return NextResponse.json(
         { error: result.error },
-        { status: 500 }
+        { status: 500, headers }
       );
     }
 
