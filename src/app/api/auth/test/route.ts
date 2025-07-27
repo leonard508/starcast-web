@@ -1,40 +1,50 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { requireAdmin, securityHeaders, corsHeaders } from '@/lib/auth/middleware'
+import { env, isDevelopment } from '@/lib/env'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Only allow in development or with admin authentication
+  if (!isDevelopment()) {
+    const authResult = await requireAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+  }
+
   try {
-    // Test environment variables are present
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    const headers = {
+      ...securityHeaders(),
+      ...corsHeaders(request.headers.get('origin') || undefined)
+    };
+
+    // Test BetterAuth configuration instead of Supabase
+    const betterAuthSecret = env.BETTER_AUTH_SECRET
+    const betterAuthUrl = env.NEXT_PUBLIC_BETTER_AUTH_URL
     
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!betterAuthSecret || !betterAuthUrl) {
       return NextResponse.json(
         { 
-          error: 'Missing Supabase environment variables',
+          error: 'Missing BetterAuth environment variables',
           missing: {
-            url: !supabaseUrl,
-            anonKey: !supabaseAnonKey
+            secret: !betterAuthSecret,
+            url: !betterAuthUrl
           }
         },
-        { status: 500 }
+        { status: 500, headers }
       )
     }
 
-    // Validate URL format
-    const urlPattern = /^https:\/\/.*\.supabase\.co$/
-    const isValidUrl = urlPattern.test(supabaseUrl)
-
     return NextResponse.json({
-      status: 'Configuration ready',
-      supabaseUrl: supabaseUrl,
-      validUrl: isValidUrl,
-      message: isValidUrl 
-        ? 'Ready for Supabase connection' 
-        : 'Please update with actual Supabase project URL'
-    })
+      status: 'BetterAuth configuration ready',
+      url: betterAuthUrl,
+      hasSecret: !!betterAuthSecret,
+      environment: env.NODE_ENV,
+      message: 'Authentication system configured'
+    }, { headers })
   } catch (error) {
     return NextResponse.json(
-      { error: 'Configuration test failed', details: error },
-      { status: 500 }
+      { error: 'Configuration test failed' },
+      { status: 500, headers: securityHeaders() }
     )
   }
 }
