@@ -1,9 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { Prisma } from '@prisma/client'
+import { rateLimit, securityHeaders, corsHeaders } from '@/lib/auth/middleware'
 
 export async function GET(request: NextRequest) {
   try {
+    // Add security headers
+    const headers = {
+      ...securityHeaders(),
+      ...corsHeaders(request.headers.get('origin') || undefined)
+    };
+
+    // Rate limiting for public package access
+    const rateLimitResult = rateLimit(60, 60000)(request);
+    if (rateLimitResult) {
+      return rateLimitResult;
+    }
+
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type')
     const provider = searchParams.get('provider')
@@ -70,19 +83,34 @@ export async function GET(request: NextRequest) {
       success: true,
       data: packages,
       count: packages.length
-    })
+    }, { headers })
 
   } catch (error) {
     console.error('Error fetching packages:', error)
     return NextResponse.json(
       { 
         success: false, 
-        error: 'Failed to fetch packages',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        error: 'Failed to fetch packages'
       },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          ...securityHeaders(),
+          ...corsHeaders()
+        }
+      }
     )
   }
+}
+
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      ...corsHeaders(request.headers.get('origin') || undefined),
+      ...securityHeaders()
+    }
+  });
 }
 
 export async function POST(request: NextRequest) {
