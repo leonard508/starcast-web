@@ -1,5 +1,12 @@
 [build]
-  command = "npm install && npm run build"
+  command = "npm install && npm run build && npx prisma generate"
+
+[deploy]
+  healthcheckPath = "/api/health"
+  healthcheckTimeout = 600
+  restartPolicyType = "ON_FAILURE"
+  restartPolicyMaxRetries = 5
+  startCommand = "npx prisma db push --force-reset && npx prisma db seed && next start"
 
 [deploy]
   healthcheckPath = "/api/health"
