@@ -1,0 +1,115 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { OzowPaymentService } from '@/lib/payments/ozow'
+import { db } from '@/lib/db'
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.text()
+    const signature = request.headers.get('x-ozow-signature') || ''
+    
+    // Initialize Ozow service
+    const ozowService = new OzowPaymentService()
+
+    // Verify webhook signature for security
+    if (!ozowService.verifyWebhook(body, signature)) {
+      console.error('Ozow webhook signature verification failed')
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+    }
+
+    // Parse webhook data
+    const webhookData = JSON.parse(body)
+    console.log('Ozow webhook received:', webhookData)
+
+    // Process the webhook
+    const processedData = await ozowService.processWebhook(webhookData)
+
+    // Update payment record in database
+    const payment = await db.payment.findUnique({
+      where: { id: processedData.reference },
+    })
+
+    if (!payment) {
+      console.error('Payment not found:', processedData.reference)
+      return NextResponse.json({ error: 'Payment not found' }, { status: 404 })
+    }
+
+    // Update payment status
+    const updatedPayment = await db.payment.update({
+      where: { id: processedData.reference },
+      data: {
+        status: processedData.status,
+        providerTransactionId: processedData.transactionId,
+        completedAt: processedData.status === 'complete' ? new Date() : null,
+        updatedAt: new Date(),
+        metadata: {
+          ...payment.metadata,
+          webhookData: webhookData,
+          processedAt: new Date().toISOString(),
+        },
+      },
+    })
+
+    // Handle different payment statuses
+    switch (processedData.status) {
+      case 'complete':
+        await handleSuccessfulPayment(updatedPayment)
+        break
+      case 'cancelled':
+        await handleCancelledPayment(updatedPayment)
+        break
+      case 'error':
+        await handleFailedPayment(updatedPayment)
+        break
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      status: processedData.status,
+      transactionId: processedData.transactionId 
+    })
+
+  } catch (error) {
+    console.error('Ozow webhook processing error:', error)
+    return NextResponse.json(
+      { error: 'Webhook processing failed' },
+      { status: 500 }
+    )
+  }
+}
+
+async function handleSuccessfulPayment(payment: any) {
+  console.log('Payment completed successfully:', payment.id)
+  
+  // If this is for an application, update the application status
+  if (payment.applicationId) {
+    try {
+      await db.application.update({
+        where: { id: payment.applicationId },
+        data: { 
+          paymentStatus: 'paid',
+          updatedAt: new Date(),
+        },
+      })
+      console.log('Application payment status updated:', payment.applicationId)
+    } catch (error) {
+      console.error('Failed to update application payment status:', error)
+    }
+  }
+
+  // TODO: Send payment confirmation email
+  // TODO: Trigger any post-payment workflows
+}
+
+async function handleCancelledPayment(payment: any) {
+  console.log('Payment cancelled:', payment.id)
+  
+  // TODO: Handle cancelled payment logic
+  // TODO: Send cancellation notification if needed
+}
+
+async function handleFailedPayment(payment: any) {
+  console.log('Payment failed:', payment.id)
+  
+  // TODO: Handle failed payment logic
+  // TODO: Send failure notification if needed
+}

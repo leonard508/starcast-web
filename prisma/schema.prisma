@@ -222,6 +222,7 @@ model User {
   specialRates SpecialRate[]
   bills        Bill[]
   applications Application[]
+  payments     Payment[]
   whatsappMessages WhatsAppMessage[]
   
   // POPI Act Compliance Relations
@@ -264,6 +265,7 @@ model Application {
   // Relations
   user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   package               Package           @relation(fields: [packageId], references: [id])
+  payments              Payment[]
   
   @@map("applications")
 }
@@ -308,26 +310,33 @@ model Bill {
 
 // Payment model - Payment transactions
 model Payment {
-  id                String        @id @default(cuid())
-  billId            String
+  id                    String        @id @default(cuid())
+  userId                String
+  billId                String?       // Made optional for general payments
+  applicationId         String?       // For application fees
   
   // Payment Details
-  amount            Decimal       @db.Decimal(10,2)
-  method            PaymentMethod @default(OZOW)
-  reference         String        @unique
+  amount                Decimal       @db.Decimal(10,2)
+  currency              String        @default("ZAR")
+  description           String?
+  provider              String        @default("ozow") // "ozow", "bank_transfer", etc.
+  reference             String        @unique
   
-  // Ozow Integration
-  ozowTransactionId String?       @unique
-  ozowStatus        String?
-  ozowCallback      Json?         // Store callback data
+  // Provider Integration
+  providerTransactionId String?       @unique
+  providerStatus        String?
+  metadata              Json?         // Store provider-specific data
   
   // Processing
-  status            PaymentStatus @default(PENDING)
-  processedAt       DateTime?
-  verifiedAt        DateTime?
+  status                PaymentStatus @default(PENDING)
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  completedAt           DateTime?
   
   // Relations
-  bill              Bill          @relation(fields: [billId], references: [id], onDelete: Cascade)
+  user                  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bill                  Bill?         @relation(fields: [billId], references: [id], onDelete: Cascade)
+  application           Application?  @relation(fields: [applicationId], references: [id], onDelete: SetNull)
   
   @@map("payments")
 }
