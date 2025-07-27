@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
         completedAt: processedData.status === 'COMPLETED' ? new Date() : null,
         updatedAt: new Date(),
         metadata: {
-          ...payment.metadata,
+          ...(payment.metadata as object || {}),
           webhookData: webhookData,
           processedAt: new Date().toISOString(),
         },
