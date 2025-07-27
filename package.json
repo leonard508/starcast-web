@@ -43,6 +43,7 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
+    "start:railway": "node railway-migrate.js && next start",
     "lint": "next lint --fix",
     "lint:check": "next lint",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
