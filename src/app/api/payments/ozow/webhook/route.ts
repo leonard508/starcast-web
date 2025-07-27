@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       data: {
         status: processedData.status,
         providerTransactionId: processedData.transactionId,
-        completedAt: processedData.status === 'complete' ? new Date() : null,
+        completedAt: processedData.status === 'COMPLETED' ? new Date() : null,
         updatedAt: new Date(),
         metadata: {
           ...payment.metadata,
@@ -51,13 +51,13 @@ export async function POST(request: NextRequest) {
 
     // Handle different payment statuses
     switch (processedData.status) {
-      case 'complete':
+      case 'COMPLETED':
         await handleSuccessfulPayment(updatedPayment)
         break
-      case 'cancelled':
+      case 'CANCELLED':
         await handleCancelledPayment(updatedPayment)
         break
-      case 'error':
+      case 'FAILED':
         await handleFailedPayment(updatedPayment)
         break
     }
