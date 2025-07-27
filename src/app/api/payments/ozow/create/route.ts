@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
         userId: session.user.id,
         amount: validatedData.amount,
         currency: 'ZAR',
-        status: 'pending',
+        status: 'PENDING',
         provider: 'ozow',
         providerTransactionId: paymentResponse.transactionId,
         description: validatedData.description,

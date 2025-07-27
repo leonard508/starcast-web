@@ -192,7 +192,7 @@ export class OzowPaymentService {
    */
   async processWebhook(data: any): Promise<{
     transactionId: string
-    status: 'complete' | 'cancelled' | 'error'
+    status: 'COMPLETED' | 'CANCELLED' | 'FAILED'
     amount: number
     reference: string
   }> {
@@ -204,16 +204,16 @@ export class OzowPaymentService {
     }
   }
 
-  private mapOzowStatus(ozowStatus: string): 'complete' | 'cancelled' | 'error' {
+  private mapOzowStatus(ozowStatus: string): 'COMPLETED' | 'CANCELLED' | 'FAILED' {
     switch (ozowStatus?.toLowerCase()) {
       case 'complete':
       case 'successful':
-        return 'complete'
+        return 'COMPLETED'
       case 'cancelled':
       case 'canceled':
-        return 'cancelled'
+        return 'CANCELLED'
       default:
-        return 'error'
+        return 'FAILED'
     }
   }
 }
