@@ -158,8 +158,8 @@ async function main() {
       process.exit(1);
     }
     
-    // Deploy database schema (creates tables if they don't exist)
-    runCommand('npx prisma db push --force-reset', 'Deploying database schema');
+    // Deploy database schema (safe deployment without data loss)
+    runCommand('npx prisma db push', 'Deploying database schema');
     
     // Seed the database with packages (allow failure in case already seeded)
     const seedSuccess = runCommand('npx prisma db seed', 'Seeding database with packages', true);

@@ -96,14 +96,37 @@ function SignupContent() {
 
     setSubmitting(true)
     
-    // Simulate form submission
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // Show success message
-      alert(`Application submitted successfully! We'll contact you within 24 hours to confirm your ${selectedPackage.name} package.`)
-      router.push('/')
+      const response = await fetch('/api/applications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          packageId: selectedPackage.id,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          city: formData.city,
+          province: formData.province,
+          postalCode: formData.postalCode,
+          promoCode: formData.promoCode || null
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        // Show success message
+        alert(`Application submitted successfully! We'll contact you within 24 hours to confirm your ${selectedPackage.name} package. Application ID: ${data.data.applicationNumber}`)
+        router.push('/')
+      } else {
+        alert(data.error || 'Failed to submit application. Please try again.')
+      }
     } catch (error) {
+      console.error('Error submitting application:', error)
       alert('Failed to submit application. Please try again.')
     } finally {
       setSubmitting(false)

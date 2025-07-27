@@ -224,6 +224,9 @@ model User {
   applications Application[]
   whatsappMessages WhatsAppMessage[]
   
+  // POPI Act Compliance Relations
+  dataConsents DataConsent[]
+  
   @@map("users")
 }
 
@@ -569,4 +572,96 @@ enum WhatsAppMessageStatus {
   FAILED
   RECEIVED
   ESCALATED
+}
+
+// POPI Act Compliance Models
+
+// Data consent tracking for POPI Act compliance
+model DataConsent {
+  id                String   @id @default(cuid())
+  userId            String
+  dataCategory      String   // PERSONAL_IDENTIFIER, CONTACT_INFO, etc.
+  processingPurpose String   // SERVICE_PROVISION, BILLING_PAYMENT, etc.
+  legalBasis        String   // CONSENT, CONTRACT, LEGAL_OBLIGATION, etc.
+  consentGiven      Boolean
+  consentDate       DateTime
+  withdrawnAt       DateTime?
+  ipAddress         String
+  userAgent         String
+  version           String   // Terms version when consent was given
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, dataCategory, processingPurpose])
+  @@map("data_consents")
+}
+
+// Data processing audit trail for POPI Act compliance
+model DataProcessingLog {
+  id           String   @id @default(cuid())
+  userId       String
+  action       String   // CREATE, READ, UPDATE, DELETE, EXPORT
+  dataCategory String   // Category of data accessed
+  purpose      String   // Purpose of data processing
+  adminUser    String?  // Admin user who performed action
+  ipAddress    String
+  userAgent    String
+  dataFields   String   // JSON array of fields accessed
+  timestamp    DateTime @default(now())
+  
+  @@index([userId, timestamp])
+  @@index([adminUser, timestamp])
+  @@map("data_processing_logs")
+}
+
+// RICA Act communication logging
+model RicaCommunicationLog {
+  id                  String   @id @default(cuid())
+  hashedFromNumber    String   // Hashed phone number for privacy
+  hashedToNumber      String   // Hashed phone number for privacy
+  messageHash         String   // Hash of message content
+  communicationType   String   // SMS, WHATSAPP, EMAIL
+  direction          String   // INBOUND, OUTBOUND
+  messageLength      Int      // Length of original message
+  timestamp          DateTime @default(now())
+  retentionPeriod    DateTime // When this log should be deleted
+  
+  @@index([hashedFromNumber, timestamp])
+  @@index([hashedToNumber, timestamp])
+  @@index([retentionPeriod])
+  @@map("rica_communication_logs")
+}
+
+// Security audit log for Ozow compliance
+model SecurityAuditLog {
+  id          String   @id @default(cuid())
+  eventType   String   // LOGIN_ATTEMPT, PASSWORD_CHANGE, DATA_ACCESS, etc.
+  userId      String?  // User involved (if applicable)
+  ipAddress   String
+  userAgent   String
+  success     Boolean
+  details     Json?    // Additional event details
+  riskLevel   String   // LOW, MEDIUM, HIGH, CRITICAL
+  timestamp   DateTime @default(now())
+  
+  @@index([eventType, timestamp])
+  @@index([userId, timestamp])
+  @@index([riskLevel, timestamp])
+  @@map("security_audit_logs")
+}
+
+// Data retention policy tracking
+model DataRetentionPolicy {
+  id             String   @id @default(cuid())
+  dataCategory   String   // Category of data
+  retentionPeriod Int     // Retention period in days
+  legalBasis     String   // Legal requirement for retention
+  autoDelete     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  @@unique([dataCategory])
+  @@map("data_retention_policies")
 }

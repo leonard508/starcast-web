@@ -345,35 +345,8 @@ export default function AdminDashboard() {
   }
 
   const handleSendEmailToUser = async (user: any) => {
-    const subject = prompt('Email Subject:')
-    if (!subject) return
-    
-    const message = prompt('Email Message:')
-    if (!message) return
-
-    try {
-      const response = await fetch('/api/send-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          to: user.email,
-          subject,
-          message,
-          customerName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Customer'
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to send email')
-      }
-
-      alert(`Email sent successfully to ${user.email}`)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send email')
-    }
+    // Redirect to messaging dashboard with pre-selected user
+    router.push(`/admin/messages?user=${user.id}&email=${user.email}&name=${encodeURIComponent(`${user.firstName} ${user.lastName}`)}`)
   }
 
   const handleViewUserDetails = (user: any) => {
@@ -470,6 +443,12 @@ ${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join(
               <p className="text-gray-600 mt-2 text-lg">Manage packages, promotions, and customer applications</p>
             </div>
             <div className="flex space-x-4">
+              <Link 
+                href="/admin/messages"
+                className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
+              >
+                📧 Messages
+              </Link>
               <Link 
                 href="/admin/import"
                 className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
