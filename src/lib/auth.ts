@@ -4,7 +4,7 @@ import { db } from "./db"
 
 export const auth = betterAuth({
   database: prismaAdapter(db, {
-    provider: "postgresql", // Using PostgreSQL for Railway deployment
+    provider: "postgresql", // Using PostgreSQL to match Railway deployment
   }),
   emailAndPassword: {
     enabled: true,
