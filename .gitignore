@@ -57,6 +57,12 @@ tmp/
 # Claude settings (local only)
 .claude/
 
+# SECURITY: Keep sensitive documentation LOCAL ONLY
+docs/
+CLAUDE.md
+*.md
+!README.md
+
 # Build artifacts
 *.tsbuildinfo
 
