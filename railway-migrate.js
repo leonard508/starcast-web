@@ -7,7 +7,7 @@
  * It handles the differences between local development (SQLite) and production (PostgreSQL).
  */
 
-const { execSync } = require('child_process');
+import { execSync } from 'child_process';
 
 function runCommand(command, description, allowFailure = false) {
   console.log(`📋 ${description}...`);
