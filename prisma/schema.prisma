@@ -5,7 +5,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -272,9 +272,9 @@ model Bill {
   packageId       String?
   
   // Billing Details
-  amount          Float       // SQLite doesn't support Decimal
-  vatAmount       Float       // SQLite doesn't support Decimal
-  totalAmount     Float       // SQLite doesn't support Decimal
+  amount          Decimal     @db.Decimal(10,2)
+  vatAmount       Decimal     @db.Decimal(10,2)
+  totalAmount     Decimal     @db.Decimal(10,2)
   
   // Billing Period
   periodStart     DateTime
@@ -308,7 +308,7 @@ model Payment {
   billId            String
   
   // Payment Details
-  amount            Float         // SQLite doesn't support Decimal
+  amount            Decimal       @db.Decimal(10,2)
   method            PaymentMethod @default(OZOW)
   reference         String        @unique
   
