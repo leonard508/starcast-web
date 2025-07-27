@@ -24,26 +24,108 @@ function runCommand(command, description, allowFailure = false) {
   }
 }
 
+async function testDatabaseConnection() {
+  console.log('🔍 Testing database connection...');
+  
+  const testScript = `
+    const { PrismaClient } = require('@prisma/client');
+    
+    async function testConnection() {
+      const prisma = new PrismaClient({
+        log: ['error'],
+        datasources: {
+          db: {
+            url: process.env.DATABASE_URL,
+          },
+        },
+      });
+      
+      try {
+        console.log('Connecting to database...');
+        await prisma.$connect();
+        console.log('✅ Database connection successful!');
+        
+        // Test a simple query
+        const result = await prisma.$queryRaw\`SELECT 1 as test\`;
+        console.log('✅ Database query test successful:', result);
+        
+        await prisma.$disconnect();
+        console.log('✅ Database disconnected successfully');
+        process.exit(0);
+      } catch (error) {
+        console.error('❌ Database connection failed:', error.message);
+        console.error('Error details:', {
+          code: error.code,
+          meta: error.meta,
+          clientVersion: error.clientVersion
+        });
+        await prisma.$disconnect();
+        process.exit(1);
+      }
+    }
+    
+    testConnection();
+  `;
+  
+  try {
+    execSync(`node -e "${testScript}"`, { 
+      stdio: 'inherit', 
+      timeout: 30000,
+      env: { ...process.env }
+    });
+    return true;
+  } catch (error) {
+    console.error('❌ Database connection test failed:', error.message);
+    return false;
+  }
+}
+
 async function waitForDatabase(maxAttempts = 30) {
   console.log('🔍 Waiting for database connection...');
   
   for (let i = 1; i <= maxAttempts; i++) {
-    try {
-      console.log(`Attempt ${i}/${maxAttempts}: Testing database connection...`);
-      execSync('node -e "const { PrismaClient } = require(\'@prisma/client\'); const prisma = new PrismaClient(); prisma.$connect().then(() => { console.log(\'Database connected!\'); process.exit(0); }).catch((e) => { console.error(\'Connection failed:\', e.message); process.exit(1); });"', 
-        { stdio: 'inherit', timeout: 10000 });
+    console.log(`Attempt ${i}/${maxAttempts}: Testing database connection...`);
+    
+    if (await testDatabaseConnection()) {
       console.log('✅ Database connection successful!');
       return true;
-    } catch (error) {
-      console.log(`⏳ Attempt ${i} failed, waiting 10 seconds...`);
-      if (i < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 10000));
-      }
+    }
+    
+    console.log(`⏳ Attempt ${i} failed, waiting 10 seconds...`);
+    if (i < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, 10000));
     }
   }
   
   console.error('❌ Database connection failed after all attempts');
   return false;
+}
+
+async function validateEnvironment() {
+  console.log('🔍 Validating environment variables...');
+  
+  const requiredVars = ['DATABASE_URL'];
+  const missingVars = [];
+  
+  for (const varName of requiredVars) {
+    if (!process.env[varName]) {
+      missingVars.push(varName);
+    }
+  }
+  
+  if (missingVars.length > 0) {
+    console.error('❌ Missing required environment variables:', missingVars);
+    return false;
+  }
+  
+  if (!process.env.DATABASE_URL.startsWith('postgres')) {
+    console.error('❌ DATABASE_URL is not a PostgreSQL URL');
+    console.log('Expected format: postgresql://user:password@host:port/database');
+    return false;
+  }
+  
+  console.log('✅ Environment validation passed');
+  return true;
 }
 
 async function main() {
@@ -57,11 +139,9 @@ async function main() {
   // Check if we're in Railway environment
   const isRailway = process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_PROJECT_NAME;
   const isProduction = process.env.NODE_ENV === 'production';
-  const hasDatabaseUrl = process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('postgres');
   
-  if (!hasDatabaseUrl) {
-    console.error('❌ DATABASE_URL is not set or not a PostgreSQL URL');
-    console.log('Expected format: postgresql://user:password@host:port/database');
+  // Validate environment
+  if (!await validateEnvironment()) {
     process.exit(1);
   }
   
@@ -88,7 +168,14 @@ async function main() {
       console.log('⚠️ Seeding failed, but this might be expected if data already exists');
     }
     
-    console.log('🎉 Railway migration completed successfully!');
+    // Final connection test
+    console.log('🔍 Performing final connection test...');
+    if (await testDatabaseConnection()) {
+      console.log('🎉 Railway migration completed successfully!');
+    } else {
+      console.error('❌ Final connection test failed');
+      process.exit(1);
+    }
   } else {
     console.log('🏠 Local development environment - skipping Railway migration');
     console.log('💡 Use "npm run dev" for local development');
