@@ -58,14 +58,43 @@ interface Promotion {
   packageId?: string
 }
 
+interface Application {
+  id: string
+  applicationNumber: string
+  user: {
+    id: string
+    firstName: string
+    lastName: string
+    email: string
+    phone?: string
+  }
+  package: {
+    id: string
+    name: string
+    type: string
+    provider: {
+      name: string
+    }
+  }
+  serviceAddress: any
+  applicationStatus: 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED'
+  specialRequirements?: string
+  submittedAt: string
+  reviewedAt?: string
+  reviewedBy?: string
+  rejectionReason?: string
+}
+
 export default function AdminDashboard() {
   const [packages, setPackages] = useState<Package[]>([])
   const [providers, setProviders] = useState<Provider[]>([])
   const [promotions, setPromotions] = useState<Promotion[]>([])
+  const [applications, setApplications] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'packages' | 'promotions' | 'price-changes' | 'providers'>('packages')
+  const [activeTab, setActiveTab] = useState<'applications' | 'packages' | 'promotions' | 'price-changes' | 'providers'>('applications')
   const [selectedType, setSelectedType] = useState<'all' | 'FIBRE' | 'LTE_FIXED' | 'LTE_MOBILE'>('all')
+  const [selectedStatus, setSelectedStatus] = useState<'all' | 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED'>('all')
   const [editingPackage, setEditingPackage] = useState<Package | null>(null)
   const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null)
   const [showPackageEditor, setShowPackageEditor] = useState(false)
@@ -79,14 +108,15 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const [packagesRes, providersRes, promotionsRes, priceHistoryRes] = await Promise.all([
+      const [packagesRes, providersRes, promotionsRes, priceHistoryRes, applicationsRes] = await Promise.all([
         fetch('/api/packages'),
         fetch('/api/providers'),
         fetch('/api/promotions'),
-        fetch('/api/price-history')
+        fetch('/api/price-history'),
+        fetch('/api/applications')
       ])
 
-      if (!packagesRes.ok || !providersRes.ok || !promotionsRes.ok || !priceHistoryRes.ok) {
+      if (!packagesRes.ok || !providersRes.ok || !promotionsRes.ok || !priceHistoryRes.ok || !applicationsRes.ok) {
         throw new Error('Failed to fetch data')
       }
 
@@ -94,11 +124,13 @@ export default function AdminDashboard() {
       const providersData = await providersRes.json()
       const promotionsData = await promotionsRes.json()
       const priceHistoryData = await priceHistoryRes.json()
+      const applicationsData = await applicationsRes.json()
 
       setPackages(packagesData.data || [])
       setProviders(providersData.data || [])
       setPromotions(promotionsData.data || [])
       setPriceHistory(priceHistoryData.data || [])
+      setApplications(applicationsData.data || [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data')
     } finally {
@@ -108,6 +140,10 @@ export default function AdminDashboard() {
 
   const filteredPackages = packages.filter(pkg => 
     selectedType === 'all' || pkg.type === selectedType
+  )
+
+  const filteredApplications = applications.filter(app => 
+    selectedStatus === 'all' || app.applicationStatus === selectedStatus
   )
 
   const fibrePackages = packages.filter(pkg => pkg.type === 'FIBRE')
@@ -130,6 +166,15 @@ export default function AdminDashboard() {
 
   const getStatusColor = (active: boolean) => {
     return active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+  }
+
+  const getApplicationStatusColor = (status: string) => {
+    switch (status) {
+      case 'PENDING_APPROVAL': return 'bg-yellow-100 text-yellow-800'
+      case 'APPROVED': return 'bg-green-100 text-green-800'
+      case 'REJECTED': return 'bg-red-100 text-red-800'
+      default: return 'bg-gray-100 text-gray-800'
+    }
   }
 
   const handleEditPackage = (pkg: Package) => {
@@ -194,6 +239,56 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleApproveApplication = async (application: Application) => {
+    try {
+      const response = await fetch(`/api/applications/${application.id}/approve`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          reviewedBy: 'Admin', // In a real app, get from auth context
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to approve application')
+      }
+
+      // Refresh data
+      await fetchData()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to approve application')
+    }
+  }
+
+  const handleRejectApplication = async (application: Application) => {
+    const reason = prompt('Enter rejection reason:')
+    if (!reason) return
+
+    try {
+      const response = await fetch(`/api/applications/${application.id}/reject`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          rejectionReason: reason,
+          reviewedBy: 'Admin', // In a real app, get from auth context
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to reject application')
+      }
+
+      // Refresh data
+      await fetchData()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to reject application')
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -253,7 +348,25 @@ export default function AdminDashboard() {
 
       {/* Stats Overview */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-7 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-8 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-red-500 rounded-md flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500">Applications</p>
+                <p className="text-2xl font-semibold text-gray-900">{applications.length}</p>
+                <p className="text-xs text-yellow-600">
+                  {applications.filter(a => a.applicationStatus === 'PENDING_APPROVAL').length} pending
+                </p>
+              </div>
+            </div>
+          </div>
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -376,6 +489,21 @@ export default function AdminDashboard() {
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8 px-6 overflow-x-auto">
               <button
+                onClick={() => setActiveTab('applications')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                  activeTab === 'applications'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Applications ({applications.length})
+                {applications.filter(a => a.applicationStatus === 'PENDING_APPROVAL').length > 0 && (
+                  <span className="ml-2 bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                    {applications.filter(a => a.applicationStatus === 'PENDING_APPROVAL').length}
+                  </span>
+                )}
+              </button>
+              <button
                 onClick={() => setActiveTab('packages')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                   activeTab === 'packages'
@@ -419,6 +547,156 @@ export default function AdminDashboard() {
           </div>
 
           <div className="p-6">
+            {/* Applications Tab */}
+            {activeTab === 'applications' && (
+              <div>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900">Customer Applications</h2>
+                  <div className="flex space-x-4">
+                    <select
+                      value={selectedStatus}
+                      onChange={(e) => setSelectedStatus(e.target.value as any)}
+                      className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    >
+                      <option value="all">All Status</option>
+                      <option value="PENDING_APPROVAL">Pending Approval</option>
+                      <option value="APPROVED">Approved</option>
+                      <option value="REJECTED">Rejected</option>
+                    </select>
+                    <button 
+                      onClick={fetchData}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                      Refresh
+                    </button>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Application
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Customer
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Package
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Service Address
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Submitted
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredApplications.map((app) => (
+                        <tr key={app.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">{app.applicationNumber}</div>
+                              {app.specialRequirements && (
+                                <div className="text-xs text-gray-500">Special requirements noted</div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {app.user.firstName} {app.user.lastName}
+                              </div>
+                              <div className="text-sm text-gray-500">{app.user.email}</div>
+                              {app.user.phone && (
+                                <div className="text-xs text-gray-500">{app.user.phone}</div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">{app.package.name}</div>
+                              <div className="text-sm text-gray-500">{app.package.provider.name}</div>
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(app.package.type)}`}>
+                                {app.package.type}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div className="max-w-xs truncate">
+                              {app.serviceAddress?.street && (
+                                <div>{app.serviceAddress.street}</div>
+                              )}
+                              {app.serviceAddress?.suburb && app.serviceAddress?.city && (
+                                <div>{app.serviceAddress.suburb}, {app.serviceAddress.city}</div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getApplicationStatusColor(app.applicationStatus)}`}>
+                              {app.applicationStatus.replace('_', ' ')}
+                            </span>
+                            {app.reviewedAt && (
+                              <div className="text-xs text-gray-500 mt-1">
+                                Reviewed by {app.reviewedBy}
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {new Date(app.submittedAt).toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex space-x-2">
+                              {app.applicationStatus === 'PENDING_APPROVAL' && (
+                                <>
+                                  <button 
+                                    onClick={() => handleApproveApplication(app)}
+                                    className="text-green-600 hover:text-green-900"
+                                  >
+                                    Approve
+                                  </button>
+                                  <button 
+                                    onClick={() => handleRejectApplication(app)}
+                                    className="text-red-600 hover:text-red-900"
+                                  >
+                                    Reject
+                                  </button>
+                                </>
+                              )}
+                              <button className="text-blue-600 hover:text-blue-900">View Details</button>
+                              {app.rejectionReason && (
+                                <span className="text-xs text-gray-500" title={app.rejectionReason}>
+                                  Reason: {app.rejectionReason.slice(0, 20)}...
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {filteredApplications.length === 0 && (
+                  <div className="text-center py-12">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">No applications</h3>
+                    <p className="mt-1 text-sm text-gray-500">No customer applications found for the selected filter.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Packages Tab */}
             {activeTab === 'packages' && (
               <div>
