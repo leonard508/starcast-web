@@ -59,6 +59,7 @@
     "postinstall": "prisma generate",
     "deploy": "node railway-migrate.js",
     "railway:migrate": "node railway-migrate.js",
+    "railway:fix-db": "node scripts/fix-railway-database.js",
     "import:excel": "node scripts/import-excel-data.js",
     "test:excel": "node test-excel-import.js",
     "analyze": "cross-env ANALYZE=true next build",
