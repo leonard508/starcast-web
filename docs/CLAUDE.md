@@ -286,8 +286,123 @@ src/lib/email/
 Following micro-task methodology for all implementations. Each task broken into small, testable steps with immediate validation.
 
 **Current Working Directory**: `C:\Users\Admin\Desktop\starcast-nextjs`
-**Server**: `npm run dev` on http://localhost:3000
-**Database**: SQLite with Prisma Studio for management
+**Server**: `npm run dev` on http://localhost:3002
+**Database**: PostgreSQL with Docker (matches Railway production exactly)
+
+---
+
+# 🐳 **DATABASE SETUP - DOCKER POSTGRESQL**
+
+## 🚨 **CRITICAL**: Local Environment Must Match Railway Production
+
+### **Current Setup Status**
+- ✅ **Schema**: PostgreSQL configured to match Railway exactly
+- ✅ **Docker Config**: `docker-compose.yml` created with Railway credentials
+- ✅ **Environment**: `.env` configured for local PostgreSQL
+- ⏳ **Docker Installation**: Required for local development
+- ⏳ **Database Running**: Pending Docker setup
+
+### **🛠️ Required Setup Steps**
+
+#### **Step 1: Install Docker Desktop**
+```bash
+# Download from: https://www.docker.com/products/docker-desktop/
+# Install Docker Desktop for Windows
+# Restart computer if prompted
+# Ensure Docker Desktop is running (Docker icon in system tray)
+```
+
+#### **Step 2: Start Local PostgreSQL Database**
+```bash
+# Start PostgreSQL container (matches Railway exactly)
+npm run docker:up
+
+# OR run full setup (database + schema + seed data)
+npm run docker:setup
+
+# OR manual step-by-step
+docker-compose up -d postgres    # Start PostgreSQL
+npx prisma db push              # Create database schema  
+npx prisma db seed              # Add test data + admin user
+```
+
+#### **Step 3: Start Development Server**
+```bash
+npm run dev                     # Runs on http://localhost:3002
+```
+
+### **🔧 Database Configuration**
+```bash
+# Local PostgreSQL (matches Railway production)
+DATABASE_URL="postgresql://postgres:VxqKeoIHzxWJITYMzPOQRRAKMHtORehK@localhost:5432/railway"
+
+# BetterAuth Configuration
+BETTER_AUTH_SECRET="ba_dev_secret_key_12345678901234567890123456789012"
+NEXT_PUBLIC_BETTER_AUTH_URL="http://localhost:3002"
+```
+
+### **📊 Test Data Available**
+- **Admin User**: `admin@starcast.co.za` / `admin123`
+- **Fibre Packages**: 127 packages from 19 providers
+- **LTE/5G Packages**: Multiple packages from MTN, Vodacom, Telkom
+- **Providers**: All major South African ISP providers
+
+### **🚀 Quick Commands**
+```bash
+# Database Management
+npm run docker:up          # Start PostgreSQL
+npm run docker:down        # Stop PostgreSQL
+npm run docker:setup       # Full setup (start + schema + seed)
+
+# Development
+npm run dev                # Start Next.js server
+npm run db:studio          # Open Prisma Studio
+npm run type-check         # TypeScript check
+npm run lint:check         # ESLint check
+```
+
+### **🔍 Troubleshooting**
+
+#### **Docker Issues**
+```bash
+# Check Docker is running
+docker --version
+docker ps
+
+# If container fails to start
+docker-compose down
+docker-compose up -d postgres
+```
+
+#### **Database Connection Issues**
+```bash
+# Check PostgreSQL is accessible
+docker exec -it starcast-postgres psql -U postgres -d railway -c "SELECT version();"
+
+# Reset database if corrupted
+npm run docker:down
+docker volume prune -f
+npm run docker:setup
+```
+
+#### **Authentication Issues**
+- Ensure PostgreSQL is running: `docker ps` should show `starcast-postgres`
+- Verify server runs on `:3002`: Check `NEXT_PUBLIC_BETTER_AUTH_URL`
+- Test with admin account: `admin@starcast.co.za` / `admin123`
+
+### **⚠️ Important Notes**
+1. **PostgreSQL Required**: SQLite removed - only PostgreSQL supported
+2. **Railway Compatibility**: Local setup identical to production deployment
+3. **Docker Dependency**: Local development requires Docker Desktop
+4. **Port Consistency**: Server must run on `:3002` for BetterAuth
+5. **Schema Sync**: Any Prisma changes work identically local and Railway
+
+### **🎯 Current Development Status**
+- **Signin System**: ✅ Implemented and ready for testing
+- **Database Schema**: ✅ PostgreSQL with all required tables
+- **Authentication**: ✅ BetterAuth configured with proper endpoints
+- **Test Data**: ✅ Admin user and package data ready
+- **Next Step**: Install Docker → Start database → Test signin
 
 ---
 

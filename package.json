@@ -63,7 +63,11 @@
     "import:excel": "node scripts/import-excel-data.js",
     "test:excel": "node test-excel-import.js",
     "analyze": "cross-env ANALYZE=true next build",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:setup": "docker-compose up -d postgres && timeout 10 && npx prisma db push && npx prisma db seed",
+    "dev:setup": "npm run docker:setup && npm run dev"
   },
   "eslintConfig": {
     "extends": [

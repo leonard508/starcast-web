@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import PackageEditor from './components/PackageEditor'
 import PromotionEditor from './components/PromotionEditor'
 
@@ -86,15 +87,21 @@ interface Application {
 }
 
 export default function AdminDashboard() {
+  const router = useRouter()
   const [packages, setPackages] = useState<Package[]>([])
   const [providers, setProviders] = useState<Provider[]>([])
   const [promotions, setPromotions] = useState<Promotion[]>([])
   const [applications, setApplications] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'applications' | 'packages' | 'promotions' | 'price-changes' | 'providers'>('applications')
+  const [authChecked, setAuthChecked] = useState(false)
+  const [activeTab, setActiveTab] = useState<'applications' | 'packages' | 'promotions' | 'price-changes' | 'providers' | 'users'>('applications')
   const [selectedType, setSelectedType] = useState<'all' | 'FIBRE' | 'LTE_FIXED' | 'LTE_MOBILE'>('all')
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED'>('all')
+  const [selectedProvider, setSelectedProvider] = useState<'all' | string>('all')
+  const [packageSearchTerm, setPackageSearchTerm] = useState('')
+  const [userSearchTerm, setUserSearchTerm] = useState('')
+  const [users, setUsers] = useState<any[]>([])
   const [editingPackage, setEditingPackage] = useState<Package | null>(null)
   const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null)
   const [showPackageEditor, setShowPackageEditor] = useState(false)
@@ -102,21 +109,45 @@ export default function AdminDashboard() {
   const [priceHistory, setPriceHistory] = useState<any[]>([])
 
   useEffect(() => {
-    fetchData()
+    checkAuthentication()
   }, [])
+
+  const checkAuthentication = async () => {
+    try {
+      // Check if user is authenticated as admin by trying to fetch a protected endpoint
+      const response = await fetch('/api/applications', { 
+        credentials: 'include',
+        method: 'HEAD' // Just check auth without getting data
+      })
+      
+      if (response.status === 401 || response.status === 403) {
+        // Not authenticated or not admin, redirect to login
+        router.push('/login?redirect=/admin')
+        return
+      }
+      
+      // Authentication successful, proceed to fetch data
+      setAuthChecked(true)
+      fetchData()
+    } catch (error) {
+      console.error('Auth check failed:', error)
+      router.push('/login?redirect=/admin')
+    }
+  }
 
   const fetchData = async () => {
     try {
       setLoading(true)
-      const [packagesRes, providersRes, promotionsRes, priceHistoryRes, applicationsRes] = await Promise.all([
-        fetch('/api/packages'),
-        fetch('/api/providers'),
-        fetch('/api/promotions'),
-        fetch('/api/price-history'),
-        fetch('/api/applications')
+      const [packagesRes, providersRes, promotionsRes, priceHistoryRes, applicationsRes, usersRes] = await Promise.all([
+        fetch('/api/packages', { credentials: 'include' }),
+        fetch('/api/providers', { credentials: 'include' }),
+        fetch('/api/promotions', { credentials: 'include' }),
+        fetch('/api/price-history', { credentials: 'include' }),
+        fetch('/api/applications', { credentials: 'include' }),
+        fetch('/api/users', { credentials: 'include' })
       ])
 
-      if (!packagesRes.ok || !providersRes.ok || !promotionsRes.ok || !priceHistoryRes.ok || !applicationsRes.ok) {
+      if (!packagesRes.ok || !providersRes.ok || !promotionsRes.ok || !priceHistoryRes.ok || !applicationsRes.ok || !usersRes.ok) {
         throw new Error('Failed to fetch data')
       }
 
@@ -125,12 +156,14 @@ export default function AdminDashboard() {
       const promotionsData = await promotionsRes.json()
       const priceHistoryData = await priceHistoryRes.json()
       const applicationsData = await applicationsRes.json()
+      const usersData = await usersRes.json()
 
       setPackages(packagesData.data || [])
       setProviders(providersData.data || [])
       setPromotions(promotionsData.data || [])
       setPriceHistory(priceHistoryData.data || [])
       setApplications(applicationsData.data || [])
+      setUsers(usersData.data || [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data')
     } finally {
@@ -138,12 +171,36 @@ export default function AdminDashboard() {
     }
   }
 
-  const filteredPackages = packages.filter(pkg => 
-    selectedType === 'all' || pkg.type === selectedType
-  )
+  const filteredPackages = packages.filter(pkg => {
+    const typeMatch = selectedType === 'all' || pkg.type === selectedType
+    const providerMatch = selectedProvider === 'all' || pkg.provider.slug === selectedProvider
+    const searchMatch = packageSearchTerm === '' || 
+      pkg.name.toLowerCase().includes(packageSearchTerm.toLowerCase()) ||
+      pkg.provider.name.toLowerCase().includes(packageSearchTerm.toLowerCase()) ||
+      pkg.speed?.toLowerCase().includes(packageSearchTerm.toLowerCase())
+    
+    return typeMatch && providerMatch && searchMatch
+  })
 
   const filteredApplications = applications.filter(app => 
     selectedStatus === 'all' || app.status === selectedStatus
+  )
+
+  const filteredUsers = users.filter(user => {
+    if (userSearchTerm === '') return true
+    return user.firstName?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+           user.lastName?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+           user.email?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+           user.phone?.toLowerCase().includes(userSearchTerm.toLowerCase())
+  })
+
+  // Get providers categorized by type
+  const fibreProviders = providers.filter(provider => 
+    packages.some(pkg => pkg.provider.id === provider.id && pkg.type === 'FIBRE')
+  )
+  
+  const lteProviders = providers.filter(provider => 
+    packages.some(pkg => pkg.provider.id === provider.id && (pkg.type === 'LTE_FIXED' || pkg.type === '5G_FIXED'))
   )
 
   const fibrePackages = packages.filter(pkg => pkg.type === 'FIBRE')
@@ -191,6 +248,7 @@ export default function AdminDashboard() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(editingPackage ? { ...packageData, id: editingPackage.id } : packageData),
       })
 
@@ -217,6 +275,7 @@ export default function AdminDashboard() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(editingPromotion ? { ...promotionData, id: editingPromotion.id } : promotionData),
       })
 
@@ -240,6 +299,7 @@ export default function AdminDashboard() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           reviewedBy: 'Admin', // In a real app, get from auth context
         }),
@@ -266,6 +326,7 @@ export default function AdminDashboard() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           rejectionReason: reason,
           reviewedBy: 'Admin', // In a real app, get from auth context
@@ -283,12 +344,96 @@ export default function AdminDashboard() {
     }
   }
 
-  if (loading) {
+  const handleSendEmailToUser = async (user: any) => {
+    const subject = prompt('Email Subject:')
+    if (!subject) return
+    
+    const message = prompt('Email Message:')
+    if (!message) return
+
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          to: user.email,
+          subject,
+          message,
+          customerName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Customer'
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to send email')
+      }
+
+      alert(`Email sent successfully to ${user.email}`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send email')
+    }
+  }
+
+  const handleViewUserDetails = (user: any) => {
+    const userApps = applications.filter(app => app.user.id === user.id)
+    const details = `
+User Details:
+Name: ${user.firstName || 'N/A'} ${user.lastName || ''}
+Email: ${user.email}
+Phone: ${user.phone || 'Not provided'}
+Role: ${user.role}
+Status: ${user.active ? 'Active' : 'Inactive'}
+Email Verified: ${user.emailVerified ? 'Yes' : 'No'}
+Joined: ${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown'}
+Applications: ${userApps.length}
+
+Recent Applications:
+${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join('\n')}
+    `
+    alert(details)
+  }
+
+  const handleToggleUserStatus = async (user: any) => {
+    const action = user.active ? 'deactivate' : 'activate'
+    const confirmed = confirm(`Are you sure you want to ${action} ${user.email}?`)
+    
+    if (!confirmed) return
+
+    try {
+      const response = await fetch('/api/users/toggle-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          userId: user.id,
+          active: !user.active
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update user status')
+      }
+
+      // Refresh data
+      await fetchData()
+      alert(`User ${action}d successfully`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update user status')
+    }
+  }
+
+  if (!authChecked || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-4 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-lg text-gray-600">Loading admin dashboard...</p>
+          <p className="mt-4 text-lg text-gray-600">
+            {!authChecked ? 'Checking authentication...' : 'Loading admin dashboard...'}
+          </p>
         </div>
       </div>
     )
@@ -313,27 +458,29 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+          <div className="flex justify-between items-center py-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-gray-600">Manage packages, promotions, and providers</p>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Admin Dashboard
+              </h1>
+              <p className="text-gray-600 mt-2 text-lg">Manage packages, promotions, and customer applications</p>
             </div>
             <div className="flex space-x-4">
               <Link 
                 href="/admin/import"
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
               >
-                Import Data
+                📊 Import Data
               </Link>
               <button 
                 onClick={fetchData}
-                className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
+                className="bg-gray-100 text-gray-700 px-6 py-3 rounded-xl hover:bg-gray-200 transition-all duration-200 shadow-md hover:shadow-lg font-medium border border-gray-200"
               >
-                Refresh
+                🔄 Refresh
               </button>
             </div>
           </div>
@@ -341,105 +488,120 @@ export default function AdminDashboard() {
       </header>
 
       {/* Stats Overview */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-8 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-12">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-red-500 rounded-md flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Applications</p>
-                <p className="text-2xl font-semibold text-gray-900">{applications.length}</p>
-                <p className="text-xs text-yellow-600">
-                  {applications.filter(a => a.status === 'PENDING_APPROVAL').length} pending
+              <div className="ml-6">
+                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Applications</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">{applications.length}</p>
+                <p className="text-sm text-amber-600 font-medium mt-1">
+                  {applications.filter(a => a.status === 'PENDING_APPROVAL').length} pending review
                 </p>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
                 </div>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Total Packages</p>
-                <p className="text-2xl font-semibold text-gray-900">{packages.length}</p>
+              <div className="ml-6">
+                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Total Packages</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">{packages.length}</p>
+                <p className="text-sm text-blue-600 font-medium mt-1">
+                  {packages.filter(p => p.active).length} active
+                </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-orange-500 rounded-md flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
                 </div>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Fibre Packages</p>
-                <p className="text-2xl font-semibold text-gray-900">{fibrePackages.length}</p>
+              <div className="ml-6">
+                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Fibre Packages</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">{fibrePackages.length}</p>
+                <p className="text-sm text-orange-600 font-medium mt-1">
+                  High-speed internet
+                </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
                 </div>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">LTE Packages</p>
-                <p className="text-2xl font-semibold text-gray-900">{ltePackages.length}</p>
+              <div className="ml-6">
+                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">LTE Packages</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">{ltePackages.length}</p>
+                <p className="text-sm text-purple-600 font-medium mt-1">
+                  Mobile connectivity
+                </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Active Packages</p>
-                <p className="text-2xl font-semibold text-gray-900">
+              <div className="ml-6">
+                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Active Packages</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
                   {packages.filter(p => p.active).length}
+                </p>
+                <p className="text-sm text-green-600 font-medium mt-1">
+                  Available for customers
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-pink-500 rounded-md flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                   </svg>
                 </div>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Active Promotions</p>
-                <p className="text-2xl font-semibold text-gray-900">
+              <div className="ml-6">
+                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Active Promotions</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
                   {promotions.filter(p => p.active).length}
+                </p>
+                <p className="text-sm text-pink-600 font-medium mt-1">
+                  Discounts & offers
                 </p>
               </div>
             </div>
@@ -473,6 +635,25 @@ export default function AdminDashboard() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">Price Changes</p>
                 <p className="text-2xl font-semibold text-gray-900">{priceHistory.length}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-emerald-500 rounded-md flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                  </svg>
+                </div>
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500">Registered Users</p>
+                <p className="text-2xl font-semibold text-gray-900">{users.length}</p>
+                <p className="text-xs text-blue-600">
+                  {users.filter(u => u.role === 'ADMIN').length} admin(s)
+                </p>
               </div>
             </div>
           </div>
@@ -536,6 +717,16 @@ export default function AdminDashboard() {
                 }`}
               >
                 Providers ({providers.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('users')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                  activeTab === 'users'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Users ({users.length})
               </button>
             </nav>
           </div>
@@ -697,15 +888,42 @@ export default function AdminDashboard() {
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-xl font-semibold text-gray-900">Package Management</h2>
                   <div className="flex space-x-4">
+                    <input
+                      type="text"
+                      placeholder="Search packages, providers, speeds..."
+                      value={packageSearchTerm}
+                      onChange={(e) => setPackageSearchTerm(e.target.value)}
+                      className="border border-gray-300 rounded-md px-3 py-2 text-sm w-64"
+                    />
                     <select
                       value={selectedType}
                       onChange={(e) => setSelectedType(e.target.value as any)}
                       className="border border-gray-300 rounded-md px-3 py-2 text-sm"
                     >
                       <option value="all">All Types</option>
-                      <option value="FIBRE">Fibre</option>
-                      <option value="LTE_FIXED">LTE Fixed</option>
-                      <option value="LTE_MOBILE">LTE Mobile</option>
+                      <option value="FIBRE">Fibre Only</option>
+                      <option value="LTE_FIXED">LTE/5G Only</option>
+                    </select>
+                    <select
+                      value={selectedProvider}
+                      onChange={(e) => setSelectedProvider(e.target.value)}
+                      className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    >
+                      <option value="all">All Providers</option>
+                      <optgroup label="Fibre Providers">
+                        {fibreProviders.map(provider => (
+                          <option key={provider.id} value={provider.slug}>
+                            {provider.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="LTE/5G Providers">
+                        {lteProviders.map(provider => (
+                          <option key={provider.id} value={provider.slug}>
+                            {provider.name}
+                          </option>
+                        ))}
+                      </optgroup>
                     </select>
                     <button 
                       onClick={() => {
@@ -1102,6 +1320,134 @@ export default function AdminDashboard() {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            )}
+
+            {/* Users Tab */}
+            {activeTab === 'users' && (
+              <div>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900">User Management</h2>
+                  <div className="flex space-x-4">
+                    <input
+                      type="text"
+                      placeholder="Search users by name, email, phone..."
+                      value={userSearchTerm}
+                      onChange={(e) => setUserSearchTerm(e.target.value)}
+                      className="border border-gray-300 rounded-md px-3 py-2 text-sm w-64"
+                    />
+                    <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                      Export Users
+                    </button>
+                    <button className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
+                      Send Bulk Email
+                    </button>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          User
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Contact
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Role
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Joined
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Applications
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredUsers.map((user) => (
+                        <tr key={user.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {user.firstName || 'N/A'} {user.lastName || ''}
+                              </div>
+                              <div className="text-sm text-gray-500">{user.email}</div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div>
+                              <div className="text-sm">{user.phone || 'No phone'}</div>
+                              <div className="text-xs text-gray-500">
+                                {user.emailVerified ? '✅ Email verified' : '⚠️ Email not verified'}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {user.role}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              user.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                              {user.active ? 'Active' : 'Inactive'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {applications.filter(app => app.user.id === user.id).length} applications
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex space-x-2">
+                              <button 
+                                onClick={() => handleSendEmailToUser(user)}
+                                className="text-blue-600 hover:text-blue-900"
+                              >
+                                Send Email
+                              </button>
+                              <button 
+                                onClick={() => handleViewUserDetails(user)}
+                                className="text-green-600 hover:text-green-900"
+                              >
+                                View Details
+                              </button>
+                              <button 
+                                onClick={() => handleToggleUserStatus(user)}
+                                className="text-yellow-600 hover:text-yellow-900"
+                              >
+                                {user.active ? 'Deactivate' : 'Activate'}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {filteredUsers.length === 0 && (
+                  <div className="text-center py-12">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                    </svg>
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">No users found</h3>
+                    <p className="mt-1 text-sm text-gray-500">No users match your search criteria.</p>
+                  </div>
+                )}
               </div>
             )}
           </div>

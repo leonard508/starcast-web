@@ -529,22 +529,10 @@ async function main() {
   }
 
 
-  // Create sample admin user
-  const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@starcast.co.za' },
-    update: {},
-    create: {
-      email: 'admin@starcast.co.za',
-      password: 'admin123', // In production, this should be hashed
-      firstName: 'Admin',
-      lastName: 'User',
-      role: 'ADMIN',
-      active: true,
-      emailVerified: true
-    }
-  })
-
-  console.log(`✅ Created admin user: ${adminUser.email}`)
+  // Note: Admin user should be created via the API signup endpoint for proper password hashing
+  // This is just for reference - use the test-signup endpoint to create admin users
+  console.log('ℹ️  To create admin user, use: POST /api/auth/test-signup with admin credentials')
+  console.log('ℹ️  Then update role to ADMIN in database: UPDATE users SET role = \'ADMIN\' WHERE email = \'admin@starcast.co.za\';')
 
   console.log('🎉 Complete database seeding completed! (Fibre + LTE/5G)')
 }

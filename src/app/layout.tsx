@@ -8,7 +8,14 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata = {
   title: 'Starcast Technologies',
   description: 'Lightning-fast fibre and LTE internet solutions nationwide',
-  viewport: 'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, viewport-fit=cover',
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  minimumScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({
