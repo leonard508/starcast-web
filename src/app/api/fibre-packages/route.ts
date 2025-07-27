@@ -5,7 +5,6 @@ import { Prisma } from '@prisma/client'
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const type = searchParams.get('type')
     const provider = searchParams.get('provider')
     const active = searchParams.get('active')
     const includePromotions = searchParams.get('include_promotions') === 'true'

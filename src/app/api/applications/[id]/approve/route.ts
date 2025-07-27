@@ -16,7 +16,7 @@ export async function POST(
     const application = await prisma.application.update({
       where: { id: params.id },
       data: {
-        applicationStatus: 'APPROVED',
+        status: 'APPROVED',
         reviewedAt: new Date(),
         reviewedBy,
       },
@@ -35,7 +35,7 @@ export async function POST(
       where: { id: application.userId },
       data: {
         applicationStatus: 'APPROVED',
-        serviceStatus: 'PENDING_ACTIVATION',
+        serviceStatus: 'PENDING_INSTALLATION',
         packageId: application.packageId,
       },
     });

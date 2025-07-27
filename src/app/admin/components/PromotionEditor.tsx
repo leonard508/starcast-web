@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 
 interface Promotion {
   id: string
@@ -142,10 +142,6 @@ export default function PromotionEditor({
     ]
   }
 
-  const getFilteredPackages = () => {
-    if (!formData.packageId) return packages
-    return packages.filter(pkg => pkg.id === formData.packageId)
-  }
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">

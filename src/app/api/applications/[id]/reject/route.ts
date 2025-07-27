@@ -16,7 +16,7 @@ export async function POST(
     const application = await prisma.application.update({
       where: { id: params.id },
       data: {
-        applicationStatus: 'REJECTED',
+        status: 'REJECTED',
         reviewedAt: new Date(),
         reviewedBy,
         rejectionReason,
@@ -46,7 +46,7 @@ export async function POST(
         to: application.user.email,
         customerName: `${application.user.firstName} ${application.user.lastName}`,
         packageName: application.package.name,
-        applicationId: application.applicationNumber,
+        applicationId: (application as any).applicationNumber || application.id,
         rejectionReason: rejectionReason || 'service not available in your area',
         alternativeOptions: 'We are continuously expanding our coverage areas and will notify you when service becomes available.',
         contactPhone: '087 550 0000',

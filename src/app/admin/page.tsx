@@ -77,7 +77,7 @@ interface Application {
     }
   }
   serviceAddress: any
-  applicationStatus: 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED'
+  status: 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED'
   specialRequirements?: string
   submittedAt: string
   reviewedAt?: string
@@ -143,17 +143,11 @@ export default function AdminDashboard() {
   )
 
   const filteredApplications = applications.filter(app => 
-    selectedStatus === 'all' || app.applicationStatus === selectedStatus
+    selectedStatus === 'all' || app.status === selectedStatus
   )
 
   const fibrePackages = packages.filter(pkg => pkg.type === 'FIBRE')
   const ltePackages = packages.filter(pkg => pkg.type.startsWith('LTE'))
-  const fibreProviders = providers.filter(provider => 
-    provider.packages?.some(pkg => pkg.type === 'FIBRE')
-  )
-  const lteProviders = providers.filter(provider => 
-    provider.packages?.some(pkg => pkg.type.startsWith('LTE'))
-  )
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -362,7 +356,7 @@ export default function AdminDashboard() {
                 <p className="text-sm font-medium text-gray-500">Applications</p>
                 <p className="text-2xl font-semibold text-gray-900">{applications.length}</p>
                 <p className="text-xs text-yellow-600">
-                  {applications.filter(a => a.applicationStatus === 'PENDING_APPROVAL').length} pending
+                  {applications.filter(a => a.status === 'PENDING_APPROVAL').length} pending
                 </p>
               </div>
             </div>
@@ -497,9 +491,9 @@ export default function AdminDashboard() {
                 }`}
               >
                 Applications ({applications.length})
-                {applications.filter(a => a.applicationStatus === 'PENDING_APPROVAL').length > 0 && (
+                {applications.filter(a => a.status === 'PENDING_APPROVAL').length > 0 && (
                   <span className="ml-2 bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                    {applications.filter(a => a.applicationStatus === 'PENDING_APPROVAL').length}
+                    {applications.filter(a => a.status === 'PENDING_APPROVAL').length}
                   </span>
                 )}
               </button>
@@ -641,8 +635,8 @@ export default function AdminDashboard() {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getApplicationStatusColor(app.applicationStatus)}`}>
-                              {app.applicationStatus.replace('_', ' ')}
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getApplicationStatusColor(app.status)}`}>
+                              {app.status.replace('_', ' ')}
                             </span>
                             {app.reviewedAt && (
                               <div className="text-xs text-gray-500 mt-1">
@@ -655,7 +649,7 @@ export default function AdminDashboard() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div className="flex space-x-2">
-                              {app.applicationStatus === 'PENDING_APPROVAL' && (
+                              {app.status === 'PENDING_APPROVAL' && (
                                 <>
                                   <button 
                                     onClick={() => handleApproveApplication(app)}

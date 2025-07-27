@@ -26,7 +26,7 @@ export function LoginForm() {
     setError("")
     
     try {
-      const { data: authResult, error: authError } = await authClient.signIn.email({
+      const { error: authError } = await authClient.signIn.email({
         email: data.email,
         password: data.password,
       })

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { testBrevoConnection } from '@/lib/email/providers';
 
 export async function GET() {

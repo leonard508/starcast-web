@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const packageId = searchParams.get('packageId')
     const active = searchParams.get('active')
 
-    let where: any = {}
+    const where: any = {}
 
     if (packageId) {
       where.packageId = packageId

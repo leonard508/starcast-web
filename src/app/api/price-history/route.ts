@@ -9,11 +9,7 @@ export async function GET(request: NextRequest) {
     const packageId = searchParams.get('packageId')
     const limit = parseInt(searchParams.get('limit') || '50')
 
-    let where: any = {}
-
-    if (packageId) {
-      where.packageId = packageId
-    }
+    const where: any = packageId ? { packageId } : {}
 
     const priceHistory = await prisma.priceHistory.findMany({
       where,

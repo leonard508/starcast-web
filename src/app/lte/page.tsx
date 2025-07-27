@@ -751,7 +751,6 @@ function LTEPackageCard({ provider, providerIndex, onPackageSelect }: LTEPackage
   }
 
   const isFixedLTE = selectedPackage.type === 'LTE_FIXED'
-  const isMobileLTE = selectedPackage.type === 'LTE_MOBILE'
 
   return (
     <div 

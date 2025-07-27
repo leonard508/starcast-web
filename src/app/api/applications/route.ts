@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { emailService } from '../../../lib/email/service';
 
 const prisma = new PrismaClient();
 
@@ -10,7 +11,7 @@ export async function GET(request: NextRequest) {
 
     const where: any = {};
     if (status && status !== 'all') {
-      where.applicationStatus = status;
+      where.status = status;
     }
 
     const applications = await prisma.application.findMany({
@@ -61,6 +62,7 @@ export async function POST(request: NextRequest) {
       packageId,
       serviceAddress,
       specialRequirements,
+      contactNumber = '',
     } = body;
 
     // Generate application number
@@ -72,8 +74,9 @@ export async function POST(request: NextRequest) {
         userId,
         packageId,
         serviceAddress,
+        contactNumber,
         specialRequirements,
-        applicationStatus: 'PENDING_APPROVAL',
+        status: 'PENDING_APPROVAL',
         submittedAt: new Date(),
       },
       include: {
@@ -87,26 +90,24 @@ export async function POST(request: NextRequest) {
     });
 
     // Send welcome email to customer and admin notification
-    // This will be integrated with our email service
     try {
-      // TODO: Import and use email service
-      // await emailService.sendWelcomeEmail({
-      //   to: application.user.email,
-      //   customerName: `${application.user.firstName} ${application.user.lastName}`,
-      //   packageName: application.package.name,
-      //   applicationId: application.applicationNumber,
-      // });
+      await emailService.sendWelcomeEmail({
+        to: application.user.email,
+        customerName: `${application.user.firstName} ${application.user.lastName}`,
+        packageName: application.package.name,
+        applicationId: application.applicationNumber,
+      });
       
-      // await emailService.sendAdminNotification({
-      //   customerName: `${application.user.firstName} ${application.user.lastName}`,
-      //   customerEmail: application.user.email,
-      //   customerPhone: application.user.phone,
-      //   packageName: application.package.name,
-      //   applicationId: application.applicationNumber,
-      //   serviceAddress: application.serviceAddress,
-      //   submittedAt: application.submittedAt.toISOString(),
-      //   specialRequirements: application.specialRequirements,
-      // });
+      await emailService.sendAdminNotification({
+        customerName: `${application.user.firstName} ${application.user.lastName}`,
+        customerEmail: application.user.email,
+        customerPhone: application.user.phone || '',
+        packageName: application.package.name,
+        applicationId: application.applicationNumber,
+        serviceAddress: application.serviceAddress,
+        submittedAt: application.submittedAt.toISOString(),
+        specialRequirements: application.specialRequirements || '',
+      });
     } catch (emailError) {
       console.error('Failed to send emails:', emailError);
       // Continue even if email fails

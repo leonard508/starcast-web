@@ -39,7 +39,7 @@ export default function RegisterPage() {
     setSuccess(false)
     
     try {
-      const { data: authResult, error: authError } = await authClient.signUp.email({
+      const { error: authError } = await authClient.signUp.email({
         email: data.email,
         password: data.password,
         name: data.email.split('@')[0], // Use email prefix as name

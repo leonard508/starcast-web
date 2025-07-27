@@ -229,6 +229,7 @@ model User {
 // Application model - Customer service applications
 model Application {
   id                    String            @id @default(cuid())
+  applicationNumber     String            @unique
   userId                String
   packageId             String
   
