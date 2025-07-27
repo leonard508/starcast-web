@@ -1,0 +1,519 @@
+// Starcast Technologies - Package Management Database Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Provider model - ISP companies offering services
+model Provider {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  logo      String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  packages Package[]
+
+  @@map("providers")
+}
+
+// Package model - Internet service packages (Fibre, LTE Fixed, LTE Mobile)
+model Package {
+  id         String      @id @default(cuid())
+  name       String
+  providerId String
+  type       String      // "FIBRE", "LTE_FIXED", "LTE_MOBILE", "5G_FIXED"
+  speed      String?     // e.g., "10Mbps", "100Mbps"
+  data       String?     // e.g., "Unlimited", "100GB"
+  
+  // Legacy fields (kept for backward compatibility)
+  aup        String?     // Acceptable Use Policy info (deprecated - use fupDescription)
+  throttle   String?     // Throttling information (deprecated - use throttleSpeed)
+  
+  // FUP (Fair Use Policy) Fields
+  fupLimit            String?     // e.g., "1000GB", "500GB", "UNLIMITED"
+  throttleSpeed       String?     // Primary throttle speed e.g., "1Mbps", "2Mbps"
+  secondaryThrottleSpeed String?  // Secondary throttle for Telkom packages
+  fupDescription      String?     // Detailed FUP terms and conditions
+  specialTerms        String?     // Any special terms or conditions
+  
+  // LTE/5G Specific Fields
+  technology          String?     // "LTE", "5G", "LTE_ADVANCED"
+  coverage            String?     // Coverage area information
+  installation        String?     // Installation type (Self-install, Tech install)
+  
+  // Pricing
+  basePrice    Float       // Original price
+  currentPrice Float       // Current active price
+  
+  // Package Status
+  active       Boolean     @default(true)
+  featured     Boolean     @default(false)
+  
+  // Timestamps
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  // Relations
+  provider     Provider     @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  promotions   Promotion[]
+  specialRates SpecialRate[]
+  packageUrls  PackageUrl[]
+  priceHistory PriceHistory[]
+  orders       Order[]
+  users        User[]       // Users who selected this package
+  applications Application[] // Applications for this package
+  bills        Bill[]       // Bills for this package
+
+  @@map("packages")
+}
+
+// Price History - Track all price changes
+model PriceHistory {
+  id        String   @id @default(cuid())
+  packageId String
+  oldPrice  Float
+  newPrice  Float
+  changedBy String   // Admin user ID or system
+  reason    String?  // Price change reason
+  createdAt DateTime @default(now())
+  
+  package Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@map("price_history")
+}
+
+// Promotion model - Discount codes and special offers
+model Promotion {
+  id            String       @id @default(cuid())
+  code          String       @unique
+  name          String       // Display name for promotion
+  description   String?      // Promotion description
+  packageId     String?      // Optional - can be package-specific or global
+  
+  // Discount Configuration
+  discountType  String       // "PERCENTAGE", "FIXED_AMOUNT", "OVERRIDE_PRICE"
+  discountValue Float
+  
+  // Date Configuration
+  startDate     DateTime
+  endDate       DateTime
+  
+  // Usage Configuration
+  usageLimit    Int          @default(1)  // Max number of uses
+  timesUsed     Int          @default(0)  // Current usage count
+  
+  // Targeting (stored as comma-separated strings)
+  targetAudience String?      // "new_customers,existing,bulk_orders"
+  userSpecific   String?      // Comma-separated user IDs
+  minimumOrders  Int?         // For bulk deals
+  
+  // Behavior
+  stackable     Boolean      @default(false) // Can combine with other promos
+  autoApply     Boolean      @default(false) // Automatically applied
+  
+  // Status
+  active        Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  // Relations
+  package Package? @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  orders  Order[]
+
+  @@map("promotions")
+}
+
+// Special Rates - Individual pricing for specific customers
+model SpecialRate {
+  id            String      @id @default(cuid())
+  packageId     String
+  userId        String?     // Specific user
+  email         String?     // Email-based targeting
+  name          String?     // Name/description for this rate
+  
+  discountType  String       // "PERCENTAGE", "FIXED_AMOUNT", "OVERRIDE_PRICE"
+  discountValue Float
+  
+  expiresAt     DateTime?    // Optional expiry
+  active        Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  package Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id])
+
+  @@map("special_rates")
+}
+
+// Package URLs - Custom URLs for packages with special parameters
+model PackageUrl {
+  id        String   @id @default(cuid())
+  packageId String
+  slug      String   @unique  // e.g., "vumatel-100mbps-special"
+  params    String?  // JSON string for custom parameters, pricing overrides
+  expiresAt DateTime?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  package Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@map("package_urls")
+}
+
+// User model - Customer accounts (Extended for ISP Customer Journey)
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String?   // Made optional for BetterAuth
+  firstName     String?   // Made optional
+  lastName      String?   // Made optional
+  name          String?   // Added for BetterAuth compatibility
+  phone         String?
+  address       String?
+  city          String?
+  province      String?
+  postalCode    String?
+  idNumber      String?   // South African ID number
+  
+  // ISP Customer Journey Fields
+  applicationStatus    ApplicationStatus @default(PENDING_APPROVAL)
+  serviceStatus        ServiceStatus     @default(NOT_ACTIVE)
+  applicationDate      DateTime          @default(now())
+  approvedAt           DateTime?
+  approvedBy           String?           // Admin user ID who approved
+  rejectedAt           DateTime?
+  rejectionReason      String?
+  activationDate       DateTime?
+  
+  // Service Details
+  serviceAddress       Json?             // Installation address if different from billing
+  packageId            String?           // Selected package
+  installationNotes    String?           // Special installation requirements
+  
+  // Login Credentials (after approval)
+  tempPassword         String?           // Temporary password sent after approval
+  mustChangePassword   Boolean           @default(true)
+  
+  // Account Management
+  role          String    @default("USER") // "USER", "ADMIN", "SUPPORT"
+  emailVerified Boolean   @default(false)
+  active        Boolean   @default(true)
+  image         String?   // Added for BetterAuth profile images
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // BetterAuth Relations
+  sessions     Session[]
+  accounts     Account[]
+  
+  // ISP Relations
+  selectedPackage Package?     @relation(fields: [packageId], references: [id])
+  orders       Order[]
+  specialRates SpecialRate[]
+  bills        Bill[]
+  applications Application[]
+  
+  @@map("users")
+}
+
+// Application model - Customer service applications
+model Application {
+  id                    String            @id @default(cuid())
+  userId                String
+  packageId             String
+  
+  // Application Details
+  serviceAddress        Json              // Installation address
+  contactNumber         String
+  preferredInstallDate  DateTime?
+  specialRequirements   String?
+  idDocument            String?           // Path to uploaded ID
+  proofOfResidence      String?           // Path to uploaded proof of residence
+  
+  // Admin Processing
+  status                ApplicationStatus @default(PENDING_APPROVAL)
+  submittedAt           DateTime          @default(now())
+  reviewedAt            DateTime?
+  reviewedBy            String?           // Admin user ID
+  reviewNotes           String?
+  
+  // Approval/Rejection Details
+  approvalReason        String?
+  rejectionReason       String?
+  adminComments         String?
+  
+  // Service Availability Check
+  serviceAvailable      Boolean?          // Checked by admin
+  estimatedInstallDate  DateTime?
+  
+  // Relations
+  user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  package               Package           @relation(fields: [packageId], references: [id])
+  
+  @@map("applications")
+}
+
+// Bill model - Monthly billing and invoices
+model Bill {
+  id              String      @id @default(cuid())
+  billNumber      String      @unique
+  userId          String
+  packageId       String?
+  
+  // Billing Details
+  amount          Float       // SQLite doesn't support Decimal
+  vatAmount       Float       // SQLite doesn't support Decimal
+  totalAmount     Float       // SQLite doesn't support Decimal
+  
+  // Billing Period
+  periodStart     DateTime
+  periodEnd       DateTime
+  dueDate         DateTime    // Always 1st of month for ISP billing
+  
+  // Bill Type
+  billType        BillType    @default(MONTHLY)
+  description     String?     // e.g., "Pro-rata charge", "Monthly service"
+  
+  // Status Management
+  status          BillStatus  @default(PENDING)
+  paidAt          DateTime?
+  suspensionDate  DateTime?   // When account was suspended for non-payment
+  
+  // Payment Integration
+  paymentReference String?    // Ozow payment reference
+  paymentMethod    String?    // "OZOW", "BANK_TRANSFER", etc.
+  
+  // Relations
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  package         Package?    @relation(fields: [packageId], references: [id])
+  payments        Payment[]
+  
+  @@map("bills")
+}
+
+// Payment model - Payment transactions
+model Payment {
+  id                String        @id @default(cuid())
+  billId            String
+  
+  // Payment Details
+  amount            Float         // SQLite doesn't support Decimal
+  method            PaymentMethod @default(OZOW)
+  reference         String        @unique
+  
+  // Ozow Integration
+  ozowTransactionId String?       @unique
+  ozowStatus        String?
+  ozowCallback      Json?         // Store callback data
+  
+  // Processing
+  status            PaymentStatus @default(PENDING)
+  processedAt       DateTime?
+  verifiedAt        DateTime?
+  
+  // Relations
+  bill              Bill          @relation(fields: [billId], references: [id], onDelete: Cascade)
+  
+  @@map("payments")
+}
+
+// Email Log model - Track all emails sent
+model EmailLog {
+  id          String      @id @default(cuid())
+  userId      String?     // Recipient user (if applicable)
+  adminEmail  String?     // Admin email (if admin notification)
+  
+  // Email Details
+  to          String
+  subject     String
+  emailType   EmailType
+  status      String      // "SENT", "FAILED", "PENDING"
+  
+  // Brevo Integration
+  brevoId     String?     // Brevo message ID
+  brevoStatus String?     // Brevo delivery status
+  
+  // Content
+  content     String?     // Email content for audit
+  error       String?     // Error message if failed
+  
+  sentAt      DateTime    @default(now())
+  deliveredAt DateTime?
+  
+  @@map("email_logs")
+}
+
+// Enums for ISP Operations
+enum ApplicationStatus {
+  PENDING_APPROVAL    // New application, waiting admin review
+  UNDER_REVIEW        // Admin is actively reviewing
+  APPROVED            // Approved by admin, user can login
+  REJECTED            // Rejected due to no service/other reasons
+  REQUIRES_INFO       // Admin needs more information
+  CANCELLED           // Customer cancelled application
+}
+
+enum ServiceStatus {
+  NOT_ACTIVE          // No active service
+  PENDING_PAYMENT     // Approved but awaiting payment
+  PENDING_INSTALLATION // Paid, awaiting installation
+  ACTIVE              // Service is active
+  SUSPENDED           // Service suspended (non-payment)
+  CANCELLED           // Service cancelled
+  TERMINATED          // Permanently terminated
+}
+
+enum BillStatus {
+  PENDING             // Generated, awaiting payment
+  OVERDUE             // Past due date, customer notified
+  SUSPENDED           // Account suspended for non-payment
+  PAID                // Payment confirmed
+  CANCELLED           // Bill cancelled (refund, etc.)
+  PARTIAL_PAYMENT     // Partial payment received
+}
+
+enum BillType {
+  MONTHLY             // Regular monthly bill
+  PRORATA             // Pro-rata charge (partial month)
+  SETUP               // Setup/activation fee
+  CANCELLATION        // Cancellation charges
+  ADJUSTMENT          // Price adjustments
+}
+
+enum PaymentMethod {
+  OZOW                // Ozow payment gateway
+  BANK_TRANSFER       // Manual bank transfer
+  CREDIT_CARD         // Credit card payment
+  DEBIT_ORDER         // Debit order payment
+  CASH                // Cash payment (in-person)
+  OTHER               // Other payment methods
+}
+
+enum PaymentStatus {
+  PENDING             // Payment initiated
+  PROCESSING          // Ozow processing
+  COMPLETED           // Payment successful
+  FAILED              // Payment failed
+  CANCELLED           // Payment cancelled
+  REFUNDED            // Payment refunded
+}
+
+enum EmailType {
+  WELCOME             // Welcome email after signup
+  APPROVAL            // Service approved notification
+  REJECTION           // Service rejected notification
+  ADMIN_NOTIFICATION  // New application notification to admin
+  INVOICE             // Monthly invoice
+  PAYMENT_CONFIRMATION // Payment received confirmation
+  PAYMENT_REMINDER    // Payment reminder
+  SUSPENSION_WARNING  // Service suspension warning
+  SERVICE_ACTIVATION  // Service activation confirmation
+  PASSWORD_RESET      // Password reset email
+  GENERAL             // General notifications
+}
+
+// Order model - Package applications/orders
+model Order {
+  id               String      @id @default(cuid())
+  userId           String
+  packageId        String
+  promotionId      String?
+  status           String      @default("PENDING") // "PENDING", "PROCESSING", "APPROVED", "REJECTED", "INSTALLED", "CANCELLED"
+  originalPrice    Float
+  discountAmount   Float       @default(0)
+  finalPrice       Float
+  installationDate DateTime?
+  notes            String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  // Relations
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  package   Package    @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  promotion Promotion? @relation(fields: [promotionId], references: [id], onDelete: SetNull)
+  documents Document[]
+
+  @@map("orders")
+}
+
+// Document model - General documents and guides
+model Document {
+  id        String   @id @default(cuid())
+  orderId   String
+  type      String   // e.g., "id_copy", "proof_of_residence", "bank_statement"
+  filename  String
+  filepath  String
+  filesize  Int
+  mimetype  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
+
+// BetterAuth Required Tables
+
+// Session model - User login sessions
+model Session {
+  id          String   @id @default(cuid())
+  userId      String
+  token       String   @unique
+  expiresAt   DateTime
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// Account model - External provider accounts (OAuth, etc.)
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  accountId         String  // Provider's account ID
+  providerId        String  // "github", "google", etc.
+  accessToken       String?
+  refreshToken      String?
+  idToken           String?
+  accessTokenExpiresAt DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope             String?
+  password          String? // For email/password accounts
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@map("accounts")
+}
+
+// Verification model - Email verification tokens
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String   // email address
+  token      String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  @@unique([identifier, token])
+  @@map("verifications")
+}
