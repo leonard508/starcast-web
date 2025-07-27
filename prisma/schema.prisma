@@ -222,6 +222,7 @@ model User {
   specialRates SpecialRate[]
   bills        Bill[]
   applications Application[]
+  whatsappMessages WhatsAppMessage[]
   
   @@map("users")
 }
@@ -517,4 +518,55 @@ model Verification {
 
   @@unique([identifier, token])
   @@map("verifications")
+}
+
+// WhatsApp Messages - Store all incoming and outgoing WhatsApp messages
+model WhatsAppMessage {
+  id            String                  @id @default(cuid())
+  messageId     String                  @unique // Twilio message SID
+  direction     WhatsAppMessageDirection
+  fromNumber    String                  // Phone number (without whatsapp: prefix)
+  toNumber      String                  // Phone number (without whatsapp: prefix)
+  messageBody   String                  // Message content
+  profileName   String?                 // WhatsApp profile name
+  whatsappId    String?                 // WhatsApp ID (waId)
+  status        WhatsAppMessageStatus   @default(PENDING)
+  
+  // Media attachments
+  mediaCount    Int                     @default(0)
+  mediaUrls     Json?                   // Array of media URLs
+  
+  // Timestamps
+  sentAt        DateTime?               // When message was sent
+  deliveredAt   DateTime?               // When message was delivered
+  readAt        DateTime?               // When message was read
+  receivedAt    DateTime?               // When we received the message
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+  
+  // Customer relationship
+  userId        String?                 // Link to user if known
+  user          User?                   @relation(fields: [userId], references: [id])
+  
+  // Auto-response tracking
+  isAutoResponse Boolean                @default(false)
+  escalated      Boolean                @default(false)
+  
+  @@map("whatsapp_messages")
+}
+
+enum WhatsAppMessageDirection {
+  INCOMING
+  OUTGOING
+  ESCALATION
+}
+
+enum WhatsAppMessageStatus {
+  PENDING
+  SENT
+  DELIVERED
+  READ
+  FAILED
+  RECEIVED
+  ESCALATED
 }
