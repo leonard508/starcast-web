@@ -469,7 +469,13 @@ ${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join(
       {/* Stats Overview */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-12">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+          <button 
+            onClick={() => {
+              setActiveTab('applications')
+              setSelectedStatus('all')
+            }}
+            className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 w-full text-left cursor-pointer"
+          >
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -481,13 +487,28 @@ ${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join(
               <div className="ml-6">
                 <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Applications</p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">{applications.length}</p>
-                <p className="text-sm text-amber-600 font-medium mt-1">
+                <button 
+                  onClick={(e) => { 
+                    e.stopPropagation()
+                    setActiveTab('applications')
+                    setSelectedStatus('PENDING_APPROVAL')
+                  }}
+                  className="text-sm text-amber-600 font-medium mt-1 hover:text-amber-800 hover:underline"
+                >
                   {applications.filter(a => a.status === 'PENDING_APPROVAL').length} pending review
-                </p>
+                </button>
               </div>
             </div>
-          </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+          </button>
+          <button 
+            onClick={() => {
+              setActiveTab('packages')
+              setSelectedType('all')
+              setSelectedProvider('all')
+              setPackageSearchTerm('')
+            }}
+            className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 w-full text-left cursor-pointer"
+          >
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -504,9 +525,17 @@ ${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join(
                 </p>
               </div>
             </div>
-          </div>
+          </button>
 
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+          <button 
+            onClick={() => {
+              setActiveTab('packages')
+              setSelectedType('FIBRE')
+              setSelectedProvider('all')
+              setPackageSearchTerm('')
+            }}
+            className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 w-full text-left cursor-pointer"
+          >
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -523,9 +552,17 @@ ${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join(
                 </p>
               </div>
             </div>
-          </div>
+          </button>
 
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+          <button 
+            onClick={() => {
+              setActiveTab('packages')
+              setSelectedType('LTE_FIXED')
+              setSelectedProvider('all')
+              setPackageSearchTerm('')
+            }}
+            className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 w-full text-left cursor-pointer"
+          >
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -542,9 +579,17 @@ ${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join(
                 </p>
               </div>
             </div>
-          </div>
+          </button>
 
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+          <button 
+            onClick={() => {
+              setActiveTab('packages')
+              setSelectedType('all')
+              setSelectedProvider('all')
+              setPackageSearchTerm('')
+            }}
+            className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 w-full text-left cursor-pointer"
+          >
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -563,9 +608,12 @@ ${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join(
                 </p>
               </div>
             </div>
-          </div>
+          </button>
 
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+          <button 
+            onClick={() => setActiveTab('promotions')}
+            className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 w-full text-left cursor-pointer"
+          >
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -584,9 +632,12 @@ ${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join(
                 </p>
               </div>
             </div>
-          </div>
+          </button>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <button 
+            onClick={() => setActiveTab('providers')}
+            className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-all duration-200 w-full text-left cursor-pointer"
+          >
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-8 h-8 bg-indigo-500 rounded-md flex items-center justify-center">
@@ -600,9 +651,12 @@ ${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join(
                 <p className="text-2xl font-semibold text-gray-900">{providers.length}</p>
               </div>
             </div>
-          </div>
+          </button>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <button 
+            onClick={() => setActiveTab('price-changes')}
+            className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-all duration-200 w-full text-left cursor-pointer"
+          >
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-8 h-8 bg-teal-500 rounded-md flex items-center justify-center">
@@ -616,9 +670,15 @@ ${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join(
                 <p className="text-2xl font-semibold text-gray-900">{priceHistory.length}</p>
               </div>
             </div>
-          </div>
+          </button>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <button 
+            onClick={() => {
+              setActiveTab('users')
+              setUserSearchTerm('')
+            }}
+            className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-all duration-200 w-full text-left cursor-pointer"
+          >
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-8 h-8 bg-emerald-500 rounded-md flex items-center justify-center">
@@ -635,7 +695,7 @@ ${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join(
                 </p>
               </div>
             </div>
-          </div>
+          </button>
         </div>
 
         {/* Tabs */}
