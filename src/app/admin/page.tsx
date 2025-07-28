@@ -99,6 +99,7 @@ export default function AdminDashboard() {
   const [selectedType, setSelectedType] = useState<'all' | 'FIBRE' | 'LTE_FIXED' | 'LTE_MOBILE'>('all')
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED'>('all')
   const [selectedProvider, setSelectedProvider] = useState<'all' | string>('all')
+  const [selectedUserFilter, setSelectedUserFilter] = useState<'all' | 'pending' | 'active' | 'inactive' | 'unverified' | 'admins'>('all')
   const [packageSearchTerm, setPackageSearchTerm] = useState('')
   const [userSearchTerm, setUserSearchTerm] = useState('')
   const [users, setUsers] = useState<any[]>([])
@@ -187,6 +188,33 @@ export default function AdminDashboard() {
   )
 
   const filteredUsers = users.filter(user => {
+    // First apply the filter
+    let matches = false
+    switch (selectedUserFilter) {
+      case 'pending':
+        matches = !user.emailVerified || (!user.active && user.role === 'USER')
+        break
+      case 'active':
+        matches = user.active && user.emailVerified
+        break
+      case 'inactive':
+        matches = !user.active
+        break
+      case 'unverified':
+        matches = !user.emailVerified
+        break
+      case 'admins':
+        matches = user.role === 'ADMIN'
+        break
+      case 'all':
+      default:
+        matches = true
+        break
+    }
+    
+    if (!matches) return false
+    
+    // Then apply search term if provided
     if (userSearchTerm === '') return true
     return user.firstName?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
            user.lastName?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
@@ -468,6 +496,46 @@ ${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join(
 
       {/* Stats Overview */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Pending Actions Alert */}
+        {(applications.filter(a => a.status === 'PENDING_APPROVAL').length > 0 || users.filter(u => !u.emailVerified || u.role === 'USER' && !u.active).length > 0) && (
+          <div className="mb-8 bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-amber-400 p-6 rounded-lg shadow-md">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg className="h-8 w-8 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <div className="ml-4 flex-1">
+                <h3 className="text-lg font-semibold text-amber-800">⚠️ Action Required</h3>
+                <div className="mt-2 flex flex-wrap gap-4 text-sm text-amber-700">
+                  {applications.filter(a => a.status === 'PENDING_APPROVAL').length > 0 && (
+                    <button 
+                      onClick={() => {
+                        setActiveTab('applications')
+                        setSelectedStatus('PENDING_APPROVAL')
+                      }}
+                      className="bg-amber-100 hover:bg-amber-200 px-3 py-1 rounded-md font-medium transition-colors"
+                    >
+                      📋 {applications.filter(a => a.status === 'PENDING_APPROVAL').length} Applications Awaiting Approval
+                    </button>
+                  )}
+                  {users.filter(u => !u.emailVerified && u.role === 'USER').length > 0 && (
+                    <button 
+                      onClick={() => {
+                        setActiveTab('users')
+                        setUserSearchTerm('')
+                      }}
+                      className="bg-amber-100 hover:bg-amber-200 px-3 py-1 rounded-md font-medium transition-colors"
+                    >
+                      👤 {users.filter(u => !u.emailVerified && u.role === 'USER').length} Users Need Email Verification
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-12">
           <button 
             onClick={() => {
@@ -1368,6 +1436,18 @@ ${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join(
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-xl font-semibold text-gray-900">User Management</h2>
                   <div className="flex space-x-4">
+                    <select
+                      value={selectedUserFilter || 'all'}
+                      onChange={(e) => setSelectedUserFilter(e.target.value as any)}
+                      className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    >
+                      <option value="all">All Users</option>
+                      <option value="pending">⚠️ Needs Attention</option>
+                      <option value="active">✅ Active Users</option>
+                      <option value="inactive">❌ Inactive Users</option>
+                      <option value="unverified">📧 Unverified Email</option>
+                      <option value="admins">🔒 Admins</option>
+                    </select>
                     <input
                       type="text"
                       placeholder="Search users by name, email, phone..."
@@ -1389,87 +1469,138 @@ ${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join(
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          User
+                          User Details
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Contact
+                          Account Status
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Role
+                          Activity & Applications
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Joined
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Applications
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
+                          Admin Actions
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {filteredUsers.map((user) => (
-                        <tr key={user.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">
-                                {user.firstName || 'N/A'} {user.lastName || ''}
+                        <tr key={user.id} className={`hover:bg-gray-50 ${!user.emailVerified || !user.active ? 'bg-amber-50' : ''}`}>
+                          {/* User Details */}
+                          <td className="px-6 py-4">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 h-10 w-10">
+                                <div className={`h-10 w-10 rounded-full flex items-center justify-center text-white font-semibold ${
+                                  user.role === 'ADMIN' ? 'bg-purple-500' : 
+                                  user.active && user.emailVerified ? 'bg-green-500' : 'bg-gray-400'
+                                }`}>
+                                  {(user.firstName?.[0] || user.email[0]).toUpperCase()}
+                                </div>
                               </div>
-                              <div className="text-sm text-gray-500">{user.email}</div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {user.firstName || 'N/A'} {user.lastName || ''}
+                                  {user.role === 'ADMIN' && <span className="ml-2 text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">Admin</span>}
+                                </div>
+                                <div className="text-sm text-gray-500">{user.email}</div>
+                                <div className="text-xs text-gray-400">{user.phone || 'No phone provided'}</div>
+                              </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            <div>
-                              <div className="text-sm">{user.phone || 'No phone'}</div>
+
+                          {/* Account Status */}
+                          <td className="px-6 py-4">
+                            <div className="space-y-1">
+                              <div className="flex items-center space-x-2">
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  user.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                }`}>
+                                  {user.active ? '✅ Active' : '❌ Inactive'}
+                                </span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  user.emailVerified ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800'
+                                }`}>
+                                  {user.emailVerified ? '📧 Verified' : '⚠️ Unverified'}
+                                </span>
+                              </div>
                               <div className="text-xs text-gray-500">
-                                {user.emailVerified ? '✅ Email verified' : '⚠️ Email not verified'}
+                                Joined: {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown'}
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'
-                            }`}>
-                              {user.role}
-                            </span>
+
+                          {/* Activity & Applications */}
+                          <td className="px-6 py-4">
+                            <div className="text-sm">
+                              <div className="font-medium text-gray-900">
+                                {applications.filter(app => app.user.id === user.id).length} Applications
+                              </div>
+                              {applications.filter(app => app.user.id === user.id).length > 0 && (
+                                <div className="text-xs text-gray-500 mt-1">
+                                  {applications.filter(app => app.user.id === user.id && app.status === 'PENDING_APPROVAL').length > 0 && (
+                                    <span className="text-amber-600 font-medium">
+                                      {applications.filter(app => app.user.id === user.id && app.status === 'PENDING_APPROVAL').length} pending approval
+                                    </span>
+                                  )}
+                                  {applications.filter(app => app.user.id === user.id && app.status === 'APPROVED').length > 0 && (
+                                    <span className="text-green-600">
+                                      {applications.filter(app => app.user.id === user.id && app.status === 'APPROVED').length} approved
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              user.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                            }`}>
-                              {user.active ? 'Active' : 'Inactive'}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown'}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {applications.filter(app => app.user.id === user.id).length} applications
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div className="flex space-x-2">
-                              <button 
-                                onClick={() => handleSendEmailToUser(user)}
-                                className="text-blue-600 hover:text-blue-900"
-                              >
-                                Send Email
-                              </button>
-                              <button 
-                                onClick={() => handleViewUserDetails(user)}
-                                className="text-green-600 hover:text-green-900"
-                              >
-                                View Details
-                              </button>
-                              <button 
-                                onClick={() => handleToggleUserStatus(user)}
-                                className="text-yellow-600 hover:text-yellow-900"
-                              >
-                                {user.active ? 'Deactivate' : 'Activate'}
-                              </button>
+
+                          {/* Admin Actions */}
+                          <td className="px-6 py-4">
+                            <div className="flex flex-col space-y-2">
+                              {/* Primary Actions for users needing attention */}
+                              {(!user.emailVerified || !user.active) && user.role !== 'ADMIN' && (
+                                <div className="flex space-x-2">
+                                  {!user.active && (
+                                    <button 
+                                      onClick={() => handleToggleUserStatus(user)}
+                                      className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors"
+                                    >
+                                      ✅ Approve User
+                                    </button>
+                                  )}
+                                  {!user.emailVerified && (
+                                    <button 
+                                      onClick={() => handleSendEmailToUser(user)}
+                                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors"
+                                    >
+                                      📧 Send Verification
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                              
+                              {/* Secondary Actions */}
+                              <div className="flex space-x-2 text-xs">
+                                <button 
+                                  onClick={() => handleViewUserDetails(user)}
+                                  className="text-gray-600 hover:text-gray-900 underline"
+                                >
+                                  View Details
+                                </button>
+                                <button 
+                                  onClick={() => handleSendEmailToUser(user)}
+                                  className="text-blue-600 hover:text-blue-900 underline"
+                                >
+                                  Send Email
+                                </button>
+                                {user.role !== 'ADMIN' && (
+                                  <button 
+                                    onClick={() => handleToggleUserStatus(user)}
+                                    className={`${user.active ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'} underline`}
+                                  >
+                                    {user.active ? 'Deactivate' : 'Activate'}
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           </td>
                         </tr>
