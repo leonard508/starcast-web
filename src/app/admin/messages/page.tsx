@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import ConversationsPanel from '@/components/ConversationsPanel'
+// import ConversationsPanel from '@/components/ConversationsPanel' // Disabled - requires Twilio Conversations setup
 import WhatsAppMessages from '@/components/WhatsAppMessages'
 
 interface Contact {
@@ -172,7 +172,7 @@ Transform your home connectivity & entertainment!`,
 export default function MessagesPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'conversations' | 'compose' | 'templates' | 'history' | 'contacts' | 'analytics'>('conversations')
+  const [activeTab, setActiveTab] = useState<'conversations' | 'compose' | 'templates' | 'history' | 'contacts' | 'analytics'>('whatsapp')
   const [contacts, setContacts] = useState<Contact[]>([])
   const [messages] = useState<Message[]>([])
   const [templates] = useState<Template[]>(predefinedTemplates)
@@ -383,7 +383,7 @@ export default function MessagesPage() {
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8 px-6">
               {[
-                { id: 'conversations', label: 'Live Chat', icon: '💬' },
+                // { id: 'conversations', label: 'Live Chat', icon: '💬' }, // Disabled - requires Twilio Conversations setup
                 { id: 'whatsapp', label: 'WhatsApp Messages', icon: '📱' },
                 { id: 'compose', label: 'Compose', icon: '✉️' },
                 { id: 'templates', label: 'Templates', icon: '📝' },
@@ -408,13 +408,13 @@ export default function MessagesPage() {
           </div>
         </div>
 
-        {/* Live Conversations Tab */}
-        {activeTab === 'conversations' && (
+        {/* Live Conversations Tab - Disabled until Twilio Conversations is configured */}
+        {/* {activeTab === 'conversations' && (
           <div className="bg-white rounded-lg shadow-sm p-6">
             <h3 className="text-lg font-semibold mb-4">Real-Time Customer Conversations</h3>
             <ConversationsPanel />
           </div>
-        )}
+        )} */}
 
         {/* WhatsApp Messages Tab */}
         {(activeTab as string) === 'whatsapp' && (

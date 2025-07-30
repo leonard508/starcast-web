@@ -26,18 +26,38 @@ export function LoginForm() {
     setError("")
     
     try {
-      const { error: authError } = await authClient.signIn.email({
+      // Use BetterAuth sign-in
+      const result = await authClient.signIn.email({
         email: data.email,
         password: data.password,
       })
       
-      if (authError) {
-        setError("Invalid email or password")
+      if (result.error) {
+        setError(result.error.message || "Invalid email or password")
         return
       }
       
-      // Redirect to dashboard after successful login
-      window.location.href = "/dashboard"
+      // Check if user has admin role
+      if (result.data?.user) {
+        // Fetch user details to check role
+        const userResponse = await fetch('/api/auth/session', {
+          credentials: 'include'
+        })
+        
+        if (userResponse.ok) {
+          const sessionData = await userResponse.json()
+          if (sessionData.user?.role === 'ADMIN') {
+            // Redirect to admin dashboard
+            window.location.href = "/admin"
+          } else {
+            // Regular user - redirect to dashboard
+            window.location.href = "/dashboard"
+          }
+        } else {
+          // Fallback redirect
+          window.location.href = "/admin"
+        }
+      }
       
     } catch (err) {
       console.error("Login error:", err)
