@@ -71,8 +71,8 @@ export async function POST(request: NextRequest) {
             direction: 'OUTGOING',
             fromNumber: process.env.TWILIO_WHATSAPP_NUMBER?.replace('whatsapp:', '') || '+27872502788',
             toNumber: result.to,
-            messageBody: message,
-            status: 'SENT',
+            messageBody: result.demo ? `[DEMO] ${message}` : message,
+            status: result.demo ? 'DEMO_SENT' : 'SENT',
             sentAt: new Date(),
             userId: existingUser?.id || null,
             isAutoResponse: false,
@@ -151,121 +151,181 @@ async function sendViaThirdPartyService(to: string, message: string) {
   
   // 1. Twilio WhatsApp API (Primary configured provider)
   if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_WHATSAPP_NUMBER) {
-    try {
-      console.log('Attempting to send via Twilio WhatsApp API...');
-      const twilioResponse = await fetch(
-        `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Basic ${Buffer.from(`${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`).toString('base64')}`,
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: new URLSearchParams({
-            From: process.env.TWILIO_WHATSAPP_NUMBER,
-            To: `whatsapp:${formattedNumber}`,
-            Body: message
-          })
+    // Check if credentials are placeholder values
+    const isPlaceholderSID = process.env.TWILIO_ACCOUNT_SID.includes('xxx') || 
+                             process.env.TWILIO_ACCOUNT_SID.includes('placeholder') ||
+                             process.env.TWILIO_ACCOUNT_SID === 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+    const isPlaceholderToken = process.env.TWILIO_AUTH_TOKEN.includes('placeholder') || 
+                              process.env.TWILIO_AUTH_TOKEN.includes('your-') ||
+                              process.env.TWILIO_AUTH_TOKEN === 'your-twilio-auth-token-here';
+    
+    if (isPlaceholderSID || isPlaceholderToken) {
+      console.log('⚠️ Twilio credentials are placeholder values, skipping...');
+      lastError = new Error('Twilio credentials not configured (placeholder values detected)');
+    } else {
+      try {
+        console.log('Attempting to send via Twilio WhatsApp API...');
+        const twilioResponse = await fetch(
+          `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Basic ${Buffer.from(`${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`).toString('base64')}`,
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              From: process.env.TWILIO_WHATSAPP_NUMBER,
+              To: `whatsapp:${formattedNumber}`,
+              Body: message
+            })
+          }
+        );
+        
+        // Check if response is HTML (error page) instead of JSON
+        const contentType = twilioResponse.headers.get('content-type');
+        if (contentType && contentType.includes('text/html')) {
+          throw new Error('Twilio returned HTML error page - likely invalid credentials or account issue');
         }
-      );
-      
-      const twilioData = await twilioResponse.json();
-      
-      if (twilioResponse.ok) {
-        return {
-          messageId: twilioData.sid,
-          to: formattedNumber,
-          sentAt: new Date().toISOString(),
-          provider: 'Twilio WhatsApp',
-          status: twilioData.status || 'sent',
-          twilioData
-        };
-      } else {
-        throw new Error(`Twilio error: ${twilioData.message || 'Unknown error'}`);
+        
+        const twilioData = await twilioResponse.json();
+        
+        if (twilioResponse.ok) {
+          return {
+            messageId: twilioData.sid,
+            to: formattedNumber,
+            sentAt: new Date().toISOString(),
+            provider: 'Twilio WhatsApp',
+            status: twilioData.status || 'sent',
+            twilioData
+          };
+        } else {
+          throw new Error(`Twilio error: ${twilioData.message || 'Unknown error'}`);
+        }
+      } catch (error) {
+        console.error('Twilio WhatsApp API failed:', error);
+        lastError = error instanceof Error ? error : new Error('Twilio API failed');
       }
-    } catch (error) {
-      console.error('Twilio WhatsApp API failed:', error);
-      lastError = error instanceof Error ? error : new Error('Twilio API failed');
     }
   }
 
   // 2. WhatsApp Cloud API (Meta) - Fallback
   if (process.env.META_ACCESS_TOKEN && process.env.META_PHONE_NUMBER_ID) {
-    try {
-      console.log('Attempting to send via Meta WhatsApp Cloud API...');
-      const metaResponse = await fetch(
-        `https://graph.facebook.com/v18.0/${process.env.META_PHONE_NUMBER_ID}/messages`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${process.env.META_ACCESS_TOKEN}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            messaging_product: 'whatsapp',
+    // Check if Meta credentials are placeholder values
+    const isPlaceholderToken = process.env.META_ACCESS_TOKEN.includes('your-') || 
+                              process.env.META_ACCESS_TOKEN.includes('placeholder') ||
+                              process.env.META_ACCESS_TOKEN === 'your-meta-access-token-here';
+    const isPlaceholderPhoneId = process.env.META_PHONE_NUMBER_ID.includes('your-') || 
+                                process.env.META_PHONE_NUMBER_ID.includes('placeholder') ||
+                                process.env.META_PHONE_NUMBER_ID === 'your-phone-number-id-here';
+    
+    if (isPlaceholderToken || isPlaceholderPhoneId) {
+      console.log('⚠️ Meta credentials are placeholder values, skipping...');
+      lastError = new Error('Meta credentials not configured (placeholder values detected)');
+    } else {
+      try {
+        console.log('Attempting to send via Meta WhatsApp Cloud API...');
+        const metaResponse = await fetch(
+          `https://graph.facebook.com/v18.0/${process.env.META_PHONE_NUMBER_ID}/messages`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${process.env.META_ACCESS_TOKEN}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              messaging_product: 'whatsapp',
+              to: formattedNumber,
+              type: 'text',
+              text: { body: message }
+            })
+          }
+        );
+        
+        const metaData = await metaResponse.json();
+        
+        if (metaResponse.ok) {
+          return {
+            messageId: metaData.messages?.[0]?.id,
             to: formattedNumber,
-            type: 'text',
-            text: { body: message }
-          })
+            sentAt: new Date().toISOString(),
+            provider: 'Meta WhatsApp Cloud API',
+            status: metaData.messages?.[0]?.message_status || 'sent',
+            metaData
+          };
+        } else {
+          throw new Error(`Meta API error: ${metaData.error?.message || 'Unknown error'}`);
         }
-      );
-      
-      const metaData = await metaResponse.json();
-      
-      if (metaResponse.ok) {
-        return {
-          messageId: metaData.messages?.[0]?.id,
-          to: formattedNumber,
-          sentAt: new Date().toISOString(),
-          provider: 'Meta WhatsApp Cloud API',
-          status: metaData.messages?.[0]?.message_status || 'sent',
-          metaData
-        };
-      } else {
-        throw new Error(`Meta API error: ${metaData.error?.message || 'Unknown error'}`);
+      } catch (error) {
+        console.error('Meta WhatsApp Cloud API failed:', error);
+        lastError = error instanceof Error ? error : new Error('Meta API failed');
       }
-    } catch (error) {
-      console.error('Meta WhatsApp Cloud API failed:', error);
-      lastError = error instanceof Error ? error : new Error('Meta API failed');
     }
   }
 
   // 3. Green API (Simple WhatsApp service) - Fallback
   if (process.env.GREEN_API_URL && process.env.GREEN_API_INSTANCE && process.env.GREEN_API_TOKEN) {
-    try {
-      console.log('Attempting to send via Green API...');
-      const greenResponse = await fetch(
-        `${process.env.GREEN_API_URL}/waInstance${process.env.GREEN_API_INSTANCE}/sendMessage/${process.env.GREEN_API_TOKEN}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chatId: `${formattedNumber}@c.us`,
-            message: message
-          })
+    // Check if Green API credentials are placeholder values
+    const isPlaceholderInstance = process.env.GREEN_API_INSTANCE.includes('your-') || 
+                                 process.env.GREEN_API_INSTANCE.includes('placeholder') ||
+                                 process.env.GREEN_API_INSTANCE === 'your-instance-id-here';
+    const isPlaceholderToken = process.env.GREEN_API_TOKEN.includes('your-') || 
+                              process.env.GREEN_API_TOKEN.includes('placeholder') ||
+                              process.env.GREEN_API_TOKEN === 'your-api-token-here';
+    
+    if (isPlaceholderInstance || isPlaceholderToken) {
+      console.log('⚠️ Green API credentials are placeholder values, skipping...');
+      lastError = new Error('Green API credentials not configured (placeholder values detected)');
+    } else {
+      try {
+        console.log('Attempting to send via Green API...');
+        const greenResponse = await fetch(
+          `${process.env.GREEN_API_URL}/waInstance${process.env.GREEN_API_INSTANCE}/sendMessage/${process.env.GREEN_API_TOKEN}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chatId: `${formattedNumber}@c.us`,
+              message: message
+            })
+          }
+        );
+        
+        const greenData = await greenResponse.json();
+        
+        if (greenResponse.ok) {
+          return {
+            messageId: greenData.idMessage,
+            to: formattedNumber,
+            sentAt: new Date().toISOString(),
+            provider: 'Green API',
+            status: 'sent',
+            greenData
+          };
+        } else {
+          throw new Error(`Green API error: ${greenData.error || 'Unknown error'}`);
         }
-      );
-      
-      const greenData = await greenResponse.json();
-      
-      if (greenResponse.ok) {
-        return {
-          messageId: greenData.idMessage,
-          to: formattedNumber,
-          sentAt: new Date().toISOString(),
-          provider: 'Green API',
-          status: 'sent',
-          greenData
-        };
-      } else {
-        throw new Error(`Green API error: ${greenData.error || 'Unknown error'}`);
+      } catch (error) {
+        console.error('Green API failed:', error);
+        lastError = error instanceof Error ? error : new Error('Green API failed');
       }
-    } catch (error) {
-      console.error('Green API failed:', error);
-      lastError = error instanceof Error ? error : new Error('Green API failed');
     }
   }
 
+  // If all providers failed, check if we're in demo mode
+  if (lastError && lastError.message.includes('placeholder values detected')) {
+    // Demo mode - simulate successful sending for testing UI
+    console.log('🎭 Demo mode: Simulating WhatsApp message send...');
+    return {
+      messageId: `demo-${Date.now()}`,
+      to: formattedNumber,
+      sentAt: new Date().toISOString(),
+      provider: 'Demo Mode',
+      status: 'sent',
+      demo: true,
+      note: 'This is a simulated message - configure real WhatsApp credentials to send actual messages'
+    };
+  }
+  
   // If all providers failed, throw the last error
   throw lastError || new Error('No WhatsApp service configured. Please set up at least one provider (Twilio, Meta, or Green API)');
 }
