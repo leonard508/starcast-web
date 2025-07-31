@@ -16,17 +16,7 @@ interface Contact {
   status: 'active' | 'inactive'
 }
 
-interface Message {
-  id: string
-  contactId: string
-  type: 'email' | 'whatsapp'
-  direction: 'sent' | 'received'
-  subject?: string
-  content: string
-  status: 'pending' | 'sent' | 'delivered' | 'read' | 'failed'
-  sentAt: string
-  readAt?: string
-}
+// Message interface removed as it's not used in the component
 
 interface Template {
   id: string
@@ -172,9 +162,9 @@ Transform your home connectivity & entertainment!`,
 export default function MessagesPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'conversations' | 'compose' | 'templates' | 'history' | 'contacts' | 'analytics'>('whatsapp')
+  const [activeTab, setActiveTab] = useState<'conversations' | 'whatsapp' | 'compose' | 'templates' | 'history' | 'contacts' | 'analytics'>('whatsapp')
   const [contacts, setContacts] = useState<Contact[]>([])
-  const [messages] = useState<Message[]>([])
+  // const [messages] = useState<Message[]>([])
   const [templates] = useState<Template[]>(predefinedTemplates)
   
   // Compose form state
@@ -187,7 +177,7 @@ export default function MessagesPage() {
   
   // Search and filter
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterType] = useState<'all' | 'email' | 'whatsapp'>('all')
+  // const [filterType] = useState<'all' | 'email' | 'whatsapp'>('all')
 
   useEffect(() => {
     checkAuth()

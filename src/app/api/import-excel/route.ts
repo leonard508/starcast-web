@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import * as XLSX from 'xlsx'
+import * as ExcelJS from 'exceljs'
 import { requireAdmin, rateLimit, securityHeaders, corsHeaders } from '@/lib/auth/middleware'
 import { importExcelSchema } from '@/lib/validation/schemas'
 
@@ -49,8 +49,9 @@ export async function POST(request: NextRequest) {
     }
     
     // Read Excel file
-    const workbook = XLSX.read(excelBuffer, { type: 'buffer' })
-    const sheetNames = workbook.SheetNames
+    const workbook = new ExcelJS.Workbook()
+    await workbook.xlsx.load(excelBuffer as any)
+    const sheetNames = workbook.worksheets.map(ws => ws.name)
     
     console.log('📋 Available sheets:', sheetNames)
     
@@ -62,8 +63,33 @@ export async function POST(request: NextRequest) {
         name.toLowerCase().includes('packages')
       ) || sheetNames[0]
     
-    const worksheet = workbook.Sheets[targetSheetName]
-    const jsonData = XLSX.utils.sheet_to_json(worksheet)
+    const worksheet = workbook.getWorksheet(targetSheetName)
+    if (!worksheet) {
+      return NextResponse.json(
+        { error: `Sheet '${targetSheetName}' not found` },
+        { status: 400, headers }
+      )
+    }
+    
+    const jsonData: any[] = []
+    const headerRow = worksheet.getRow(1)
+    const excelHeaders: string[] = []
+    
+    headerRow.eachCell((cell, colNumber) => {
+      excelHeaders[colNumber] = cell.value?.toString() || ''
+    })
+    
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber > 1) { // Skip header row
+        const rowData: any = {}
+        row.eachCell((cell, colNumber) => {
+          if (excelHeaders[colNumber]) {
+            rowData[excelHeaders[colNumber]] = cell.value
+          }
+        })
+        jsonData.push(rowData)
+      }
+    })
     
     console.log(`📊 Processing sheet: ${targetSheetName}`)
     console.log(`📈 Found ${jsonData.length} rows`)

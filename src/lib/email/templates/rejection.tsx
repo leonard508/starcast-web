@@ -126,7 +126,7 @@ export const RejectionEmail = ({
           
           <Text style={text}>
             If you have any questions or need assistance with alternative solutions, 
-            please don't hesitate to contact us:
+            please don&apos;t hesitate to contact us:
           </Text>
           
           <ul style={list}>
