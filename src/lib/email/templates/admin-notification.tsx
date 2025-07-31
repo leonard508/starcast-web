@@ -158,7 +158,7 @@ export const AdminNotificationEmail = ({
             </Text>
             
             <ul style={actionList}>
-              <li>Verify service availability in the customer's area</li>
+              <li>Verify service availability in the customer&apos;s area</li>
               <li>Check network capacity and installation requirements</li>
               <li>Approve or reject the application</li>
               <li>Contact the customer within 24 hours</li>

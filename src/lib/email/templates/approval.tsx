@@ -85,7 +85,7 @@ export const ApprovalEmail = ({
           <ul style={list}>
             <li>Our installation team will contact you within 24 hours to schedule installation</li>
             <li>Installation typically takes 2-4 hours</li>
-            <li>You'll receive your router and setup instructions</li>
+            <li>You&apos;ll receive your router and setup instructions</li>
             <li>Your first invoice will be sent after activation</li>
           </ul>
           

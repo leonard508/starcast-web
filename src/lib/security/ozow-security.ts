@@ -5,7 +5,7 @@
  * including fraud detection, rate limiting, and transaction security
  */
 
-import { NextRequest } from 'next/server'
+// NextRequest import removed as it's not used
 import { db } from '@/lib/db'
 import crypto from 'crypto'
 import { RateLimiterRedis } from 'rate-limiter-flexible'

@@ -509,7 +509,7 @@ export class OzowSecurityCompliance {
     recommendations: string[]
   }> {
     const issues: string[] = []
-    const recommendations: string[] = []
+    // Recommendations array removed as not used in this function
 
     // Check encryption keys
     if (!process.env.POPI_ENCRYPTION_KEY) {
