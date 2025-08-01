@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
+import { nextCookies } from "better-auth/next-js"
 import { db } from "./db"
 
 export const auth = betterAuth({
@@ -19,6 +20,16 @@ export const auth = betterAuth({
     "http://localhost:3000", 
     "http://localhost:3001", 
     "http://localhost:3002",
-    "https://starcast-web-production.up.railway.app"
+    "https://starcast-web-production.up.railway.app",
+    process.env.NEXT_PUBLIC_BETTER_AUTH_URL || ""
   ],
+  advanced: {
+    crossSubDomainCookies: {
+      enabled: true,
+      domain: process.env.NODE_ENV === 'production' ? '.railway.app' : undefined
+    }
+  },
+  plugins: [
+    nextCookies() // CRITICAL: This plugin must be included for Railway/Next.js
+  ]
 })
