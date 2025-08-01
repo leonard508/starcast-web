@@ -19,6 +19,11 @@ interface Package {
   throttleSpeed?: string
   fupDescription?: string
   specialTerms?: string
+  // Promotional Badge System
+  promoBadge?: string
+  promoBadgeColor?: string
+  promoBadgeExpiryDate?: string
+  promoBadgeTimer?: boolean
   provider: {
     id: string
     name: string
@@ -72,7 +77,12 @@ export default function PackageEditor({
     fupLimit: packageData?.fupLimit || '',
     throttleSpeed: packageData?.throttleSpeed || '',
     fupDescription: packageData?.fupDescription || '',
-    specialTerms: packageData?.specialTerms || ''
+    specialTerms: packageData?.specialTerms || '',
+    // Promotional Badge fields
+    promoBadge: packageData?.promoBadge || '',
+    promoBadgeColor: packageData?.promoBadgeColor || 'blue',
+    promoBadgeExpiryDate: packageData?.promoBadgeExpiryDate || '',
+    promoBadgeTimer: packageData?.promoBadgeTimer ?? false
   })
 
   const [loading, setLoading] = useState(false)
@@ -452,6 +462,96 @@ export default function PackageEditor({
                   />
                   <span className="ml-2 text-sm text-gray-700">Featured</span>
                 </label>
+              </div>
+            </div>
+
+            {/* Promotional Badge System */}
+            <div className="border-t pt-6">
+              <h4 className="text-md font-medium text-gray-900 mb-4">🏷️ Promotional Badge</h4>
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-200">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Badge Text
+                    </label>
+                    <input
+                      type="text"
+                      name="promoBadge"
+                      value={formData.promoBadge}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      placeholder="e.g., LIMITED TIME, 50% OFF, NEW"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Leave empty to remove badge</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Badge Color
+                    </label>
+                    <select
+                      name="promoBadgeColor"
+                      value={formData.promoBadgeColor}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="blue">🔵 Blue</option>
+                      <option value="green">🟢 Green</option>
+                      <option value="red">🔴 Red</option>
+                      <option value="yellow">🟡 Yellow</option>
+                      <option value="purple">🟣 Purple</option>
+                      <option value="pink">🩷 Pink</option>
+                      <option value="orange">🟠 Orange</option>
+                      <option value="gray">⚫ Gray</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Expiry Date (Optional)
+                    </label>
+                    <input
+                      type="datetime-local"
+                      name="promoBadgeExpiryDate"
+                      value={formData.promoBadgeExpiryDate}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Badge will auto-hide after this date</p>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        name="promoBadgeTimer"
+                        checked={formData.promoBadgeTimer}
+                        onChange={handleInputChange}
+                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">Show Countdown Timer</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Badge Preview */}
+                {formData.promoBadge && (
+                  <div className="mt-4 p-3 bg-white rounded-md border">
+                    <p className="text-xs text-gray-500 mb-2">Preview:</p>
+                    <div className="flex items-center space-x-2">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold text-white bg-${formData.promoBadgeColor}-500`}>
+                        {formData.promoBadge}
+                      </span>
+                      {formData.promoBadgeTimer && formData.promoBadgeExpiryDate && (
+                        <span className="text-xs text-gray-600 animate-pulse">
+                          ⏰ Expires {new Date(formData.promoBadgeExpiryDate).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

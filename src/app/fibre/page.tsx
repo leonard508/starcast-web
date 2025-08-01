@@ -62,19 +62,22 @@ export default function FibrePage() {
     const scrollContainer = document.getElementById('provider-package-display')
     const leftArrow = document.getElementById('desktop-scroll-left')
     const rightArrow = document.getElementById('desktop-scroll-right')
-    const indicatorsContainer = document.getElementById('scroll-indicators')
 
-    if (!scrollContainer || !leftArrow || !rightArrow || !indicatorsContainer) return
+    if (!scrollContainer || !leftArrow || !rightArrow) return
 
-    // No need to create indicators dynamically anymore - they're in JSX
-
-    const scrollAmount = 400 // Adjust scroll distance
+    const scrollAmount = 400
 
     const handleLeftScroll = () => {
       scrollContainer.scrollBy({
         left: -scrollAmount,
         behavior: 'smooth'
       })
+      
+      // Show arrows after clicking
+      setTimeout(() => {
+        leftArrow.style.opacity = '1'
+        rightArrow.style.opacity = '1'
+      }, 300)
     }
 
     const handleRightScroll = () => {
@@ -82,6 +85,12 @@ export default function FibrePage() {
         left: scrollAmount,
         behavior: 'smooth'
       })
+      
+      // Show arrows after clicking
+      setTimeout(() => {
+        leftArrow.style.opacity = '1'
+        rightArrow.style.opacity = '1'
+      }, 300)
     }
 
     // Add event listeners
@@ -92,18 +101,16 @@ export default function FibrePage() {
     const updateScrollState = () => {
       const { scrollLeft, scrollWidth, clientWidth } = scrollContainer
       
-      // Update active indicator based on scroll position
       const cardWidth = 380 // Desktop card width
       const gap = 60 // Desktop gap
       
-      // Calculate mobile card width and gap
       let mobileCardWidth, mobileGap
       if (window.innerWidth <= 480) {
-        mobileCardWidth = (window.innerWidth - 32) * 0.9 // calc((100vw - 32px) * 0.9)
-        mobileGap = 32 // 16px margin on each side
+        mobileCardWidth = window.innerWidth - 64
+        mobileGap = 16
       } else if (window.innerWidth <= 768) {
-        mobileCardWidth = (window.innerWidth - 40) * 0.9 // calc((100vw - 40px) * 0.9)
-        mobileGap = 40 // 20px margin on each side
+        mobileCardWidth = window.innerWidth - 80
+        mobileGap = 20
       } else {
         mobileCardWidth = cardWidth
         mobileGap = gap
@@ -118,17 +125,15 @@ export default function FibrePage() {
       }
       
       // Update arrow visibility
-      leftArrow.style.opacity = scrollLeft > 0 ? '1' : '0.3'
-      rightArrow.style.opacity = scrollLeft < scrollWidth - clientWidth - 10 ? '1' : '0.3'
+      if (leftArrow.style.opacity !== '0' && rightArrow.style.opacity !== '0') {
+        leftArrow.style.opacity = scrollLeft > 0 ? '1' : '0.5'
+        rightArrow.style.opacity = scrollLeft < scrollWidth - clientWidth ? '1' : '0.5'
+      }
     }
 
-    // Initial state
     updateScrollState()
-
-    // Add scroll event listener
     scrollContainer.addEventListener('scroll', updateScrollState)
 
-    // Add keyboard navigation
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') {
         e.preventDefault()
@@ -141,7 +146,6 @@ export default function FibrePage() {
 
     document.addEventListener('keydown', handleKeyDown)
 
-    // Cleanup
     return () => {
       leftArrow.removeEventListener('click', handleLeftScroll)
       rightArrow.removeEventListener('click', handleRightScroll)
@@ -152,7 +156,6 @@ export default function FibrePage() {
 
   const fetchData = async () => {
     try {
-      // Fetch fibre packages and providers - using dedicated fibre endpoint
       const [packagesResponse, providersResponse] = await Promise.all([
         fetch('/api/fibre-packages?include_promotions=true'),
         fetch('/api/providers')
@@ -168,17 +171,14 @@ export default function FibrePage() {
       const packages = packagesData.data || []
       const providers = providersData.data || []
 
-      // Group packages by provider - show all providers from backend
       const grouped: ProviderData[] = []
 
       providers.forEach((provider: any) => {
-        // Get packages for this provider - API already filters for fibre packages
         const providerPackages = packages.filter((pkg: FibrePackage) => 
           pkg.provider.slug === provider.slug
         )
 
         if (providerPackages.length > 0) {
-          // Sort packages by speed
           const sortedPackages = providerPackages.sort((a: FibrePackage, b: FibrePackage) => {
             const aSpeed = parseInt(a.speed?.replace(/[^0-9]/g, '') || '0')
             const bSpeed = parseInt(b.speed?.replace(/[^0-9]/g, '') || '0')
@@ -190,14 +190,12 @@ export default function FibrePage() {
             slug: provider.slug,
             logo: getProviderLogo(provider.name, provider.slug) || provider.logo,
             packages: sortedPackages,
-            priority: 0 // All providers have equal priority
+            priority: 0
           })
         }
       })
 
-      // Sort providers alphabetically
       grouped.sort((a, b) => a.name.localeCompare(b.name))
-      
       setProviderData(grouped)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data')
@@ -212,10 +210,10 @@ export default function FibrePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-4 border-orange-500 mx-auto"></div>
-          <p className="mt-4 text-lg text-gray-600">Loading fibre networks...</p>
+      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f0ebe3 0%, #e8dfd5 30%, #ede4d8 70%, #f0ebe3 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ animation: 'spin 1s linear infinite', borderRadius: '50%', height: '8rem', width: '8rem', border: '4px solid #d67d3e', borderTop: '4px solid transparent', margin: '0 auto' }}></div>
+          <p style={{ marginTop: '1rem', fontSize: '1.125rem', color: '#6b6355' }}>Loading fibre networks...</p>
         </div>
       </div>
     )
@@ -223,14 +221,14 @@ export default function FibrePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Networks</h1>
-          <p className="text-gray-600 mb-4">{error}</p>
+      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f0ebe3 0%, #e8dfd5 30%, #ede4d8 70%, #f0ebe3 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ color: '#dc2626', fontSize: '3.75rem', marginBottom: '1rem' }}>⚠️</div>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '0.5rem' }}>Error Loading Networks</h1>
+          <p style={{ color: '#6b6355', marginBottom: '1rem' }}>{error}</p>
           <button 
             onClick={() => window.location.reload()}
-            className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600"
+            style={{ background: '#d67d3e', color: 'white', padding: '0.5rem 1.5rem', borderRadius: '0.5rem', border: 'none', cursor: 'pointer' }}
           >
             Try Again
           </button>
@@ -240,437 +238,473 @@ export default function FibrePage() {
   }
 
   return (
-    <div className="fibre-page">
-      <header className="fibre-header">
-        <div className="container">
-          <h1 className="heading-gradient">
-            Uncapped Fibre. <span>Installed Within 7 Days.</span>
-          </h1>
-        </div>
-      </header>
+    <>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+      
+      <div className="fibre-page">
+        <header className="fibre-header">
+          <div className="container">
+            <h1 className="heading-gradient">
+              Uncapped Fibre. <span>Installed Within 7 Days.</span>
+            </h1>
+          </div>
+        </header>
 
-      <section className="fibre-section">
-        <div className="container">
-          <div className="title-container">
-            <h2 className="section-title">Choose a Fibre Network</h2>
-          </div>
-          
-          <div className="scroll-indicators" id="scroll-indicators">
-            {/* Mobile scroll indicators */}
-            {providerData.map((provider, index) => (
-              <div 
-                key={provider.slug}
-                className={`scroll-dot ${index === activeProviderIndex ? 'active' : ''}`}
-                onClick={() => {
-                  const scrollContainer = document.getElementById('provider-package-display')
-                  if (scrollContainer) {
-                    const cardWidth = 380 // Desktop card width
-                    const gap = 60 // Desktop gap
-                    
-                    // Calculate mobile card width and gap
-                    let mobileCardWidth, mobileGap
-                    if (window.innerWidth <= 480) {
-                      mobileCardWidth = (window.innerWidth - 32) * 0.9 // calc((100vw - 32px) * 0.9)
-                      mobileGap = 32 // 16px margin on each side
-                    } else if (window.innerWidth <= 768) {
-                      mobileCardWidth = (window.innerWidth - 40) * 0.9 // calc((100vw - 40px) * 0.9)
-                      mobileGap = 40 // 20px margin on each side
-                    } else {
-                      mobileCardWidth = cardWidth
-                      mobileGap = gap
-                    }
-                    
-                    const currentCardWidth = window.innerWidth <= 768 ? mobileCardWidth : cardWidth
-                    const currentGap = window.innerWidth <= 768 ? mobileGap : gap
-                    
-                    const scrollPosition = (currentCardWidth + currentGap) * index
-                    scrollContainer.scrollTo({
-                      left: scrollPosition,
-                      behavior: 'smooth'
-                    })
-                    setActiveProviderIndex(index)
-                  }
-                }}
-              />
-            ))}
-          </div>
-          
-          <div className="desktop-scroll-container">
-            <button className="desktop-scroll-arrow desktop-scroll-left" id="desktop-scroll-left">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-              </svg>
-            </button>
-            
-            <div className="provider-package-display" id="provider-package-display">
-              {providerData.length === 0 ? (
-                <div className="no-packages">No providers available at the moment.</div>
-              ) : (
-                providerData.map((provider, providerIndex) => (
-                  <ProviderCard
-                    key={provider.slug}
-                    provider={provider}
-                    providerIndex={providerIndex}
-                    onPackageSelect={handlePackageSelect}
-                  />
-                ))
-              )}
+        <section className="fibre-section">
+          <div className="container">
+            <div className="title-container">
+              <h2 className="section-title">Choose a Fibre Network</h2>
             </div>
             
-            <button className="desktop-scroll-arrow desktop-scroll-right" id="desktop-scroll-right">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                <path fill="currentColor" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-              </svg>
-            </button>
+            <div className="scroll-indicators" id="scroll-indicators">
+              {providerData.map((provider, index) => (
+                <div 
+                  key={provider.slug}
+                  className={`scroll-dot ${index === activeProviderIndex ? 'active' : ''}`}
+                  onClick={() => {
+                    const scrollContainer = document.getElementById('provider-package-display')
+                    if (scrollContainer) {
+                      const cardWidth = 380
+                      const gap = 60
+                      
+                      let mobileCardWidth, mobileGap
+                      if (window.innerWidth <= 480) {
+                        mobileCardWidth = window.innerWidth - 64
+                        mobileGap = 16
+                      } else if (window.innerWidth <= 768) {
+                        mobileCardWidth = window.innerWidth - 80
+                        mobileGap = 20
+                      } else {
+                        mobileCardWidth = cardWidth
+                        mobileGap = gap
+                      }
+                      
+                      const currentCardWidth = window.innerWidth <= 768 ? mobileCardWidth : cardWidth
+                      const currentGap = window.innerWidth <= 768 ? mobileGap : gap
+                      
+                      const scrollPosition = (currentCardWidth + currentGap) * index
+                      scrollContainer.scrollTo({
+                        left: scrollPosition,
+                        behavior: 'smooth'
+                      })
+                      setActiveProviderIndex(index)
+                    }
+                  }}
+                />
+              ))}
+            </div>
+            
+            <div className="desktop-scroll-container">
+              <button className="desktop-scroll-arrow desktop-scroll-left" id="desktop-scroll-left">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                  <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                </svg>
+              </button>
+              
+              <div className="provider-package-display" id="provider-package-display">
+                {providerData.length === 0 ? (
+                  <div className="no-packages">No providers available at the moment.</div>
+                ) : (
+                  providerData.map((provider, providerIndex) => (
+                    <ProviderCard
+                      key={provider.slug}
+                      provider={provider}
+                      providerIndex={providerIndex}
+                      onPackageSelect={handlePackageSelect}
+                    />
+                  ))
+                )}
+              </div>
+              
+              <button className="desktop-scroll-arrow desktop-scroll-right" id="desktop-scroll-right">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                  <path fill="currentColor" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                </svg>
+              </button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <style jsx>{`
-        .fibre-page {
-          font-family: 'Poppins', 'Inter', sans-serif;
-          color: #4a453f;
-          background: #e8e8e8;
-          width: 100%;
-          overflow-x: hidden;
-          min-height: 100vh;
-        }
+        <style jsx global>{`
+          /* Reset and Base Styles - Exact copy from PHP */
+          * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+          }
+          
+          body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f0ebe3 0%, #e8dfd5 30%, #ede4d8 70%, #f0ebe3 100%);
+            background-attachment: fixed;
+            color: #4a453f;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            line-height: 1.6;
+          }
 
-        .container {
-          width: 100%;
-          max-width: 100%;
-          margin: 0 auto;
-          padding: 0;
-        }
-
-        .fibre-header {
-          text-align: center;
-          padding: 80px 0 20px;
-          background: #e8e8e8;
-          position: relative;
-        }
-
-        .heading-gradient {
-          font-family: 'Poppins', sans-serif;
-          font-size: 2.8rem;
-          font-weight: 800;
-          color: #2d2823;
-          margin-bottom: 20px;
-          line-height: 1.2;
-          letter-spacing: -0.02em;
-          position: relative;
-          z-index: 2;
-        }
-
-        .heading-gradient span {
-          color: #d67d3e;
-        }
-
-        .fibre-section {
-          padding: 10px 0 100px;
-          background: #e8e8e8;
-          position: relative;
-        }
-
-
-        .title-container {
-          width: 100%;
-          text-align: center;
-          margin-bottom: 30px;
-          position: relative;
-          z-index: 2;
-        }
-
-        .section-title {
-          text-align: center;
-          color: #2d2823;
-          font-size: 2.5rem;
-          font-weight: 800;
-          margin: 0 auto;
-          display: inline-block;
-          position: relative;
-          line-height: 1.2;
-          letter-spacing: -0.02em;
-        }
-
-        .section-title::after {
-          content: "";
-          position: absolute;
-          bottom: -12px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 80px;
-          height: 4px;
-          background: #d67d3e;
-          border-radius: 2px;
-        }
-
-        .desktop-scroll-container {
-          position: relative;
-          display: flex;
-          align-items: center;
-          width: 100vw;
-          max-width: 100vw;
-          overflow: hidden;
-          margin-left: calc(-50vw + 50%);
-          margin-right: calc(-50vw + 50%);
-        }
-
-        .provider-package-display {
-          display: flex;
-          gap: 60px;
-          overflow-x: auto;
-          scroll-snap-type: x mandatory;
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-          margin: 0;
-          padding: 20px 80px;
-          position: relative;
-          z-index: 2;
-          scroll-behavior: smooth;
-          -webkit-overflow-scrolling: touch;
-          background: #e8e8e8;
-          border-radius: 0;
-          width: 100%;
-          max-width: 100%;
-          justify-content: flex-start;
-        }
-
-        .provider-package-display::-webkit-scrollbar {
-          display: none;
-        }
-
-        .provider-package-card {
-          scroll-snap-align: center;
-          flex-shrink: 0;
-        }
-
-        .desktop-scroll-arrow {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 64px;
-          height: 64px;
-          border-radius: 50%;
-          background: rgba(0, 0, 0, 0.7);
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          color: white;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          z-index: 10;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-          backdrop-filter: blur(15px);
-          opacity: 1;
-        }
-
-        .desktop-scroll-arrow:hover {
-          background: rgba(0, 0, 0, 0.85);
-          color: white;
-          transform: translateY(-50%) scale(1.05);
-          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
-          border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        .desktop-scroll-arrow:disabled {
-          opacity: 0.3;
-          cursor: not-allowed;
-          pointer-events: none;
-        }
-
-        .desktop-scroll-left {
-          left: 20px;
-        }
-
-        .desktop-scroll-right {
-          right: 20px;
-        }
-
-        .desktop-scroll-arrow svg {
-          width: 32px;
-          height: 32px;
-        }
-
-        .scroll-indicators {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 6px;
-          margin: 15px auto;
-          position: relative;
-          z-index: 2;
-          padding: 10px 16px;
-          background: rgba(255, 255, 255, 0.9);
-          backdrop-filter: blur(10px);
-          border-radius: 15px;
-          border: 1px solid #000000;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-          width: fit-content;
-          max-width: 90%;
-          min-height: 28px;
-        }
-
-        .scroll-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: rgba(45, 40, 35, 0.4);
-          cursor: pointer;
-          transition: all 0.2s ease;
-          flex-shrink: 0;
-          border: none;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .scroll-dot.active {
-          background: #4a90e2;
-          transform: scale(1.4);
-          box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.3);
-        }
-
-        .scroll-dot:hover {
-          background: #4a90e2;
-          opacity: 0.8;
-          transform: scale(1.2);
-        }
-
-        .no-packages {
-          grid-column: 1 / -1;
-          text-align: center;
-          padding: 40px;
-          color: #6b6355;
-          background: #ffffff;
-          backdrop-filter: blur(20px);
-          border: 1px solid #000000;
-          border-radius: 20px;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        @media (max-width: 768px) {
+          .fibre-page {
+            font-family: 'Poppins', 'Inter', sans-serif;
+            color: #4a453f;
+            background: transparent;
+            width: 100%;
+            overflow-x: hidden;
+            min-height: 100vh;
+          }
+          
           .container {
-            padding: 0 16px;
-          }
-
-          .heading-gradient {
-            font-size: 1.8rem;
-          }
-
-          .section-title {
-            font-size: 1.5rem;
-          }
-
-          .title-container {
-            margin-bottom: 20px;
-          }
-
-          .desktop-scroll-arrow {
-            display: none;
-          }
-
-          .desktop-scroll-container {
-            width: 100vw;
-            max-width: 100vw;
-            margin-left: calc(-50vw + 50%);
-            margin-right: calc(-50vw + 50%);
-            overflow: hidden;
-          }
-
-          .provider-package-display {
-            gap: 20px;
-            padding: 20px 40px;
-            background: #e8e8e8;
-            width: 100vw;
-            max-width: 100vw;
-            scroll-snap-type: x mandatory;
-            scroll-padding: 0 40px;
-            justify-content: flex-start;
-          }
-
-          .provider-package-card {
-            scroll-snap-align: center;
+            width: 100%;
+            max-width: 1200px;
             margin: 0 auto;
+            padding: 0 20px;
           }
-
-          .scroll-indicators {
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-            margin: 10px auto 15px auto;
-            padding: 8px 14px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(15px);
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-            gap: 5px;
-            width: fit-content;
-            max-width: calc(100% - 32px);
-            min-height: 24px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .desktop-scroll-container {
-            width: 100vw;
-            max-width: 100vw;
-            margin-left: calc(-50vw + 50%);
-            margin-right: calc(-50vw + 50%);
+          
+          /* Header Styles - Exact copy from PHP */
+          .fibre-page .fibre-header {
+            text-align: center;
+            padding: 100px 0 40px;
+            background: transparent;
+            position: relative;
             overflow: hidden;
           }
 
-          .provider-package-display {
-            gap: 16px;
-            padding: 20px 24px;
-            background: #e8e8e8;
-            width: 100vw;
-            max-width: 100vw;
+          .fibre-page .fibre-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+              radial-gradient(circle at 20% 20%, rgba(214, 125, 62, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 80%, rgba(242, 237, 230, 0.3) 0%, transparent 50%),
+              radial-gradient(circle at 40% 60%, rgba(232, 227, 219, 0.2) 0%, transparent 50%);
+          }
+
+          .fibre-page .container {
+            position: relative;
+            z-index: 2;
+          }
+          
+          .fibre-page .heading-gradient {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #2d2823;
+            margin-bottom: 32px;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+          }
+
+          .fibre-page .heading-gradient span {
+            color: #d67d3e;
+          }
+          
+          /* Section Styles - Exact copy from PHP */
+          .fibre-page .fibre-section {
+            padding: 20px 0 100px;
+            background: transparent;
+            position: relative;
+          }
+
+          .fibre-page .fibre-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+              radial-gradient(circle at 70% 30%, rgba(242, 237, 230, 0.4) 0%, transparent 50%),
+              radial-gradient(circle at 30% 70%, rgba(214, 125, 62, 0.05) 0%, transparent 50%);
+          }
+          
+          .fibre-page .title-container {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+            z-index: 2;
+          }
+          
+          .fibre-page .section-title {
+            text-align: center;
+            color: #2d2823;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0 auto;
+            display: inline-block;
+            position: relative;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+          }
+
+          .fibre-page .section-title::after {
+            content: "";
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: #d67d3e;
+            border-radius: 2px;
+          }
+          
+          /* Provider Package Display - Exact copy from PHP */
+          .fibre-page .provider-package-display {
+            display: flex;
+            gap: 60px;
+            overflow-x: auto;
             scroll-snap-type: x mandatory;
-            scroll-padding: 0 24px;
             scrollbar-width: none;
             -ms-overflow-style: none;
-            justify-content: flex-start;
+            margin-top: 4px;
+            margin-left: calc(-50vw + 50%);
+            margin-right: calc(-50vw + 50%);
+            padding: 15px;
+            position: relative;
+            z-index: 2;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-stop: always;
+            background: transparent;
+            border-radius: 0;
+            width: 100vw;
+            max-width: 100vw;
           }
-
-          .provider-package-card {
-            scroll-snap-align: center;
-            margin: 0 auto;
+          
+          .fibre-page .provider-package-display::-webkit-scrollbar {
+            display: none;
           }
-
-          .scroll-indicators {
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-            margin: 8px auto 12px auto;
-            position: sticky;
-            top: 60px;
-            z-index: 10;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(15px);
-            padding: 8px 14px;
-            border-radius: 12px;
-            border: 1px solid #000000;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            gap: 4px;
-            width: fit-content;
-            max-width: calc(100% - 32px);
-            min-height: 22px;
+          
+          .fibre-page .scroll-indicators {
+            display: none;
+            justify-content: center;
+            gap: 8px;
+            margin: 10px 0 4px 0;
+            position: relative;
+            z-index: 2;
           }
-
-          .scroll-dot {
-            width: 6px;
-            height: 6px;
+          
+          .fibre-page .scroll-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: rgba(107, 99, 85, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
           }
-
-          .scroll-dot.active {
+          
+          .fibre-page .scroll-dot.active {
             background: #4a90e2;
-            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+            transform: scale(1.2);
           }
-        }
-      `}</style>
-    </div>
+          
+          /* Desktop Scroll Arrows - Exact copy from PHP */
+          .desktop-scroll-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+          }
+          
+          .desktop-scroll-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(15px);
+          }
+          
+          .desktop-scroll-arrow:hover {
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.5);
+          }
+          
+          .desktop-scroll-left {
+            left: 20px;
+          }
+          
+          .desktop-scroll-right {
+            right: 20px;
+          }
+          
+          .desktop-scroll-arrow svg {
+            width: 32px;
+            height: 32px;
+          }
+          
+          .fibre-page .no-packages {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: #6b6355;
+            background: #ffffff;
+            backdrop-filter: blur(20px);
+            border: 1px solid #000000;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+          }
+          
+          /* Responsive Adjustments - Exact copy from PHP */
+          @media (max-width: 1024px) {
+            .fibre-page .provider-package-display {
+              gap: 25px;
+              padding: 15px;
+              background: transparent;
+              margin-left: calc(-50vw + 50%);
+              margin-right: calc(-50vw + 50%);
+              width: 100vw;
+              max-width: 100vw;
+            }
+          }
+          
+          @media (max-width: 768px) {
+            .container {
+              padding: 0 16px;
+            }
+            
+            .fibre-page .heading-gradient {
+              font-size: 1.8rem;
+            }
+            
+            .fibre-page .section-title {
+              font-size: 1.5rem;
+            }
+            
+            .fibre-page .title-container {
+              margin-bottom: 20px;
+            }
+            
+            .desktop-scroll-arrow {
+              display: none;
+            }
+            
+            .fibre-page .provider-package-display {
+              gap: 20px;
+              padding: 10px;
+              background: transparent;
+              margin-left: -16px;
+              margin-right: -16px;
+              width: 100vw;
+              max-width: 100vw;
+            }
+            
+            .fibre-page .scroll-indicators {
+              display: flex;
+            }
+          }
+          
+          @media (max-width: 480px) {
+            .container {
+              padding: 0 12px;
+            }
+            
+            .fibre-page .fibre-section {
+              padding-top: 12px;
+              padding-bottom: 24px;
+            }
+            
+            .fibre-page .provider-package-display {
+              gap: 16px;
+              padding: 8px;
+              background: transparent;
+              margin-left: -12px;
+              margin-right: -12px;
+              width: 100vw;
+              max-width: 100vw;
+              scrollbar-width: none;
+              -ms-overflow-style: none;
+            }
+            
+            .fibre-page .provider-package-display::-webkit-scrollbar {
+              display: none;
+            }
+            
+            .fibre-page .scroll-indicators {
+              display: flex;
+              margin: 0 0 12px 0;
+              position: sticky;
+              top: 60px;
+              z-index: 10;
+              background: #ffffff;
+              backdrop-filter: blur(15px);
+              padding: 10px 0;
+              border-radius: 16px;
+              border: 1px solid #000000;
+              box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+            }
+          }
+
+          /* Custom scrollbar - Desktop only */
+          @media (min-width: 769px) {
+            ::-webkit-scrollbar {
+              width: 8px;
+            }
+
+            ::-webkit-scrollbar-track {
+              background: #f4f1ec;
+            }
+
+            ::-webkit-scrollbar-thumb {
+              background: #c9bbaa;
+              border-radius: 4px;
+            }
+
+            ::-webkit-scrollbar-thumb:hover {
+              background: #b3a596;
+            }
+          }
+          
+          /* Remove all scrollbars on mobile */
+          @media (max-width: 768px) {
+            * {
+              scrollbar-width: none;
+              -ms-overflow-style: none;
+            }
+            
+            *::-webkit-scrollbar {
+              display: none;
+            }
+            
+            body {
+              overflow-x: hidden;
+            }
+          }
+
+          /* Smooth scrolling */
+          html {
+            scroll-behavior: smooth;
+          }
+
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    </>
   )
 }
 
@@ -693,7 +727,6 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
 
   const handleSignUpClick = () => {
     if (selectedPackage) {
-      // Store package data for signup page
       const packageData = {
         id: selectedPackage.id,
         name: selectedPackage.name,
@@ -708,7 +741,6 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
         promoDisplayText: selectedPackage.promoDisplayText
       }
       
-      // Store in sessionStorage for signup page
       if (typeof window !== 'undefined') {
         sessionStorage.setItem('selectedPackage', JSON.stringify(packageData))
       }
@@ -721,7 +753,6 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
     return null
   }
 
-  // Create download/upload speeds from the speed field if they exist
   const speeds = selectedPackage.speed ? selectedPackage.speed.split('/') : ['10', '10']
   const downloadSpeed = speeds[0]?.replace(/[^0-9]/g, '') || '10'
   const uploadSpeed = speeds[1]?.replace(/[^0-9]/g, '') || downloadSpeed
@@ -729,7 +760,6 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
   const hasPromo = Array.isArray(selectedPackage.promotions) && selectedPackage.promotions.length > 0
   const promotion = hasPromo ? selectedPackage.promotions?.[0] : null
   
-  // Calculate promo price
   let displayPrice = selectedPackage.currentPrice
   if (promotion) {
     switch (promotion.discountType) {
@@ -756,11 +786,18 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
         </div>
       )}
 
-      <img 
-        src={provider.logo} 
-        alt={provider.name} 
-        className="provider-logo-main"
-      />
+      {provider.logo ? (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img 
+            src={provider.logo} 
+            alt={provider.name} 
+            className="provider-logo-main"
+          />
+        </>
+      ) : (
+        <div className="provider-name-main">{provider.name}</div>
+      )}
 
       <div className="speed-info">
         <span className="download-arrow">↓</span>
@@ -771,7 +808,7 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
       </div>
 
       <div className="price-display">
-        {hasPromo && (
+        {hasPromo && displayPrice !== selectedPackage.currentPrice && (
           <span className="price-strikethrough">R{selectedPackage.currentPrice}pm</span>
         )}
         <span className="price-main current-price">R{Math.round(displayPrice)}</span>
@@ -793,9 +830,6 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
               <option 
                 key={pkg.id} 
                 value={pkg.id}
-                data-speed={pkg.speed}
-                data-price={pkg.currentPrice}
-                data-has-promo={Array.isArray(pkg.promotions) && pkg.promotions.length > 0}
               >
                 {pkgDown}/{pkgUp} Mbps Uncapped
               </option>
@@ -805,24 +839,25 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
       </div>
 
       <div className="feature-checklist">
+        <div className="promo-tooltip"></div>
         <div className="feature-item">
           <div className="feature-checkmark"></div>
           <div 
-            className="feature-text promotion-text"
-            onMouseEnter={() => setShowPromotionTooltip(true)}
+            className={`feature-text ${hasPromo ? 'promo-tooltip-trigger' : 'no-promo'}`}
+            onMouseEnter={() => hasPromo && setShowPromotionTooltip(true)}
             onMouseLeave={() => setShowPromotionTooltip(false)}
           >
             How our promotion works
-            {showPromotionTooltip && (
-              <div className="promotion-tooltip">
-                {hasPromo && promotion?.description ? promotion.description : "Currently no promotion"}
+            {showPromotionTooltip && hasPromo && (
+              <div className="promo-tooltip show">
+                {promotion?.description || "Currently no promotion"}
               </div>
             )}
           </div>
         </div>
         <div className="feature-item">
           <div className="feature-checkmark"></div>
-          <div className="feature-text">Free-to-use router (return when you cancel)</div>
+          <div className="feature-text">Free-to-use router</div>
         </div>
         <div className="feature-item">
           <div className="feature-checkmark"></div>
@@ -830,15 +865,15 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
         </div>
         <div className="feature-item">
           <div className="feature-checkmark"></div>
-          <div className="feature-text">Installation time: 7 days (up to 30 days if workload is high)</div>
+          <div className="feature-text">Installation time: 7 days</div>
         </div>
         <div className="feature-item">
           <div className="feature-checkmark"></div>
-          <div className="feature-text">Order processing fee: R249 (setup for your installation)</div>
+          <div className="feature-text">Order processing fee: R249</div>
         </div>
         <div className="feature-item">
           <div className="feature-checkmark"></div>
-          <div className="feature-text">Pro rata rates apply (pay only for days used)</div>
+          <div className="feature-text">Pro rata rates apply</div>
         </div>
       </div>
 
@@ -850,13 +885,13 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
       </button>
 
       <style jsx>{`
+        /* Provider Card Styles - Exact copy from PHP */
         .provider-package-card {
           background: #ffffff;
           backdrop-filter: blur(20px);
           border-radius: 16px;
           box-shadow: 
-            0 12px 40px rgba(0, 0, 0, 0.15),
-            0 4px 16px rgba(0, 0, 0, 0.1),
+            0 8px 32px rgba(0, 0, 0, 0.3),
             inset 0 1px 0 rgba(255, 255, 255, 0.8);
           border: 1px solid #000000;
           padding: 20px;
@@ -873,14 +908,7 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
           position: relative;
           overflow: visible;
           scroll-snap-align: center;
-        }
-
-        .provider-package-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 
-            0 20px 60px rgba(0, 0, 0, 0.2),
-            0 8px 24px rgba(0, 0, 0, 0.15),
-            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+          scroll-snap-stop: always;
         }
 
         .provider-logo-main {
@@ -889,7 +917,7 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
           margin-bottom: 8px;
           object-fit: contain;
         }
-
+        
         .provider-name-main {
           font-size: 1.3rem;
           font-weight: 700;
@@ -897,7 +925,7 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
           margin-bottom: 8px;
           text-align: center;
         }
-
+        
         .speed-info {
           display: flex;
           align-items: center;
@@ -907,52 +935,53 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
           color: #2d2823;
           font-weight: 500;
         }
-
+        
         .speed-info .download-arrow {
           color: #4a90e2;
           font-weight: 600;
           font-size: 1.2rem;
         }
-
+        
         .speed-info .upload-arrow {
           color: #7ed321;
           font-weight: 600;
           font-size: 1.2rem;
         }
-
+        
         .price-display {
           display: flex;
           align-items: baseline;
           margin-bottom: 12px;
-          gap: 8px;
         }
-
+        
         .price-main {
           font-size: 2.4rem;
           font-weight: 700;
           color: #4a90e2;
           line-height: 1;
         }
-
+        
         .price-period {
           font-size: 1.2rem;
           color: #6b6355;
+          margin-left: 8px;
         }
-
+        
         .price-strikethrough {
           text-decoration: line-through;
           opacity: 0.6;
           font-size: 1.2rem;
           color: #6b6355;
+          margin-right: 12px;
         }
-
+        
         .package-selector {
           width: 100%;
           max-width: 400px;
           margin-bottom: 8px;
           position: relative;
         }
-
+        
         .package-dropdown {
           width: 100%;
           padding: 12px 12px;
@@ -973,19 +1002,20 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
           text-align: center;
           line-height: 1.3;
         }
-
+        
         .package-dropdown:focus {
           outline: none;
           border-color: #4a90e2;
           box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
         }
-
+        
         .feature-checklist {
           width: 100%;
           max-width: 400px;
           margin-bottom: 16px;
+          position: relative;
         }
-
+        
         .feature-item {
           display: flex;
           align-items: center;
@@ -993,11 +1023,11 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
           padding: 6px 0;
           border-bottom: 1px dotted #e8e3db;
         }
-
+        
         .feature-item:last-child {
           border-bottom: none;
         }
-
+        
         .feature-checkmark {
           width: 16px;
           height: 16px;
@@ -1008,53 +1038,78 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
           justify-content: center;
           flex-shrink: 0;
         }
-
+        
         .feature-checkmark::after {
           content: "✓";
           color: white;
           font-size: 10px;
           font-weight: 600;
         }
-
+        
         .feature-text {
           font-size: 0.85rem;
           color: #6b6355;
           line-height: 1.3;
         }
-
-        .promotion-text {
+        
+        /* Promo Text Tooltip Styles - Exact copy from PHP */
+        .promo-tooltip-trigger {
+          cursor: pointer;
+          color: #4a90e2;
+          text-decoration: underline;
           position: relative;
-          cursor: help;
         }
-
-        .promotion-tooltip {
+        
+        .promo-tooltip-trigger:hover {
+          color: #357abd;
+        }
+        
+        .promo-tooltip {
           position: absolute;
-          bottom: 100%;
+          top: 40px;
           left: 0;
           right: 0;
-          background: #2d2823;
-          color: white;
+          background: #ffffff;
+          color: #2d2823;
+          border: 1px dotted #000000;
           padding: 12px 16px;
-          border-radius: 8px;
-          font-size: 0.85rem;
+          border-radius: 12px;
+          font-size: 0.8rem;
           line-height: 1.4;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-          z-index: 1000;
-          margin-bottom: 8px;
-          max-width: 300px;
-          word-wrap: break-word;
+          z-index: 1500;
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.3s ease, visibility 0.3s ease;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
           white-space: normal;
+          word-wrap: break-word;
+          font-weight: 500;
         }
-
-        .promotion-tooltip::after {
+        
+        .promo-tooltip::before {
           content: '';
           position: absolute;
-          top: 100%;
+          top: -6px;
           left: 20px;
-          border: 6px solid transparent;
-          border-top-color: #2d2823;
+          width: 12px;
+          height: 12px;
+          background: #ffffff;
+          border-left: 1px dotted #000000;
+          border-top: 1px dotted #000000;
+          transform: rotate(45deg);
         }
-
+        
+        .promo-tooltip.show {
+          opacity: 1;
+          visibility: visible;
+        }
+        
+        .promo-tooltip-trigger.no-promo {
+          cursor: default;
+          color: #6b6355;
+          text-decoration: none;
+        }
+        
         .promo-badge-corner {
           position: absolute;
           top: -10px;
@@ -1070,7 +1125,7 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
           z-index: 15;
         }
-
+        
         .check-availability-btn {
           width: 100%;
           max-width: 280px;
@@ -1091,13 +1146,14 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
           line-height: 1.2;
           margin: 0 auto;
         }
-
+        
         .check-availability-btn:hover {
           background: #e55a2b;
           transform: translateY(-2px);
           box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
         }
-
+        
+        /* Responsive Adjustments - Exact copy from PHP */
         @media (max-width: 1024px) {
           .provider-package-card {
             width: 340px;
@@ -1107,56 +1163,85 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
             max-height: 560px;
           }
         }
-
+        
         @media (max-width: 768px) {
           .provider-package-card {
-            width: calc((100vw - 40px) * 0.9);
-            min-width: calc((100vw - 40px) * 0.9);
-            max-width: calc((100vw - 40px) * 0.9);
+            width: calc(100vw - 80px) !important;
+            min-width: calc(100vw - 80px) !important;
+            max-width: calc(100vw - 80px) !important;
             padding: 20px;
-            margin: 0 20px;
+            margin: 0 10px;
             max-height: 540px;
-            scroll-snap-align: center;
           }
-
+          
           .provider-logo-main {
             max-width: 160px;
             max-height: 65px;
           }
-
+          
           .price-main {
             font-size: 2.5rem;
           }
         }
-
+        
         @media (max-width: 480px) {
           .provider-package-card {
-            width: calc((100vw - 32px) * 0.9);
-            min-width: calc((100vw - 32px) * 0.9);
-            max-width: calc((100vw - 32px) * 0.9);
+            width: calc(100vw - 64px) !important;
+            min-width: calc(100vw - 64px) !important;
+            max-width: calc(100vw - 64px) !important;
             padding: 18px;
-            margin: 0 16px;
+            margin: 0 8px;
             max-height: 520px;
-            scroll-snap-align: center;
           }
-
+          
           .provider-logo-main {
             max-width: 140px;
             max-height: 55px;
           }
-
+          
           .price-main {
             font-size: 2.2rem;
           }
-
+          
           .feature-checklist {
             margin-bottom: 20px;
           }
-
+          
           .check-availability-btn {
             padding: 12px 18px;
             font-size: 0.95rem;
             max-width: 280px;
+          }
+        }
+        
+        @media (max-width: 600px) {
+          .provider-package-card {
+            padding: 18px;
+            width: calc(100vw - 48px) !important;
+            min-width: calc(100vw - 48px) !important;
+            max-width: calc(100vw - 48px) !important;
+            margin: 0 16px;
+            max-height: 520px;
+          }
+          
+          .price-main {
+            font-size: 2.2rem;
+          }
+          
+          .feature-text {
+            font-size: 0.9rem;
+          }
+        }
+        
+        /* Samsung S25 and similar high-resolution mobile devices */
+        @media (max-width: 480px) and (min-resolution: 2dppx) {
+          .provider-package-card {
+            width: calc(100vw - 24px) !important;
+            min-width: calc(100vw - 24px) !important;
+            max-width: calc(100vw - 24px) !important;
+            margin: 0 12px;
+            padding: 18px;
+            max-height: 520px;
           }
         }
       `}</style>

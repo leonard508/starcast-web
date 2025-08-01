@@ -5,31 +5,29 @@ import { db } from "./db"
 
 export const auth = betterAuth({
   database: prismaAdapter(db, {
-    provider: "postgresql", // Using PostgreSQL to match Railway deployment
+    provider: "postgresql",
   }),
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false, // Disable for now during development
+    requireEmailVerification: false,
   },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // 1 day
   },
   secret: process.env.BETTER_AUTH_SECRET!,
+  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3001",
   trustedOrigins: [
-    "http://localhost:3000", 
-    "http://localhost:3001", 
-    "http://localhost:3002",
+    process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3001",
     "https://starcast-web-production.up.railway.app",
-    process.env.NEXT_PUBLIC_BETTER_AUTH_URL || ""
+    "http://localhost:3001", // Local development fallback
   ],
   advanced: {
     crossSubDomainCookies: {
-      enabled: true,
-      domain: process.env.NODE_ENV === 'production' ? '.railway.app' : undefined
+      enabled: false, // Disable for Railway deployment stability
     }
   },
   plugins: [
-    nextCookies() // CRITICAL: This plugin must be included for Railway/Next.js
+    nextCookies()
   ]
 })

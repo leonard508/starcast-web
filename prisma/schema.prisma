@@ -58,6 +58,12 @@ model Package {
   active       Boolean     @default(true)
   featured     Boolean     @default(false)
   
+  // Promotional Badge System
+  promoBadge           String?     // Badge text (e.g., "LIMITED TIME", "50% OFF")
+  promoBadgeColor      String?     // Badge color (blue, green, red, etc.)
+  promoBadgeExpiryDate DateTime?   // When badge expires
+  promoBadgeTimer      Boolean     @default(false) // Show countdown timer
+  
   // Timestamps
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
@@ -577,6 +583,7 @@ enum WhatsAppMessageStatus {
   PENDING
   SENT
   DELIVERED
+  DEMO_SENT
   READ
   FAILED
   RECEIVED

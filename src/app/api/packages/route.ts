@@ -139,7 +139,12 @@ export async function POST(request: NextRequest) {
       basePrice,
       currentPrice,
       featured = false,
-      active = true 
+      active = true,
+      // Promotional Badge System
+      promoBadge,
+      promoBadgeColor,
+      promoBadgeExpiryDate,
+      promoBadgeTimer = false 
     } = body
 
     // Validate required fields
@@ -194,7 +199,12 @@ export async function POST(request: NextRequest) {
         basePrice: parseFloat(basePrice),
         currentPrice: currentPrice ? parseFloat(currentPrice) : parseFloat(basePrice),
         featured,
-        active
+        active,
+        // Promotional Badge System
+        promoBadge: promoBadge || null,
+        promoBadgeColor: promoBadgeColor || null,
+        promoBadgeExpiryDate: promoBadgeExpiryDate ? new Date(promoBadgeExpiryDate) : null,
+        promoBadgeTimer
       },
       include: {
         provider: true,
@@ -259,7 +269,12 @@ export async function PUT(request: NextRequest) {
       basePrice,
       currentPrice,
       featured,
-      active 
+      active,
+      // Promotional Badge System
+      promoBadge,
+      promoBadgeColor,
+      promoBadgeExpiryDate,
+      promoBadgeTimer 
     } = body
 
     // Validate required fields
@@ -335,7 +350,12 @@ export async function PUT(request: NextRequest) {
         basePrice: parseFloat(basePrice),
         currentPrice: parseFloat(currentPrice),
         featured,
-        active
+        active,
+        // Promotional Badge System
+        promoBadge: promoBadge || null,
+        promoBadgeColor: promoBadgeColor || null,
+        promoBadgeExpiryDate: promoBadgeExpiryDate ? new Date(promoBadgeExpiryDate) : null,
+        promoBadgeTimer
       },
       include: {
         provider: true,
