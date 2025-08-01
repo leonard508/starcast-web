@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import PackageEditor from './components/PackageEditor'
 import PromotionEditor from './components/PromotionEditor'
+import BadgeManager from './components/BadgeManager'
 
 interface Package {
   id: string
@@ -16,6 +17,11 @@ interface Package {
   currentPrice: number
   active: boolean
   featured: boolean
+  // Promotional Badge System
+  promoBadge?: string
+  promoBadgeColor?: string
+  promoBadgeExpiryDate?: string
+  promoBadgeTimer?: boolean
   provider: {
     id: string
     name: string
@@ -107,6 +113,7 @@ export default function AdminDashboard() {
   const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null)
   const [showPackageEditor, setShowPackageEditor] = useState(false)
   const [showPromotionEditor, setShowPromotionEditor] = useState(false)
+  const [showBadgeManager, setShowBadgeManager] = useState(false)
   const [priceHistory, setPriceHistory] = useState<any[]>([])
 
   useEffect(() => {
@@ -253,6 +260,51 @@ export default function AdminDashboard() {
       case 'APPROVED': return 'bg-green-100 text-green-800'
       case 'REJECTED': return 'bg-red-100 text-red-800'
       default: return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const getBadgeColorClass = (color: string) => {
+    switch (color) {
+      case 'blue': return 'bg-blue-500 text-white'
+      case 'green': return 'bg-green-500 text-white'
+      case 'red': return 'bg-red-500 text-white'
+      case 'yellow': return 'bg-yellow-500 text-black'
+      case 'purple': return 'bg-purple-500 text-white'
+      case 'pink': return 'bg-pink-500 text-white'
+      case 'orange': return 'bg-orange-500 text-white'
+      case 'gray': return 'bg-gray-500 text-white'
+      default: return 'bg-blue-500 text-white'
+    }
+  }
+
+  const isPromoBadgeExpired = (expiryDate?: string) => {
+    if (!expiryDate) return false
+    return new Date() > new Date(expiryDate)
+  }
+
+  const handleBulkBadgeUpdate = async (updates: Array<{id: string, badgeData: any}>) => {
+    try {
+      const promises = updates.map(update => 
+        fetch('/api/packages', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            id: update.id,
+            ...packages.find(p => p.id === update.id),
+            ...update.badgeData
+          }),
+        })
+      )
+
+      await Promise.all(promises)
+      await fetchData()
+      alert(`Successfully updated badges for ${updates.length} packages`)
+    } catch (error) {
+      console.error('Bulk badge update failed:', error)
+      throw error
     }
   }
 
@@ -483,6 +535,14 @@ ${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join(
               >
                 📊 Import Data
               </Link>
+              <a 
+                href="/WHATSAPP.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-3 rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
+              >
+                📱 WhatsApp Docs
+              </a>
               <button 
                 onClick={fetchData}
                 className="bg-gray-100 text-gray-700 px-6 py-3 rounded-xl hover:bg-gray-200 transition-all duration-200 shadow-md hover:shadow-lg font-medium border border-gray-200"
@@ -1041,10 +1101,16 @@ ${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join(
                     >
                       Add Package
                     </button>
+                    <button 
+                      onClick={() => setShowBadgeManager(true)}
+                      className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors"
+                    >
+                      🏷️ Manage Badges
+                    </button>
                     <button className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
                       Import Wholesale Prices
                     </button>
-                    <button className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors">
+                    <button className="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition-colors">
                       Import Retail Prices
                     </button>
                   </div>
@@ -1083,11 +1149,28 @@ ${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join(
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
                               <div className="text-sm font-medium text-gray-900">{pkg.name}</div>
-                              {pkg.featured && (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                  Featured
-                                </span>
-                              )}
+                              <div className="flex items-center space-x-2 mt-1">
+                                {pkg.featured && (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    ⭐ Featured
+                                  </span>
+                                )}
+                                {pkg.promoBadge && !isPromoBadgeExpired(pkg.promoBadgeExpiryDate) && (
+                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${getBadgeColorClass(pkg.promoBadgeColor || 'blue')}`}>
+                                    🏷️ {pkg.promoBadge}
+                                    {pkg.promoBadgeTimer && pkg.promoBadgeExpiryDate && (
+                                      <span className="ml-1 text-xs opacity-75">
+                                        ⏰
+                                      </span>
+                                    )}
+                                  </span>
+                                )}
+                                {pkg.promoBadge && isPromoBadgeExpired(pkg.promoBadgeExpiryDate) && (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500 line-through">
+                                    🏷️ {pkg.promoBadge} (Expired)
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -1118,15 +1201,24 @@ ${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join(
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div className="flex space-x-2">
+                            <div className="flex flex-wrap gap-2">
                               <button 
                                 onClick={() => handleEditPackage(pkg)}
-                                className="text-blue-600 hover:text-blue-900"
+                                className="text-blue-600 hover:text-blue-900 font-medium"
                               >
-                                Edit
+                                ✏️ Edit
                               </button>
-                              <button className="text-green-600 hover:text-green-900">Promotions</button>
-                              <button className="text-red-600 hover:text-red-900">Delete</button>
+                              <button className="text-green-600 hover:text-green-900 font-medium">
+                                💰 Promotions
+                              </button>
+                              {pkg.promoBadge && (
+                                <button className="text-purple-600 hover:text-purple-900 font-medium">
+                                  🏷️ Badge
+                                </button>
+                              )}
+                              <button className="text-red-600 hover:text-red-900 font-medium">
+                                🗑️ Delete
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -1649,6 +1741,15 @@ ${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join(
             setEditingPromotion(null)
           }}
           mode={editingPromotion ? 'edit' : 'create'}
+        />
+      )}
+
+      {/* Badge Manager Modal */}
+      {showBadgeManager && (
+        <BadgeManager
+          packages={packages}
+          onClose={() => setShowBadgeManager(false)}
+          onBulkUpdate={handleBulkBadgeUpdate}
         />
       )}
     </div>

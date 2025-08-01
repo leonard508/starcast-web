@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { requireAdmin, withAuth, rateLimit, securityHeaders, corsHeaders } from '../../../lib/auth/middleware';
-import { applicationFilterSchema, createApplicationSchema } from '../../../lib/validation/schemas';
+import { requireAdmin, rateLimit, securityHeaders, corsHeaders } from '../../../lib/auth/middleware';
+import { applicationFilterSchema } from '../../../lib/validation/schemas';
 import * as Brevo from '@getbrevo/brevo';
 import nodemailer from 'nodemailer';
 
@@ -156,8 +156,7 @@ export async function POST(request: NextRequest) {
       address, 
       city, 
       province, 
-      postalCode, 
-      promoCode 
+      postalCode
     } = body;
 
     // Validate required fields

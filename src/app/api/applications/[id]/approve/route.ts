@@ -39,7 +39,7 @@ export async function POST(
     }
 
     // Get request body (optional for approval)
-    const body = await request.json().catch(() => ({}));
+    await request.json().catch(() => ({}));
 
     // Update application status
     const application = await prisma.application.update({

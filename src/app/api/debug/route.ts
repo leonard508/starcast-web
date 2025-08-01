@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { securityHeaders, corsHeaders } from '@/lib/auth/middleware'
 import { isDevelopment } from '@/lib/env'
+import { Prisma } from '@prisma/client'
 
 export async function GET(request: NextRequest) {
   // Only allow in development or show limited info in production
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
         })
       },
       prisma: {
-        version: require('@prisma/client').Prisma.prismaVersion?.client || 'unknown',
+        version: Prisma.prismaVersion?.client || 'unknown',
       },
       auth: {
         BETTER_AUTH_SECRET_EXISTS: !!process.env.BETTER_AUTH_SECRET,
