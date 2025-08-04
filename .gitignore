@@ -69,3 +69,6 @@ CLAUDE.md
 # Miscellaneous
 *.log
 nul
+
+# Cursor web directory (contains old WordPress files)
+"Cursor web/"
