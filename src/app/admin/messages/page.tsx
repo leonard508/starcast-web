@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 // import ConversationsPanel from '@/components/ConversationsPanel' // Disabled - requires Twilio Conversations setup
 import WhatsAppMessages from '@/components/WhatsAppMessages'
+import { supabase } from '@/lib/auth';
 
 interface Contact {
   id: string
@@ -198,22 +199,26 @@ export default function MessagesPage() {
 
   const checkAuth = async () => {
     try {
-      // Check if user is authenticated as admin by trying to fetch a protected endpoint
-      const response = await fetch('/api/applications', { 
-        credentials: 'include',
-        method: 'HEAD' // Just check auth without getting data
-      })
-      
-      if (response.status === 401 || response.status === 403) {
-        // Not authenticated or not admin, redirect to login
-        router.push('/login?redirect=/admin/messages')
-        return
+      const { data: { user }, error } = await supabase.auth.getUser();
+
+      if (error || !user) {
+        router.push('/login?redirect=/admin/messages');
+        return;
       }
-      
-      setLoading(false)
+
+      const userRole = user.user_metadata?.role;
+      if (userRole !== 'ADMIN') {
+        router.push('/login?redirect=/admin/messages');
+        return;
+      }
+
+      // Refresh session to prevent expiration
+      await supabase.auth.refreshSession();
+
+      setLoading(false);
     } catch (error) {
-      console.error('Auth check failed:', error)
-      router.push('/login?redirect=/admin/messages')
+      console.error('Auth check failed:', error);
+      router.push('/login?redirect=/admin/messages');
     }
   }
 

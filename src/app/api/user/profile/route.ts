@@ -1,28 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { auth } from '@/lib/auth'
+import { requireAuth } from '@/lib/auth/middleware'
 
 export async function GET(request: NextRequest) {
   try {
-    // Get user session from BetterAuth
-    const session = await auth.api.getSession({
-      headers: request.headers
-    })
-
-    if (!session) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Unauthorized - Please log in'
-        },
-        { status: 401 }
-      )
+    // Get user session from Supabase
+    const authResult = await requireAuth(request)
+    if (authResult instanceof NextResponse) {
+      return authResult // Return error response
     }
+    const { user } = authResult
 
     // Fetch user profile information
-    const user = await db.user.findUnique({
+    const userProfile = await db.user.findUnique({
       where: {
-        id: session.user.id
+        id: user.id
       },
       select: {
         id: true,
@@ -51,7 +43,7 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    if (!user) {
+    if (!userProfile) {
       return NextResponse.json(
         { 
           success: false, 
@@ -63,7 +55,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: user
+      data: userProfile
     })
 
   } catch (error) {

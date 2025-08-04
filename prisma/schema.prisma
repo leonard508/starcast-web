@@ -1,7 +1,6 @@
-// Starcast Technologies - Package Management Database Schema
-
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -9,527 +8,344 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Provider model - ISP companies offering services
 model Provider {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  slug      String   @unique
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
   logo      String?
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  packages Package[]
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  packages  Package[]
 
   @@map("providers")
 }
 
-// Package model - Internet service packages (Fibre, LTE Fixed, LTE Mobile)
 model Package {
-  id         String      @id @default(cuid())
-  name       String
-  providerId String
-  type       String      // "FIBRE", "LTE_FIXED", "LTE_MOBILE", "5G_FIXED"
-  speed      String?     // e.g., "10Mbps", "100Mbps"
-  data       String?     // e.g., "Unlimited", "100GB"
-  
-  // Legacy fields (kept for backward compatibility)
-  aup        String?     // Acceptable Use Policy info (deprecated - use fupDescription)
-  throttle   String?     // Throttling information (deprecated - use throttleSpeed)
-  
-  // FUP (Fair Use Policy) Fields
-  fupLimit            String?     // e.g., "1000GB", "500GB", "UNLIMITED"
-  throttleSpeed       String?     // Primary throttle speed e.g., "1Mbps", "2Mbps"
-  secondaryThrottleSpeed String?  // Secondary throttle for Telkom packages
-  fupDescription      String?     // Detailed FUP terms and conditions
-  specialTerms        String?     // Any special terms or conditions
-  
-  // LTE/5G Specific Fields
-  technology          String?     // "LTE", "5G", "LTE_ADVANCED"
-  coverage            String?     // Coverage area information
-  installation        String?     // Installation type (Self-install, Tech install)
-  
-  // Pricing
-  basePrice    Float       // Original price
-  currentPrice Float       // Current active price
-  
-  // Package Status
-  active       Boolean     @default(true)
-  featured     Boolean     @default(false)
-  
-  // Promotional Badge System
-  promoBadge           String?     // Badge text (e.g., "LIMITED TIME", "50% OFF")
-  promoBadgeColor      String?     // Badge color (blue, green, red, etc.)
-  promoBadgeExpiryDate DateTime?   // When badge expires
-  promoBadgeTimer      Boolean     @default(false) // Show countdown timer
-  
-  // Timestamps
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-
-  // Relations
-  provider     Provider     @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  promotions   Promotion[]
-  specialRates SpecialRate[]
-  packageUrls  PackageUrl[]
-  priceHistory PriceHistory[]
-  orders       Order[]
-  users        User[]       // Users who selected this package
-  applications Application[] // Applications for this package
-  bills        Bill[]       // Bills for this package
+  id                     String         @id @default(cuid())
+  name                   String
+  providerId             String
+  type                   String
+  speed                  String?
+  data                   String?
+  aup                    String?
+  throttle               String?
+  fupLimit               String?
+  throttleSpeed          String?
+  secondaryThrottleSpeed String?
+  fupDescription         String?
+  specialTerms           String?
+  technology             String?
+  coverage               String?
+  installation           String?
+  basePrice              Float
+  currentPrice           Float
+  active                 Boolean        @default(true)
+  featured               Boolean        @default(false)
+  promoBadge             String?
+  promoBadgeColor        String?
+  promoBadgeExpiryDate   DateTime?
+  promoBadgeTimer        Boolean        @default(false)
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+  applications           Application[]
+  bills                  Bill[]
+  orders                 Order[]
+  packageUrls            PackageUrl[]
+  provider               Provider       @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  priceHistory           PriceHistory[]
+  promotions             Promotion[]
+  specialRates           SpecialRate[]
+  users                  User[]
 
   @@map("packages")
 }
 
-// Price History - Track all price changes
 model PriceHistory {
   id        String   @id @default(cuid())
   packageId String
   oldPrice  Float
   newPrice  Float
-  changedBy String   // Admin user ID or system
-  reason    String?  // Price change reason
+  changedBy String
+  reason    String?
   createdAt DateTime @default(now())
-  
-  package Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  package   Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
 
   @@map("price_history")
 }
 
-// Promotion model - Discount codes and special offers
 model Promotion {
-  id            String       @id @default(cuid())
-  code          String       @unique
-  name          String       // Display name for promotion
-  description   String?      // Promotion description
-  packageId     String?      // Optional - can be package-specific or global
-  
-  // Discount Configuration
-  discountType  String       // "PERCENTAGE", "FIXED_AMOUNT", "OVERRIDE_PRICE"
-  discountValue Float
-  
-  // Date Configuration
-  startDate     DateTime
-  endDate       DateTime
-  
-  // Usage Configuration
-  usageLimit    Int          @default(1)  // Max number of uses
-  timesUsed     Int          @default(0)  // Current usage count
-  
-  // Targeting (stored as comma-separated strings)
-  targetAudience String?      // "new_customers,existing,bulk_orders"
-  userSpecific   String?      // Comma-separated user IDs
-  minimumOrders  Int?         // For bulk deals
-  
-  // Behavior
-  stackable     Boolean      @default(false) // Can combine with other promos
-  autoApply     Boolean      @default(false) // Automatically applied
-  
-  // Status
-  active        Boolean      @default(true)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-
-  // Relations
-  package Package? @relation(fields: [packageId], references: [id], onDelete: Cascade)
-  orders  Order[]
+  id             String   @id @default(cuid())
+  code           String   @unique
+  name           String
+  description    String?
+  packageId      String?
+  discountType   String
+  discountValue  Float
+  startDate      DateTime
+  endDate        DateTime
+  usageLimit     Int      @default(1)
+  timesUsed      Int      @default(0)
+  targetAudience String?
+  userSpecific   String?
+  minimumOrders  Int?
+  stackable      Boolean  @default(false)
+  autoApply      Boolean  @default(false)
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  orders         Order[]
+  package        Package? @relation(fields: [packageId], references: [id], onDelete: Cascade)
 
   @@map("promotions")
 }
 
-// Special Rates - Individual pricing for specific customers
 model SpecialRate {
-  id            String      @id @default(cuid())
+  id            String    @id @default(cuid())
   packageId     String
-  userId        String?     // Specific user
-  email         String?     // Email-based targeting
-  name          String?     // Name/description for this rate
-  
-  discountType  String       // "PERCENTAGE", "FIXED_AMOUNT", "OVERRIDE_PRICE"
+  userId        String?
+  email         String?
+  name          String?
+  discountType  String
   discountValue Float
-  
-  expiresAt     DateTime?    // Optional expiry
-  active        Boolean     @default(true)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  
-  package Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
-  user    User?   @relation(fields: [userId], references: [id])
+  expiresAt     DateTime?
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  package       Package   @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  user          User?     @relation(fields: [userId], references: [id])
 
   @@map("special_rates")
 }
 
-// Package URLs - Custom URLs for packages with special parameters
 model PackageUrl {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   packageId String
-  slug      String   @unique  // e.g., "vumatel-100mbps-special"
-  params    String?  // JSON string for custom parameters, pricing overrides
+  slug      String    @unique
+  params    String?
   expiresAt DateTime?
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  package Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  package   Package   @relation(fields: [packageId], references: [id], onDelete: Cascade)
 
   @@map("package_urls")
 }
 
-// User model - Customer accounts (Extended for ISP Customer Journey)
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  password      String?   // Made optional for BetterAuth
-  firstName     String?   // Made optional
-  lastName      String?   // Made optional
-  name          String?   // Added for BetterAuth compatibility
-  phone         String?
-  address       String?
-  city          String?
-  province      String?
-  postalCode    String?
-  idNumber      String?   // South African ID number
-  
-  // ISP Customer Journey Fields
-  applicationStatus    ApplicationStatus @default(PENDING_APPROVAL)
-  serviceStatus        ServiceStatus     @default(NOT_ACTIVE)
-  applicationDate      DateTime          @default(now())
-  approvedAt           DateTime?
-  approvedBy           String?           // Admin user ID who approved
-  rejectedAt           DateTime?
-  rejectionReason      String?
-  activationDate       DateTime?
-  
-  // Service Details
-  serviceAddress       Json?             // Installation address if different from billing
-  packageId            String?           // Selected package
-  installationNotes    String?           // Special installation requirements
-  
-  // Login Credentials (after approval)
-  tempPassword         String?           // Temporary password sent after approval
-  mustChangePassword   Boolean           @default(true)
-  
-  // Account Management
-  role          String    @default("USER") // "USER", "ADMIN", "SUPPORT"
-  emailVerified Boolean   @default(false)
-  active        Boolean   @default(true)
-  image         String?   // Added for BetterAuth profile images
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                 String            @id @default(cuid())
+  email              String            @unique
+  password           String?
+  firstName          String?
+  lastName           String?
+  name               String?
+  phone              String?
+  address            String?
+  city               String?
+  province           String?
+  postalCode         String?
+  idNumber           String?
+  applicationStatus  ApplicationStatus @default(PENDING_APPROVAL)
+  serviceStatus      ServiceStatus     @default(NOT_ACTIVE)
+  applicationDate    DateTime          @default(now())
+  approvedAt         DateTime?
+  approvedBy         String?
+  rejectedAt         DateTime?
+  rejectionReason    String?
+  activationDate     DateTime?
+  serviceAddress     Json?
+  packageId          String?
+  installationNotes  String?
+  tempPassword       String?
+  mustChangePassword Boolean           @default(true)
+  role               String            @default("USER")
+  emailVerified      Boolean           @default(false)
+  active             Boolean           @default(true)
+  image              String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  accounts           Account[]
+  applications       Application[]
+  bills              Bill[]
+  dataConsents       DataConsent[]
+  orders             Order[]
+  payments           Payment[]
+  sessions           Session[]
+  specialRates       SpecialRate[]
+  selectedPackage    Package?          @relation(fields: [packageId], references: [id])
+  whatsappMessages   WhatsAppMessage[]
 
-  // BetterAuth Relations
-  sessions     Session[]
-  accounts     Account[]
-  
-  // ISP Relations
-  selectedPackage Package?     @relation(fields: [packageId], references: [id])
-  orders       Order[]
-  specialRates SpecialRate[]
-  bills        Bill[]
-  applications Application[]
-  payments     Payment[]
-  whatsappMessages WhatsAppMessage[]
-  
-  // POPI Act Compliance Relations
-  dataConsents DataConsent[]
-  
   @@map("users")
 }
 
-// Application model - Customer service applications
 model Application {
-  id                    String            @id @default(cuid())
-  applicationNumber     String            @unique
-  userId                String
-  packageId             String
-  
-  // Application Details
-  serviceAddress        Json              // Installation address
-  contactNumber         String
-  preferredInstallDate  DateTime?
-  specialRequirements   String?
-  idDocument            String?           // Path to uploaded ID
-  proofOfResidence      String?           // Path to uploaded proof of residence
-  
-  // Admin Processing
-  status                ApplicationStatus @default(PENDING_APPROVAL)
-  submittedAt           DateTime          @default(now())
-  reviewedAt            DateTime?
-  reviewedBy            String?           // Admin user ID
-  reviewNotes           String?
-  
-  // Approval/Rejection Details
-  approvalReason        String?
-  rejectionReason       String?
-  adminComments         String?
-  
-  // Service Availability Check
-  serviceAvailable      Boolean?          // Checked by admin
-  estimatedInstallDate  DateTime?
-  
-  // Relations
-  user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  package               Package           @relation(fields: [packageId], references: [id])
-  payments              Payment[]
-  
+  id                   String            @id @default(cuid())
+  applicationNumber    String            @unique
+  userId               String
+  packageId            String
+  serviceAddress       Json
+  contactNumber        String
+  preferredInstallDate DateTime?
+  specialRequirements  String?
+  idDocument           String?
+  proofOfResidence     String?
+  status               ApplicationStatus @default(PENDING_APPROVAL)
+  submittedAt          DateTime          @default(now())
+  reviewedAt           DateTime?
+  reviewedBy           String?
+  reviewNotes          String?
+  approvalReason       String?
+  rejectionReason      String?
+  adminComments        String?
+  serviceAvailable     Boolean?
+  estimatedInstallDate DateTime?
+  package              Package           @relation(fields: [packageId], references: [id])
+  user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments             Payment[]
+
   @@map("applications")
 }
 
-// Bill model - Monthly billing and invoices
 model Bill {
-  id              String      @id @default(cuid())
-  billNumber      String      @unique
-  userId          String
-  packageId       String?
-  
-  // Billing Details
-  amount          Decimal     @db.Decimal(10,2)
-  vatAmount       Decimal     @db.Decimal(10,2)
-  totalAmount     Decimal     @db.Decimal(10,2)
-  
-  // Billing Period
-  periodStart     DateTime
-  periodEnd       DateTime
-  dueDate         DateTime    // Always 1st of month for ISP billing
-  
-  // Bill Type
-  billType        BillType    @default(MONTHLY)
-  description     String?     // e.g., "Pro-rata charge", "Monthly service"
-  
-  // Status Management
-  status          BillStatus  @default(PENDING)
-  paidAt          DateTime?
-  suspensionDate  DateTime?   // When account was suspended for non-payment
-  
-  // Payment Integration
-  paymentReference String?    // Ozow payment reference
-  paymentMethod    String?    // "OZOW", "BANK_TRANSFER", etc.
-  
-  // Relations
-  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  package         Package?    @relation(fields: [packageId], references: [id])
-  payments        Payment[]
-  
+  id               String     @id @default(cuid())
+  billNumber       String     @unique
+  userId           String
+  packageId        String?
+  amount           Decimal    @db.Decimal(10, 2)
+  vatAmount        Decimal    @db.Decimal(10, 2)
+  totalAmount      Decimal    @db.Decimal(10, 2)
+  periodStart      DateTime
+  periodEnd        DateTime
+  dueDate          DateTime
+  billType         BillType   @default(MONTHLY)
+  description      String?
+  status           BillStatus @default(PENDING)
+  paidAt           DateTime?
+  suspensionDate   DateTime?
+  paymentReference String?
+  paymentMethod    String?
+  package          Package?   @relation(fields: [packageId], references: [id])
+  user             User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments         Payment[]
+
   @@map("bills")
 }
 
-// Payment model - Payment transactions
 model Payment {
   id                    String        @id @default(cuid())
   userId                String
-  billId                String?       // Made optional for general payments
-  applicationId         String?       // For application fees
-  
-  // Payment Details
-  amount                Decimal       @db.Decimal(10,2)
+  billId                String?
+  applicationId         String?
+  amount                Decimal       @db.Decimal(10, 2)
   currency              String        @default("ZAR")
   description           String?
-  provider              String        @default("ozow") // "ozow", "bank_transfer", etc.
+  provider              String        @default("ozow")
   reference             String        @unique
-  
-  // Provider Integration
   providerTransactionId String?       @unique
   providerStatus        String?
-  metadata              Json?         // Store provider-specific data
-  
-  // Processing
+  metadata              Json?
   status                PaymentStatus @default(PENDING)
   createdAt             DateTime      @default(now())
   updatedAt             DateTime      @updatedAt
   completedAt           DateTime?
-  
-  // Relations
-  user                  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application           Application?  @relation(fields: [applicationId], references: [id])
   bill                  Bill?         @relation(fields: [billId], references: [id], onDelete: Cascade)
-  application           Application?  @relation(fields: [applicationId], references: [id], onDelete: SetNull)
-  
+  user                  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("payments")
 }
 
-// Email Log model - Track all emails sent
 model EmailLog {
-  id          String      @id @default(cuid())
-  userId      String?     // Recipient user (if applicable)
-  adminEmail  String?     // Admin email (if admin notification)
-  
-  // Email Details
+  id          String    @id @default(cuid())
+  userId      String?
+  adminEmail  String?
   to          String
   subject     String
   emailType   EmailType
-  status      String      // "SENT", "FAILED", "PENDING"
-  
-  // Brevo Integration
-  brevoId     String?     // Brevo message ID
-  brevoStatus String?     // Brevo delivery status
-  
-  // Content
-  content     String?     // Email content for audit
-  error       String?     // Error message if failed
-  
-  sentAt      DateTime    @default(now())
+  status      String
+  brevoId     String?
+  brevoStatus String?
+  content     String?
+  error       String?
+  sentAt      DateTime  @default(now())
   deliveredAt DateTime?
-  
+
   @@map("email_logs")
 }
 
-// Enums for ISP Operations
-enum ApplicationStatus {
-  PENDING_APPROVAL    // New application, waiting admin review
-  UNDER_REVIEW        // Admin is actively reviewing
-  APPROVED            // Approved by admin, user can login
-  REJECTED            // Rejected due to no service/other reasons
-  REQUIRES_INFO       // Admin needs more information
-  CANCELLED           // Customer cancelled application
-}
-
-enum ServiceStatus {
-  NOT_ACTIVE          // No active service
-  PENDING_PAYMENT     // Approved but awaiting payment
-  PENDING_INSTALLATION // Paid, awaiting installation
-  ACTIVE              // Service is active
-  SUSPENDED           // Service suspended (non-payment)
-  CANCELLED           // Service cancelled
-  TERMINATED          // Permanently terminated
-}
-
-enum BillStatus {
-  PENDING             // Generated, awaiting payment
-  OVERDUE             // Past due date, customer notified
-  SUSPENDED           // Account suspended for non-payment
-  PAID                // Payment confirmed
-  CANCELLED           // Bill cancelled (refund, etc.)
-  PARTIAL_PAYMENT     // Partial payment received
-}
-
-enum BillType {
-  MONTHLY             // Regular monthly bill
-  PRORATA             // Pro-rata charge (partial month)
-  SETUP               // Setup/activation fee
-  CANCELLATION        // Cancellation charges
-  ADJUSTMENT          // Price adjustments
-}
-
-enum PaymentMethod {
-  OZOW                // Ozow payment gateway
-  BANK_TRANSFER       // Manual bank transfer
-  CREDIT_CARD         // Credit card payment
-  DEBIT_ORDER         // Debit order payment
-  CASH                // Cash payment (in-person)
-  OTHER               // Other payment methods
-}
-
-enum PaymentStatus {
-  PENDING             // Payment initiated
-  PROCESSING          // Ozow processing
-  COMPLETED           // Payment successful
-  FAILED              // Payment failed
-  CANCELLED           // Payment cancelled
-  REFUNDED            // Payment refunded
-}
-
-enum EmailType {
-  WELCOME             // Welcome email after signup
-  APPROVAL            // Service approved notification
-  REJECTION           // Service rejected notification
-  ADMIN_NOTIFICATION  // New application notification to admin
-  INVOICE             // Monthly invoice
-  PAYMENT_CONFIRMATION // Payment received confirmation
-  PAYMENT_REMINDER    // Payment reminder
-  SUSPENSION_WARNING  // Service suspension warning
-  SERVICE_ACTIVATION  // Service activation confirmation
-  PASSWORD_RESET      // Password reset email
-  GENERAL             // General notifications
-}
-
-// Order model - Package applications/orders
 model Order {
-  id               String      @id @default(cuid())
+  id               String     @id @default(cuid())
   userId           String
   packageId        String
   promotionId      String?
-  status           String      @default("PENDING") // "PENDING", "PROCESSING", "APPROVED", "REJECTED", "INSTALLED", "CANCELLED"
+  status           String     @default("PENDING")
   originalPrice    Float
-  discountAmount   Float       @default(0)
+  discountAmount   Float      @default(0)
   finalPrice       Float
   installationDate DateTime?
   notes            String?
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
-
-  // Relations
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  package   Package    @relation(fields: [packageId], references: [id], onDelete: Cascade)
-  promotion Promotion? @relation(fields: [promotionId], references: [id], onDelete: SetNull)
-  documents Document[]
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  documents        Document[]
+  package          Package    @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  promotion        Promotion? @relation(fields: [promotionId], references: [id])
+  user             User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("orders")
 }
 
-// Document model - General documents and guides
 model Document {
   id        String   @id @default(cuid())
   orderId   String
-  type      String   // e.g., "id_copy", "proof_of_residence", "bank_statement"
+  type      String
   filename  String
   filepath  String
   filesize  Int
   mimetype  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  // Relations
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@map("documents")
 }
 
-// BetterAuth Required Tables
-
-// Session model - User login sessions
 model Session {
-  id          String   @id @default(cuid())
-  userId      String
-  token       String   @unique
-  expiresAt   DateTime
-  ipAddress   String?
-  userAgent   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
 }
 
-// Account model - External provider accounts (OAuth, etc.)
 model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  accountId         String  // Provider's account ID
-  providerId        String  // "github", "google", etc.
-  accessToken       String?
-  refreshToken      String?
-  idToken           String?
-  accessTokenExpiresAt DateTime?
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
   refreshTokenExpiresAt DateTime?
-  scope             String?
-  password          String? // For email/password accounts
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([providerId, accountId])
   @@map("accounts")
 }
 
-// Verification model - Email verification tokens
 model Verification {
   id         String   @id @default(cuid())
-  identifier String   // email address
+  identifier String
   token      String   @unique
   expiresAt  DateTime
   createdAt  DateTime @default(now())
@@ -538,39 +354,181 @@ model Verification {
   @@map("verifications")
 }
 
-// WhatsApp Messages - Store all incoming and outgoing WhatsApp messages
 model WhatsAppMessage {
-  id            String                  @id @default(cuid())
-  messageId     String                  @unique // Twilio message SID
-  direction     WhatsAppMessageDirection
-  fromNumber    String                  // Phone number (without whatsapp: prefix)
-  toNumber      String                  // Phone number (without whatsapp: prefix)
-  messageBody   String                  // Message content
-  profileName   String?                 // WhatsApp profile name
-  whatsappId    String?                 // WhatsApp ID (waId)
-  status        WhatsAppMessageStatus   @default(PENDING)
-  
-  // Media attachments
-  mediaCount    Int                     @default(0)
-  mediaUrls     Json?                   // Array of media URLs
-  
-  // Timestamps
-  sentAt        DateTime?               // When message was sent
-  deliveredAt   DateTime?               // When message was delivered
-  readAt        DateTime?               // When message was read
-  receivedAt    DateTime?               // When we received the message
-  createdAt     DateTime                @default(now())
-  updatedAt     DateTime                @updatedAt
-  
-  // Customer relationship
-  userId        String?                 // Link to user if known
-  user          User?                   @relation(fields: [userId], references: [id])
-  
-  // Auto-response tracking
-  isAutoResponse Boolean                @default(false)
-  escalated      Boolean                @default(false)
-  
+  id             String                   @id @default(cuid())
+  messageId      String                   @unique
+  direction      WhatsAppMessageDirection
+  fromNumber     String
+  toNumber       String
+  messageBody    String
+  profileName    String?
+  whatsappId     String?
+  status         WhatsAppMessageStatus    @default(PENDING)
+  mediaCount     Int                      @default(0)
+  mediaUrls      Json?
+  sentAt         DateTime?
+  deliveredAt    DateTime?
+  readAt         DateTime?
+  receivedAt     DateTime?
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  userId         String?
+  isAutoResponse Boolean                  @default(false)
+  escalated      Boolean                  @default(false)
+  user           User?                    @relation(fields: [userId], references: [id])
+
   @@map("whatsapp_messages")
+}
+
+model DataConsent {
+  id                String    @id @default(cuid())
+  userId            String
+  dataCategory      String
+  processingPurpose String
+  legalBasis        String
+  consentGiven      Boolean
+  consentDate       DateTime
+  withdrawnAt       DateTime?
+  ipAddress         String
+  userAgent         String
+  version           String
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, dataCategory, processingPurpose])
+  @@map("data_consents")
+}
+
+model DataProcessingLog {
+  id           String   @id @default(cuid())
+  userId       String
+  action       String
+  dataCategory String
+  purpose      String
+  adminUser    String?
+  ipAddress    String
+  userAgent    String
+  dataFields   String
+  timestamp    DateTime @default(now())
+
+  @@index([userId, timestamp])
+  @@index([adminUser, timestamp])
+  @@map("data_processing_logs")
+}
+
+model RicaCommunicationLog {
+  id                String   @id @default(cuid())
+  hashedFromNumber  String
+  hashedToNumber    String
+  messageHash       String
+  communicationType String
+  direction         String
+  messageLength     Int
+  timestamp         DateTime @default(now())
+  retentionPeriod   DateTime
+
+  @@index([hashedFromNumber, timestamp])
+  @@index([hashedToNumber, timestamp])
+  @@index([retentionPeriod])
+  @@map("rica_communication_logs")
+}
+
+model SecurityAuditLog {
+  id        String   @id @default(cuid())
+  eventType String
+  userId    String?
+  ipAddress String
+  userAgent String
+  success   Boolean
+  details   Json?
+  riskLevel String
+  timestamp DateTime @default(now())
+
+  @@index([eventType, timestamp])
+  @@index([userId, timestamp])
+  @@index([riskLevel, timestamp])
+  @@map("security_audit_logs")
+}
+
+model DataRetentionPolicy {
+  id              String   @id @default(cuid())
+  dataCategory    String   @unique
+  retentionPeriod Int
+  legalBasis      String
+  autoDelete      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("data_retention_policies")
+}
+
+enum ApplicationStatus {
+  PENDING_APPROVAL
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  REQUIRES_INFO
+  CANCELLED
+}
+
+enum ServiceStatus {
+  NOT_ACTIVE
+  PENDING_PAYMENT
+  PENDING_INSTALLATION
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+  TERMINATED
+}
+
+enum BillStatus {
+  PENDING
+  OVERDUE
+  SUSPENDED
+  PAID
+  CANCELLED
+  PARTIAL_PAYMENT
+}
+
+enum BillType {
+  MONTHLY
+  PRORATA
+  SETUP
+  CANCELLATION
+  ADJUSTMENT
+}
+
+enum PaymentMethod {
+  OZOW
+  BANK_TRANSFER
+  CREDIT_CARD
+  DEBIT_ORDER
+  CASH
+  OTHER
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum EmailType {
+  WELCOME
+  APPROVAL
+  REJECTION
+  ADMIN_NOTIFICATION
+  INVOICE
+  PAYMENT_CONFIRMATION
+  PAYMENT_REMINDER
+  SUSPENSION_WARNING
+  SERVICE_ACTIVATION
+  PASSWORD_RESET
+  GENERAL
 }
 
 enum WhatsAppMessageDirection {
@@ -588,96 +546,4 @@ enum WhatsAppMessageStatus {
   FAILED
   RECEIVED
   ESCALATED
-}
-
-// POPI Act Compliance Models
-
-// Data consent tracking for POPI Act compliance
-model DataConsent {
-  id                String   @id @default(cuid())
-  userId            String
-  dataCategory      String   // PERSONAL_IDENTIFIER, CONTACT_INFO, etc.
-  processingPurpose String   // SERVICE_PROVISION, BILLING_PAYMENT, etc.
-  legalBasis        String   // CONSENT, CONTRACT, LEGAL_OBLIGATION, etc.
-  consentGiven      Boolean
-  consentDate       DateTime
-  withdrawnAt       DateTime?
-  ipAddress         String
-  userAgent         String
-  version           String   // Terms version when consent was given
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@index([userId, dataCategory, processingPurpose])
-  @@map("data_consents")
-}
-
-// Data processing audit trail for POPI Act compliance
-model DataProcessingLog {
-  id           String   @id @default(cuid())
-  userId       String
-  action       String   // CREATE, READ, UPDATE, DELETE, EXPORT
-  dataCategory String   // Category of data accessed
-  purpose      String   // Purpose of data processing
-  adminUser    String?  // Admin user who performed action
-  ipAddress    String
-  userAgent    String
-  dataFields   String   // JSON array of fields accessed
-  timestamp    DateTime @default(now())
-  
-  @@index([userId, timestamp])
-  @@index([adminUser, timestamp])
-  @@map("data_processing_logs")
-}
-
-// RICA Act communication logging
-model RicaCommunicationLog {
-  id                  String   @id @default(cuid())
-  hashedFromNumber    String   // Hashed phone number for privacy
-  hashedToNumber      String   // Hashed phone number for privacy
-  messageHash         String   // Hash of message content
-  communicationType   String   // SMS, WHATSAPP, EMAIL
-  direction          String   // INBOUND, OUTBOUND
-  messageLength      Int      // Length of original message
-  timestamp          DateTime @default(now())
-  retentionPeriod    DateTime // When this log should be deleted
-  
-  @@index([hashedFromNumber, timestamp])
-  @@index([hashedToNumber, timestamp])
-  @@index([retentionPeriod])
-  @@map("rica_communication_logs")
-}
-
-// Security audit log for Ozow compliance
-model SecurityAuditLog {
-  id          String   @id @default(cuid())
-  eventType   String   // LOGIN_ATTEMPT, PASSWORD_CHANGE, DATA_ACCESS, etc.
-  userId      String?  // User involved (if applicable)
-  ipAddress   String
-  userAgent   String
-  success     Boolean
-  details     Json?    // Additional event details
-  riskLevel   String   // LOW, MEDIUM, HIGH, CRITICAL
-  timestamp   DateTime @default(now())
-  
-  @@index([eventType, timestamp])
-  @@index([userId, timestamp])
-  @@index([riskLevel, timestamp])
-  @@map("security_audit_logs")
-}
-
-// Data retention policy tracking
-model DataRetentionPolicy {
-  id             String   @id @default(cuid())
-  dataCategory   String   // Category of data
-  retentionPeriod Int     // Retention period in days
-  legalBasis     String   // Legal requirement for retention
-  autoDelete     Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  
-  @@unique([dataCategory])
-  @@map("data_retention_policies")
 }

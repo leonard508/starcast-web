@@ -1,10 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
+import { requireAdmin, rateLimit, securityHeaders, corsHeaders } from '@/lib/auth/middleware'
 
 const prisma = new PrismaClient()
 
 export async function GET(request: NextRequest) {
   try {
+    // Add security headers
+    const headers = {
+      ...securityHeaders(),
+      ...corsHeaders(request.headers.get('origin') || undefined)
+    };
+
+    // Require admin authentication for viewing price history
+    const authResult = await requireAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
+    // Rate limiting for admin access
+    const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
+    const rateLimitResult = rateLimit(`admin_price_history_${clientIp}`, 60, 60000);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: 'Too many requests' },
+        { status: 429, headers }
+      );
+    }
     const { searchParams } = new URL(request.url)
     const packageId = searchParams.get('packageId')
     const limit = parseInt(searchParams.get('limit') || '50')
@@ -30,7 +52,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: priceHistory,
       count: priceHistory.length
-    })
+    }, { headers })
   } catch (error) {
     console.error('Error fetching price history:', error)
     return NextResponse.json(
@@ -42,6 +64,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Require admin authentication for creating price history
+    const authResult = await requireAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
     const body = await request.json()
     const { packageId, oldPrice, newPrice, changedBy, reason } = body
 

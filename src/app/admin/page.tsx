@@ -122,18 +122,30 @@ export default function AdminDashboard() {
 
   const checkAuthentication = async () => {
     try {
-      // Check if user is authenticated as admin by trying to fetch a protected endpoint
-      const response = await fetch('/api/applications', { 
-        credentials: 'include',
-        method: 'HEAD' // Just check auth without getting data
-      })
+      // Import supabase here to avoid SSR issues
+      const { supabase } = await import('@/lib/auth-client')
       
-      if (response.status === 401 || response.status === 403) {
-        // Not authenticated or not admin, redirect to login
+      // Check if user is authenticated and has admin role
+      const { data: { user }, error } = await supabase.auth.getUser()
+      
+      if (error || !user) {
+        console.log('No user session found, redirecting to login...')
         router.push('/login?redirect=/admin')
         return
       }
       
+      // Check if user has admin role
+      const userRole = user.user_metadata?.role
+      console.log('Admin page - User role:', userRole)
+      
+      if (userRole !== 'ADMIN') {
+        console.log('User is not admin, redirecting to login...')
+        router.push('/login?redirect=/admin')
+        return
+      }
+      
+      console.log('Admin authentication successful!')
+      console.log('User role:', userRole)
       // Authentication successful, proceed to fetch data
       setAuthChecked(true)
       fetchData()
@@ -146,17 +158,60 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     try {
       setLoading(true)
+      
+      // Get Supabase auth headers
+      const { supabase } = await import('@/lib/auth-client')
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      const authHeaders: HeadersInit = {
+        'Content-Type': 'application/json',
+        ...(session && { 'Authorization': `Bearer ${session.access_token}` })
+      }
+      
+      console.log('Fetching admin data with auth:', !!session)
+      console.log('Auth headers:', authHeaders)
+      
       const [packagesRes, providersRes, promotionsRes, priceHistoryRes, applicationsRes, usersRes] = await Promise.all([
-        fetch('/api/packages', { credentials: 'include' }),
-        fetch('/api/providers', { credentials: 'include' }),
-        fetch('/api/promotions', { credentials: 'include' }),
-        fetch('/api/price-history', { credentials: 'include' }),
-        fetch('/api/applications', { credentials: 'include' }),
-        fetch('/api/users', { credentials: 'include' })
+        fetch('/api/packages', { 
+          credentials: 'include',
+          headers: authHeaders
+        }),
+        fetch('/api/providers', { 
+          credentials: 'include',
+          headers: authHeaders
+        }),
+        fetch('/api/promotions', { 
+          credentials: 'include',
+          headers: authHeaders
+        }),
+        fetch('/api/price-history', { 
+          credentials: 'include',
+          headers: authHeaders
+        }),
+        fetch('/api/applications', { 
+          credentials: 'include',
+          headers: authHeaders
+        }),
+        fetch('/api/users', { 
+          credentials: 'include',
+          headers: authHeaders
+        })
       ])
 
-      if (!packagesRes.ok || !providersRes.ok || !promotionsRes.ok || !priceHistoryRes.ok || !applicationsRes.ok || !usersRes.ok) {
-        throw new Error('Failed to fetch data')
+      // Check each response individually for better error reporting
+      const responses = [
+        { name: 'packages', res: packagesRes },
+        { name: 'providers', res: providersRes },
+        { name: 'promotions', res: promotionsRes },
+        { name: 'price-history', res: priceHistoryRes },
+        { name: 'applications', res: applicationsRes },
+        { name: 'users', res: usersRes }
+      ]
+      
+      const failedResponses = responses.filter(r => !r.res.ok)
+      if (failedResponses.length > 0) {
+        console.error('Failed API calls:', failedResponses.map(r => `${r.name}: ${r.res.status}`))
+        throw new Error(`Failed to fetch data from: ${failedResponses.map(r => r.name).join(', ')}`)
       }
 
       const packagesData = await packagesRes.json()
@@ -615,16 +670,16 @@ ${userApps.slice(0, 3).map(app => `- ${app.package.name} (${app.status})`).join(
               <div className="ml-6">
                 <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Applications</p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">{applications.length}</p>
-                <button 
+                <span 
                   onClick={(e) => { 
                     e.stopPropagation()
                     setActiveTab('applications')
                     setSelectedStatus('PENDING_APPROVAL')
                   }}
-                  className="text-sm text-amber-600 font-medium mt-1 hover:text-amber-800 hover:underline"
+                  className="text-sm text-amber-600 font-medium mt-1 hover:text-amber-800 hover:underline cursor-pointer"
                 >
                   {applications.filter(a => a.status === 'PENDING_APPROVAL').length} pending review
-                </button>
+                </span>
               </div>
             </div>
           </button>

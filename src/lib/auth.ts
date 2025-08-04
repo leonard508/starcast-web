@@ -1,33 +1,35 @@
-import { betterAuth } from "better-auth"
-import { prismaAdapter } from "better-auth/adapters/prisma"
-import { nextCookies } from "better-auth/next-js"
-import { db } from "./db"
+import { createClient } from '@supabase/supabase-js'
 
-export const auth = betterAuth({
-  database: prismaAdapter(db, {
-    provider: "postgresql",
-  }),
-  emailAndPassword: {
-    enabled: true,
-    requireEmailVerification: false,
-  },
-  session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 days
-    updateAge: 60 * 60 * 24, // 1 day
-  },
-  secret: process.env.BETTER_AUTH_SECRET!,
-  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3001",
-  trustedOrigins: [
-    process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3001",
-    "https://starcast-web-production.up.railway.app",
-    "http://localhost:3001", // Local development fallback
-  ],
-  advanced: {
-    crossSubDomainCookies: {
-      enabled: false, // Disable for Railway deployment stability
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+// For server-side operations
+export const createServerClient = () => {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
+
+// Manually verify JWT token and get user
+export async function verifySupabaseToken(authToken: string) {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/user`, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      }
+    })
+    
+    if (response.ok) {
+      const user = await response.json()
+      return { data: { user }, error: null }
+    } else {
+      return { data: { user: null }, error: { message: 'Invalid token' } }
     }
-  },
-  plugins: [
-    nextCookies()
-  ]
-})
+  } catch (error) {
+    return { data: { user: null }, error: { message: 'Token verification failed' } }
+  }
+}

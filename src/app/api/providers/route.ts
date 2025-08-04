@@ -1,8 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireAdmin, rateLimit, securityHeaders, corsHeaders } from '@/lib/auth/middleware'
 
 export async function GET(request: NextRequest) {
   try {
+    // Add security headers
+    const headers = {
+      ...securityHeaders(),
+      ...corsHeaders(request.headers.get('origin') || undefined)
+    };
+
+    // Check if this is an admin request (has auth header)
+    const authHeader = request.headers.get('authorization');
+    const isAdminRequest = authHeader && authHeader.startsWith('Bearer ');
+    
+    if (isAdminRequest) {
+      // Admin access - require authentication
+      const authResult = await requireAdmin(request);
+      if (authResult instanceof NextResponse) {
+        return authResult;
+      }
+      
+      // Rate limiting for admin access
+      const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
+      const rateLimitResult = rateLimit(`admin_providers_${clientIp}`, 60, 60000);
+      if (!rateLimitResult.success) {
+        return NextResponse.json(
+          { success: false, error: 'Too many requests' },
+          { status: 429, headers }
+        );
+      }
+    }
     const { searchParams } = new URL(request.url)
     const active = searchParams.get('active')
     const includePackages = searchParams.get('include_packages') === 'true'
@@ -27,7 +55,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: providers,
       count: providers.length
-    })
+    }, { headers: isAdminRequest ? headers : undefined })
 
   } catch (error) {
     console.error('Error fetching providers:', error)
@@ -44,6 +72,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Require admin authentication for creating providers
+    const authResult = await requireAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
     const body = await request.json()
     const { name, slug, logo, active = true } = body
 

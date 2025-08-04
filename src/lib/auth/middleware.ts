@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '../auth'
-import { db } from '../db'
+import { verifySupabaseToken } from '@/lib/auth'
 
 export interface AuthenticatedRequest extends NextRequest {
-  user?: {
-    id: string
-    email: string
-    role: string
-  }
+  user?: { id: string; email: string; role: string }
 }
 
 /**
@@ -18,40 +13,41 @@ export async function withAuth(request: NextRequest): Promise<{
   error?: string;
 }> {
   try {
-    // Get session from BetterAuth
-    const session = await auth.api.getSession({
-      headers: request.headers
-    })
-
-    if (!session?.user) {
-      return { user: null, error: 'No valid session found' }
+    // Extract auth token from Authorization header
+    const authHeader = request.headers.get('authorization')
+    
+    console.log('🔍 Auth middleware - checking request:', request.url)
+    console.log('🔐 Auth header present:', !!authHeader)
+    console.log('🔑 Auth header format:', authHeader?.slice(0, 20) + '...')
+    
+    if (!authHeader?.startsWith('Bearer ')) {
+      console.log('❌ No valid authorization header found')
+      return { user: null, error: 'No authorization header found' }
+    }
+    
+    const authToken = authHeader.slice(7)
+    console.log('🧪 Verifying token...')
+    
+    // Verify token and get user
+    const { data: { user }, error } = await verifySupabaseToken(authToken)
+    
+    if (error || !user) {
+      console.log('❌ Token verification failed:', error?.message)
+      return { user: null, error: error?.message || 'No valid session found' }
     }
 
-    // Get user details with role from database
-    const user = await db.user.findUnique({
-      where: { id: session.user.id },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        active: true,
-        emailVerified: true
-      }
-    })
-
-    if (!user) {
-      return { user: null, error: 'User not found' }
-    }
-
-    if (!user.active) {
-      return { user: null, error: 'Account is disabled' }
-    }
+    // Get role from user metadata (stored in Supabase Auth)
+    const role = user.user_metadata?.role || 'USER'
+    
+    console.log('✅ Token verification successful!')
+    console.log('👤 User:', user.email)
+    console.log('🔑 Role:', role)
 
     return {
       user: {
         id: user.id,
-        email: user.email,
-        role: user.role
+        email: user.email || '',
+        role: role
       }
     }
   } catch (error) {
@@ -65,13 +61,13 @@ export async function withAuth(request: NextRequest): Promise<{
  */
 export async function requireAuth(request: NextRequest) {
   const { user, error } = await withAuth(request)
-  
+
   if (!user) {
     return NextResponse.json(
       { 
         success: false, 
-        error: 'Authentication required',
-        message: error || 'Please log in to access this resource'
+        error: error || 'Authentication required',
+        message: 'Please log in to access this resource'
       },
       { status: 401 }
     )
@@ -113,57 +109,25 @@ export async function requireAdmin(request: NextRequest) {
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>()
 
 /**
- * Simple rate limiting middleware
+ * Rate limiting middleware
  */
-export function rateLimit(
-  maxRequests: number = 10,
-  windowMs: number = 60000, // 1 minute
-  keyGenerator?: (request: NextRequest) => string
-) {
-  return (request: NextRequest) => {
-    const key = keyGenerator ? keyGenerator(request) : 
-      request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
-    
-    const now = Date.now()
-    const windowStart = now - windowMs
-    
-    // Clean old entries
-    for (const [k, v] of rateLimitStore) {
-      if (v.resetTime < windowStart) {
-        rateLimitStore.delete(k)
-      }
-    }
-    
-    const current = rateLimitStore.get(key) || { count: 0, resetTime: now + windowMs }
-    
-    if (current.count >= maxRequests && current.resetTime > now) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Rate limit exceeded',
-          message: `Too many requests. Try again in ${Math.ceil((current.resetTime - now) / 1000)} seconds.`
-        },
-        { 
-          status: 429,
-          headers: {
-            'Retry-After': String(Math.ceil((current.resetTime - now) / 1000))
-          }
-        }
-      )
-    }
-    
-    // Update or create rate limit entry
-    if (current.resetTime <= now) {
-      current.count = 1
-      current.resetTime = now + windowMs
-    } else {
-      current.count++
-    }
-    
-    rateLimitStore.set(key, current)
-    
-    return null // No rate limit hit
+export function rateLimit(identifier: string, limit: number, windowMs: number) {
+  const now = Date.now()
+  const key = `${identifier}:${Math.floor(now / windowMs)}`
+  
+  const current = rateLimitStore.get(key)
+  
+  if (!current || now > current.resetTime) {
+    rateLimitStore.set(key, { count: 1, resetTime: now + windowMs })
+    return { success: true, remaining: limit - 1 }
   }
+  
+  if (current.count >= limit) {
+    return { success: false, remaining: 0 }
+  }
+  
+  current.count++
+  return { success: true, remaining: limit - current.count }
 }
 
 /**

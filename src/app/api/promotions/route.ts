@@ -1,10 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
+import { requireAdmin, rateLimit, securityHeaders, corsHeaders } from '@/lib/auth/middleware'
 
 const prisma = new PrismaClient()
 
 export async function GET(request: NextRequest) {
   try {
+    // Add security headers
+    const headers = {
+      ...securityHeaders(),
+      ...corsHeaders(request.headers.get('origin') || undefined)
+    };
+
+    // Require admin authentication for viewing promotions
+    const authResult = await requireAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
+    // Rate limiting for admin access
+    const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
+    const rateLimitResult = rateLimit(`admin_promotions_${clientIp}`, 60, 60000);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: 'Too many requests' },
+        { status: 429, headers }
+      );
+    }
     const { searchParams } = new URL(request.url)
     const packageId = searchParams.get('packageId')
     const active = searchParams.get('active')
@@ -37,7 +59,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: promotions,
       count: promotions.length
-    })
+    }, { headers })
   } catch (error) {
     console.error('Error fetching promotions:', error)
     return NextResponse.json(
@@ -49,6 +71,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Require admin authentication for creating promotions
+    const authResult = await requireAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
     const body = await request.json()
     const {
       code,
@@ -151,6 +179,12 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    // Require admin authentication for updating promotions
+    const authResult = await requireAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
     const body = await request.json()
     const { id, ...updateData } = body
 
@@ -225,6 +259,12 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    // Require admin authentication for deleting promotions
+    const authResult = await requireAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 

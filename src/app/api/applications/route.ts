@@ -16,9 +16,13 @@ export async function GET(request: NextRequest) {
     };
 
     // Rate limiting for data access
-    const rateLimitResult = rateLimit(20, 60000)(request);
-    if (rateLimitResult) {
-      return rateLimitResult;
+    const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
+    const rateLimitResult = rateLimit(clientIp, 20, 60000);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: 'Too many requests' },
+        { status: 429, headers }
+      );
     }
 
     // Require admin authentication to view applications
@@ -141,9 +145,13 @@ export async function POST(request: NextRequest) {
     };
 
     // Rate limiting for application creation - 3 per hour per IP
-    const rateLimitResult = rateLimit(3, 3600000, (req) => `create_app_${req.headers.get('x-forwarded-for') || 'unknown'}`)(request);
-    if (rateLimitResult) {
-      return rateLimitResult;
+    const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
+    const rateLimitResult = rateLimit(`create_app_${clientIp}`, 3, 3600000);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: 'Too many application submissions. Please try again later.' },
+        { status: 429, headers }
+      );
     }
 
     const body = await request.json();

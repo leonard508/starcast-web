@@ -17,10 +17,14 @@ export async function POST(
       ...corsHeaders(request.headers.get('origin') || undefined)
     };
 
-    // Rate limiting
-    const rateLimitResult = rateLimit(5, 60000, (req) => `admin_reject_${req.headers.get('x-forwarded-for') || 'unknown'}`)(request);
-    if (rateLimitResult) {
-      return rateLimitResult;
+    // Rate limiting - 5 requests per minute for admin actions
+    const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
+    const rateLimitResult = rateLimit(`admin_reject_${clientIp}`, 5, 60000);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: 'Too many requests' },
+        { status: 429, headers }
+      );
     }
 
     // Require admin authentication

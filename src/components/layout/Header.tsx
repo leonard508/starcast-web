@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { authClient } from '@/lib/auth-client'
+import { supabase } from '@/lib/auth-client'
+import { signInWithUsername, isAdmin } from '@/lib/auth-utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -16,6 +17,7 @@ interface User {
   firstName: string
   lastName: string
   email: string
+  role?: string
 }
 
 const Header = () => {
@@ -41,14 +43,17 @@ const Header = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const session = await authClient.getSession()
-        if (session && 'data' in session && session.data?.user) {
-          const userData = session.data.user
+        const { data: { user: authUser }, error } = await supabase.auth.getUser()
+        if (authUser && !error) {
+          // Get role from user metadata (stored in Supabase Auth)
+          const role = authUser.user_metadata?.role || 'USER'
+          
           setUser({
-            id: userData.id,
-            firstName: userData.name?.split(' ')[0] || '',
-            lastName: userData.name?.split(' ').slice(1).join(' ') || '',
-            email: userData.email
+            id: authUser.id,
+            firstName: authUser.user_metadata?.first_name || authUser.user_metadata?.name?.split(' ')[0] || 'User',
+            lastName: authUser.user_metadata?.last_name || authUser.user_metadata?.name?.split(' ').slice(1).join(' ') || '',
+            email: authUser.email || '',
+            role: role
           })
         }
       } catch (error) {
@@ -67,29 +72,33 @@ const Header = () => {
     setLoginError('')
     
     try {
-      const { error: authError } = await authClient.signIn.email({
-        email: data.email,
-        password: data.password,
-      })
+      const { data: authData, error: authError } = await signInWithUsername(
+        data.username,
+        data.password
+      )
       
       if (authError) {
-        setLoginError('Invalid email or password')
+        setLoginError('Invalid username or password')
         return
       }
       
-      // Refresh user state after successful login
-      const session = await authClient.getSession()
-      if (session && 'data' in session && session.data?.user) {
-        const userData = session.data.user
+      if (authData.user) {
         setUser({
-          id: userData.id,
-          firstName: userData.name?.split(' ')[0] || '',
-          lastName: userData.name?.split(' ').slice(1).join(' ') || '',
-          email: userData.email
+          id: authData.user.id,
+          firstName: authData.user.user_metadata?.first_name || 'Admin',
+          lastName: authData.user.user_metadata?.last_name || 'User',
+          email: authData.user.email || '',
+          role: authData.user.user_metadata?.role || 'USER'
         })
         setShowLoginModal(false)
         reset()
-        router.push('/dashboard')
+        
+        // Redirect based on role
+        if (isAdmin(authData.user)) {
+          router.push('/admin')
+        } else {
+          router.push('/dashboard')
+        }
       }
       
     } catch (err) {
@@ -100,10 +109,9 @@ const Header = () => {
     }
   }
 
-  // Handle logout
   const handleLogout = async () => {
     try {
-      await authClient.signOut()
+      await supabase.auth.signOut()
       setUser(null)
       setShowUserMenu(false)
       router.push('/')
@@ -299,16 +307,16 @@ const Header = () => {
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div>
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="username">Username</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="your@email.com"
-                  {...register("email")}
+                  id="username"
+                  type="text"
+                  placeholder="starcastadmin"
+                  {...register("username")}
                   className="mt-1"
                 />
-                {errors.email && (
-                  <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+                {errors.username && (
+                  <p className="text-red-500 text-sm mt-1">{errors.username.message}</p>
                 )}
               </div>
 

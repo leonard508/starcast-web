@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
+import { requireAuth } from '@/lib/auth/middleware'
 import { OzowPaymentService } from '@/lib/payments/ozow'
 import { db } from '@/lib/db'
 import { z } from 'zod'
@@ -15,10 +15,11 @@ const CreatePaymentSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({ headers: request.headers })
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const authResult = await requireAuth(request)
+    if (authResult instanceof NextResponse) {
+      return authResult // Return error response
     }
+    const { user } = authResult
 
     const body = await request.json()
     const validatedData = CreatePaymentSchema.parse(body)
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
     const payment = await db.payment.create({
       data: {
         id: validatedData.reference,
-        userId: session.user.id,
+        userId: user.id,
         amount: validatedData.amount,
         currency: 'ZAR',
         reference: validatedData.reference,

@@ -12,9 +12,13 @@ export async function POST(request: NextRequest) {
     };
 
     // Rate limiting for email sending - 5 emails per minute per admin
-    const rateLimitResult = rateLimit(5, 60000)(request);
-    if (rateLimitResult) {
-      return rateLimitResult;
+    const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
+    const rateLimitResult = rateLimit(`admin_email_${clientIp}`, 5, 60000);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: 'Too many requests' },
+        { status: 429, headers }
+      );
     }
 
     // Require admin authentication

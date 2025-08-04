@@ -18,9 +18,13 @@ export async function POST(
     };
 
     // Rate limiting - 5 requests per minute for admin actions
-    const rateLimitResult = rateLimit(5, 60000, (req) => `admin_approve_${req.headers.get('x-forwarded-for') || 'unknown'}`)(request);
-    if (rateLimitResult) {
-      return rateLimitResult;
+    const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
+    const rateLimitResult = rateLimit(`admin_approve_${clientIp}`, 5, 60000);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: 'Too many requests' },
+        { status: 429, headers }
+      );
     }
 
     // Require admin authentication

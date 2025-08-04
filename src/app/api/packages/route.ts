@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { Prisma } from '@prisma/client'
-import { rateLimit, securityHeaders, corsHeaders } from '@/lib/auth/middleware'
+import { rateLimit, securityHeaders, corsHeaders, requireAdmin } from '@/lib/auth/middleware'
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,10 +11,26 @@ export async function GET(request: NextRequest) {
       ...corsHeaders(request.headers.get('origin') || undefined)
     };
 
-    // Rate limiting for public package access
-    const rateLimitResult = rateLimit(60, 60000)(request);
-    if (rateLimitResult) {
-      return rateLimitResult;
+    // Check if this is an admin request (has auth header)
+    const authHeader = request.headers.get('authorization');
+    const isAdminRequest = authHeader && authHeader.startsWith('Bearer ');
+    
+    if (isAdminRequest) {
+      // Admin access - require authentication
+      const authResult = await requireAdmin(request);
+      if (authResult instanceof NextResponse) {
+        return authResult;
+      }
+    }
+
+    // Rate limiting for package access
+    const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
+    const rateLimitResult = rateLimit(clientIp, isAdminRequest ? 120 : 60, 60000);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: 'Too many requests' },
+        { status: 429, headers }
+      );
     }
 
     const { searchParams } = new URL(request.url)
@@ -115,6 +131,12 @@ export async function OPTIONS(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Require admin authentication for creating packages
+    const authResult = await requireAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
     const body = await request.json()
     const { 
       name, 
@@ -244,6 +266,12 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    // Require admin authentication for updating packages
+    const authResult = await requireAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
     const body = await request.json()
     const { 
       id,

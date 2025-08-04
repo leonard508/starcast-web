@@ -1,28 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { auth } from '@/lib/auth'
+import { requireAuth } from '@/lib/auth/middleware'
 
 export async function GET(request: NextRequest) {
   try {
-    // Get user session from BetterAuth
-    const session = await auth.api.getSession({
-      headers: request.headers
-    })
-
-    if (!session) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Unauthorized - Please log in'
-        },
-        { status: 401 }
-      )
+    // Get user session from Supabase
+    const authResult = await requireAuth(request)
+    if (authResult instanceof NextResponse) {
+      return authResult // Return error response
     }
+    const { user } = authResult
 
     // Fetch user's orders with complete package information
     const orders = await db.order.findMany({
       where: {
-        userId: session.user.id
+        userId: user.id
       },
       include: {
         package: {

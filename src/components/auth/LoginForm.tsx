@@ -7,7 +7,7 @@ import { loginSchema, type LoginFormData } from "@/lib/auth-schemas"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { authClient } from "@/lib/auth-client"
+import { signInWithUsername, isAdmin } from "@/lib/auth-utils"
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
@@ -26,36 +26,33 @@ export function LoginForm() {
     setError("")
     
     try {
-      // Use BetterAuth sign-in
-      const result = await authClient.signIn.email({
-        email: data.email,
-        password: data.password,
-      })
+      // Use username-based sign-in
+      const { data: authData, error: authError } = await signInWithUsername(
+        data.username,
+        data.password
+      )
       
-      if (result.error) {
-        setError(result.error.message || "Invalid email or password")
+      if (authError) {
+        setError(authError.message || "Invalid username or password")
         return
       }
       
-      // Check if user has admin role
-      if (result.data?.user) {
-        // Fetch user details to check role
-        const userResponse = await fetch('/api/auth/session', {
-          credentials: 'include'
-        })
+      if (authData.user) {
+        // Debug: Check user data
+        console.log('Login successful - User data:', authData.user)
+        console.log('User metadata:', authData.user.user_metadata)
+        console.log('User role:', authData.user.user_metadata?.role)
+        console.log('Is admin?', isAdmin(authData.user))
         
-        if (userResponse.ok) {
-          const sessionData = await userResponse.json()
-          if (sessionData.user?.role === 'ADMIN') {
-            // Redirect to admin dashboard
-            window.location.href = "/admin"
-          } else {
-            // Regular user - redirect to dashboard
-            window.location.href = "/dashboard"
-          }
-        } else {
-          // Fallback redirect
+        // Check if user is admin
+        if (isAdmin(authData.user)) {
+          console.log('Redirecting to admin dashboard...')
+          // Redirect to admin dashboard
           window.location.href = "/admin"
+        } else {
+          console.log('Redirecting to user dashboard...')
+          // Regular user - redirect to dashboard
+          window.location.href = "/dashboard"
         }
       }
       
@@ -80,16 +77,16 @@ export function LoginForm() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <Label htmlFor="email">Email Address</Label>
+            <Label htmlFor="username">Username</Label>
             <Input
-              id="email"
-              type="email"
-              placeholder="your@email.com"
-              {...register("email")}
+              id="username"
+              type="text"
+              placeholder="starcastadmin"
+              {...register("username")}
               autoFocus
             />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+            {errors.username && (
+              <p className="text-red-500 text-sm mt-1">{errors.username.message}</p>
             )}
           </div>
 

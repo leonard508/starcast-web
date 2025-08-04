@@ -1,7 +1,6 @@
-import { createAuthClient } from "better-auth/react"
+import { createClient } from '@supabase/supabase-js'
 
-export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || 
-           (typeof window !== 'undefined' ? window.location.origin : "http://localhost:3000"),
-  credentials: 'include'
-})
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)

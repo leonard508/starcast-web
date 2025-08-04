@@ -11,9 +11,13 @@ export async function GET(request: NextRequest) {
     };
 
     // Rate limiting for admin data access
-    const rateLimitResult = rateLimit(30, 60000)(request);
-    if (rateLimitResult) {
-      return rateLimitResult;
+    const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
+    const rateLimitResult = rateLimit(`admin_users_${clientIp}`, 30, 60000);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: 'Too many requests' },
+        { status: 429, headers }
+      );
     }
 
     // Require admin authentication to view users

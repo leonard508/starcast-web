@@ -13,9 +13,13 @@ export async function POST(request: NextRequest) {
     };
 
     // Strict rate limiting for imports - only 2 per hour
-    const rateLimitResult = rateLimit(2, 3600000, (req) => `admin_import_${req.headers.get('x-forwarded-for') || 'unknown'}`)(request);
-    if (rateLimitResult) {
-      return rateLimitResult;
+    const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
+    const rateLimitResult = rateLimit(`admin_import_${clientIp}`, 2, 3600000);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: 'Too many requests' },
+        { status: 429, headers }
+      );
     }
 
     // Require admin authentication
