@@ -5,9 +5,10 @@ const envSchema = z.object({
   // Database
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   
-  // Authentication
-  BETTER_AUTH_SECRET: z.string().min(32, 'BETTER_AUTH_SECRET must be at least 32 characters'),
-  NEXT_PUBLIC_BETTER_AUTH_URL: z.string().url('NEXT_PUBLIC_BETTER_AUTH_URL must be a valid URL'),
+  // Supabase Authentication
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url('NEXT_PUBLIC_SUPABASE_URL must be a valid URL'),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1, 'NEXT_PUBLIC_SUPABASE_ANON_KEY is required'),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, 'SUPABASE_SERVICE_ROLE_KEY is required for server operations'),
   
   // Email Service
   BREVO_API_KEY: z.string().min(1, 'BREVO_API_KEY is required'),
@@ -90,14 +91,13 @@ export function getAppUrl(): string {
   }
   
   // Fallback for development
-  return env.NEXT_PUBLIC_BETTER_AUTH_URL || 'http://localhost:3000'
+  return 'http://localhost:3000'
 }
 
 // Get allowed origins for CORS
 export function getAllowedOrigins(): string[] {
   const origins = [
     getAppUrl(),
-    env.NEXT_PUBLIC_BETTER_AUTH_URL,
   ]
   
   // Add development origins

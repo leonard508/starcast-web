@@ -31,7 +31,7 @@ const LTEPackageCard = ({ package: pkg, onSelect }) => {
 
     // Data feature
     if (pkg.data && pkg.data !== '') {
-      let dataValue = pkg.data.replace(/unlimited/gi, 'Uncapped').replace(/Unlimited/g, 'Uncapped');
+      const dataValue = pkg.data.replace(/unlimited/gi, 'Uncapped').replace(/Unlimited/g, 'Uncapped');
       features.push(
         <li key="data">
           {checkIcon}

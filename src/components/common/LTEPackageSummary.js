@@ -47,7 +47,7 @@ const LTEPackageSummary = ({ package: pkg, promoData, promoError, promoCode }) =
 
     // Data feature
     if (data && data !== '') {
-      let dataValue = data.replace(/unlimited/gi, 'Uncapped').replace(/Unlimited/g, 'Uncapped');
+      const dataValue = data.replace(/unlimited/gi, 'Uncapped').replace(/Unlimited/g, 'Uncapped');
       features.push(
         <div key="data" className="package-feature">
           <span className="feature-label">Data:</span>
