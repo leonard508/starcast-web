@@ -82,7 +82,15 @@
     "docker:setup": "docker-compose up -d postgres && timeout 10 && npx prisma db push && npx prisma db seed",
     "dev:setup": "npm run docker:setup && npm run dev",
     "security:generate": "node scripts/generate-security-config.cjs",
-    "security:audit": "npm run type-check && npm run lint:check",
+    "security:audit": "node scripts/security-audit.cjs",
+    "security:full-audit": "npm run type-check && npm run lint:check && npm run security:audit",
+    "deploy:health-check": "node scripts/deployment-health-check.cjs",
+    "deploy:railway": "node scripts/railway-deploy.cjs",
+    "deploy:pre-check": "node scripts/deployment-health-check.cjs pre",
+    "deploy:post-check": "node scripts/deployment-health-check.cjs post",
+    "test:api": "node scripts/api-endpoint-tester.cjs",
+    "test:api:production": "node scripts/api-endpoint-tester.cjs --url=https://starcast-web-production.up.railway.app",
+    "migration:guard": "node scripts/database-migration-guard.cjs",
     "railway:debug": "node scripts/railway-debug.cjs"
   },
   "eslintConfig": {
