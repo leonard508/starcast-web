@@ -901,8 +901,10 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
           width: 380px;
           min-width: 380px;
           max-width: 380px;
-          height: auto;
-          max-height: 580px;
+          max-height: none;  // Remove fixed height to prevent cutoff
+          overflow-y: auto;  // Allow scrolling if content is long
+          height: auto;  // Let height adjust naturally
+          min-height: 480px;  // Minimum height for consistency
           flex-shrink: 0;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           position: relative;
@@ -1169,9 +1171,11 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
             width: calc(100vw - 80px) !important;
             min-width: calc(100vw - 80px) !important;
             max-width: calc(100vw - 80px) !important;
-            padding: 20px;
+            padding: 16px;
             margin: 0 10px;
             max-height: 540px;
+            min-height: 440px;
+            overflow-y: auto;
           }
           
           .provider-logo-main {
@@ -1189,9 +1193,11 @@ function ProviderCard({ provider, providerIndex, onPackageSelect }: ProviderCard
             width: calc(100vw - 64px) !important;
             min-width: calc(100vw - 64px) !important;
             max-width: calc(100vw - 64px) !important;
-            padding: 18px;
+            padding: 14px;
             margin: 0 8px;
             max-height: 520px;
+            min-height: 420px;
+            overflow-y: auto;
           }
           
           .provider-logo-main {
