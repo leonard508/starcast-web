@@ -57,14 +57,8 @@ tmp/
 # Claude settings (local only)
 .claude/
 
-# SECURITY: Keep sensitive documentation LOCAL ONLY
-# All sensitive files are organized in build/ folder
+# Build artifacts and sensitive documentation
 build/
-
-# Allow only public documentation
-docs/
-*.md
-!README.md
 
 # Database backups and migrations
 database-backups/
