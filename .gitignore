@@ -62,10 +62,19 @@ docs/
 CLAUDE.md
 *.md
 !README.md
+
+# ⚠️  CRITICAL: These files contain credentials and system details
+# They MUST remain local-only for security compliance
+ADMIN-LOGIN-GUIDE.md
+AUTH.md
 database-backup.md
+DEPLOYMENT.md
+enable-docker-autostart.md
+RAILWAY-DEPLOYMENT.md
+RAILWAY-FIX-GUIDE.md
 RAILWAY.md
 SECURITY.md
-RAILWAY-DEPLOYMENT.md
+WHATSAPP.md
 
 # Database backups and migrations
 database-backups/
