@@ -29,7 +29,7 @@ export async function verifySupabaseToken(authToken: string) {
     } else {
       return { data: { user: null }, error: { message: 'Invalid token' } }
     }
-  } catch (error) {
+  } catch {
     return { data: { user: null }, error: { message: 'Token verification failed' } }
   }
 }

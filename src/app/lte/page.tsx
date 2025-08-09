@@ -57,76 +57,239 @@ export default function LTEPage() {
 
   useEffect(() => {
     fetchData()
+    
+    // Add global error handler for unhandled promise rejections
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.warn('Unhandled promise rejection caught:', event.reason)
+      event.preventDefault()
+    }
+    
+    window.addEventListener('unhandledrejection', handleUnhandledRejection)
+    
+    return () => {
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection)
+    }
   }, [])
 
   // Add scroll functionality and indicators
   useEffect(() => {
-    const scrollContainer = document.getElementById('provider-package-display')
-    const leftArrow = document.getElementById('desktop-scroll-left')
-    const rightArrow = document.getElementById('desktop-scroll-right')
-    const indicatorsContainer = document.getElementById('scroll-indicators')
+    try {
+      const scrollContainer = document.getElementById('provider-package-display')
+      const leftArrow = document.getElementById('desktop-scroll-left')
+      const rightArrow = document.getElementById('desktop-scroll-right')
+      const indicatorsContainer = document.getElementById('scroll-indicators')
 
-    if (!scrollContainer || !leftArrow || !rightArrow || !indicatorsContainer) return
+      if (!scrollContainer || !leftArrow || !rightArrow || !indicatorsContainer) return
 
     const scrollAmount = 400 // Adjust scroll distance
 
     const handleLeftScroll = () => {
-      scrollContainer.scrollBy({
-        left: -scrollAmount,
-        behavior: 'smooth'
-      })
+      try {
+        if (!scrollContainer) return
+        
+        // Enhanced smooth scroll with momentum
+        if (scrollContainer.style) {
+          scrollContainer.style.scrollBehavior = 'smooth'
+        }
+        
+        scrollContainer.scrollBy({
+          left: -scrollAmount,
+          behavior: 'smooth'
+        })
+        
+        // Add visual feedback
+        if (leftArrow && leftArrow.style) {
+          leftArrow.style.transform = 'translateY(-50%) scale(0.9)'
+          setTimeout(() => {
+            if (leftArrow && leftArrow.style) {
+              leftArrow.style.transform = 'translateY(-50%) scale(1)'
+            }
+          }, 150)
+        }
+      } catch (error) {
+        console.warn('handleLeftScroll error:', error)
+      }
     }
 
     const handleRightScroll = () => {
-      scrollContainer.scrollBy({
-        left: scrollAmount,
-        behavior: 'smooth'
-      })
+      try {
+        if (!scrollContainer) return
+        
+        // Enhanced smooth scroll with momentum
+        if (scrollContainer.style) {
+          scrollContainer.style.scrollBehavior = 'smooth'
+        }
+        
+        scrollContainer.scrollBy({
+          left: scrollAmount,
+          behavior: 'smooth'
+        })
+        
+        // Add visual feedback
+        if (rightArrow && rightArrow.style) {
+          rightArrow.style.transform = 'translateY(-50%) scale(0.9)'
+          setTimeout(() => {
+            if (rightArrow && rightArrow.style) {
+              rightArrow.style.transform = 'translateY(-50%) scale(1)'
+            }
+          }, 150)
+        }
+      } catch (error) {
+        console.warn('handleRightScroll error:', error)
+      }
     }
 
     // Add event listeners
     leftArrow.addEventListener('click', handleLeftScroll)
     rightArrow.addEventListener('click', handleRightScroll)
 
-    // Update active indicator and arrow visibility based on scroll position
+    // Optimized scroll state with cached calculations
     const updateScrollState = () => {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainer
-      
-      // Update active indicator based on scroll position
-      const cardWidth = 380 // Desktop card width
-      const gap = 60 // Desktop gap
-      
-      // Calculate mobile card width and gap
-      let mobileCardWidth, mobileGap
-      if (window.innerWidth <= 480) {
-        mobileCardWidth = (window.innerWidth - 32) * 0.9 // calc((100vw - 32px) * 0.9)
-        mobileGap = 32 // 16px margin on each side
-      } else if (window.innerWidth <= 768) {
-        mobileCardWidth = (window.innerWidth - 40) * 0.9 // calc((100vw - 40px) * 0.9)
-        mobileGap = 40 // 20px margin on each side
-      } else {
-        mobileCardWidth = cardWidth
-        mobileGap = gap
+      try {
+        if (!scrollContainer) return
+        
+        const { scrollLeft, scrollWidth, clientWidth } = scrollContainer
+        const viewportCenter = scrollLeft + (clientWidth / 2)
+        
+        // Use cached card elements
+        const cardElements = getCachedCardElements()
+        
+        // Fast distance calculation using scroll position estimation
+        let currentIndex = 0
+        let minDistance = Infinity
+        
+        // More efficient approach: estimate positions first, then verify with DOM
+        const cardWidth = window.innerWidth <= 768 ? 
+          (window.innerWidth <= 480 ? Math.min(300, window.innerWidth - 40) : Math.min(320, window.innerWidth - 60)) : 380
+        const gap = window.innerWidth <= 768 ? 
+          (window.innerWidth <= 480 ? 16 : 20) : 60
+        const padding = window.innerWidth <= 768 ? 
+          (window.innerWidth <= 480 ? 20 : 30) : 80
+        
+        // Quick estimation first
+        const estimatedIndex = Math.round((viewportCenter - padding - (cardWidth / 2)) / (cardWidth + gap))
+        const startIndex = Math.max(0, estimatedIndex - 1)
+        const endIndex = Math.min(cardElements.length - 1, estimatedIndex + 1)
+        
+        // Only check DOM positions for nearby cards
+        for (let i = startIndex; i <= endIndex; i++) {
+          const card = cardElements[i]
+          if (card) {
+            const cardRect = card.getBoundingClientRect()
+            const containerRect = scrollContainer.getBoundingClientRect()
+            const cardCenter = cardRect.left - containerRect.left + scrollLeft + (cardRect.width / 2)
+            const distance = Math.abs(cardCenter - viewportCenter)
+            
+            if (distance < minDistance) {
+              minDistance = distance
+              currentIndex = i
+            }
+          }
+        }
+        
+        // Batch DOM updates to avoid layout thrashing
+        requestAnimationFrame(() => {
+          cardElements.forEach((card, index) => {
+            if (card && card.classList) {
+              const shouldBeActive = index === currentIndex
+              const isActive = card.classList.contains('snap-active')
+              
+              if (shouldBeActive && !isActive) {
+                card.classList.add('snap-active')
+              } else if (!shouldBeActive && isActive) {
+                card.classList.remove('snap-active')
+              }
+            }
+          })
+        })
+        
+        // Debounced state update to prevent excessive re-renders
+        if (currentIndex !== activeProviderIndex && currentIndex < providerData.length && currentIndex >= 0) {
+          try {
+            setActiveProviderIndex(currentIndex)
+          } catch {
+            // Ignore state update errors
+          }
+        }
+        
+        // Update arrow visibility
+        if (leftArrow && leftArrow.style && rightArrow && rightArrow.style) {
+          leftArrow.style.opacity = scrollLeft > 10 ? '1' : '0.3'
+          rightArrow.style.opacity = scrollLeft < scrollWidth - clientWidth - 10 ? '1' : '0.3'
+        }
+        
+      } catch (error) {
+        console.warn('updateScrollState error:', error)
       }
-      
-      const currentCardWidth = window.innerWidth <= 768 ? mobileCardWidth : cardWidth
-      const currentGap = window.innerWidth <= 768 ? mobileGap : gap
-      
-      const currentIndex = Math.round(scrollLeft / (currentCardWidth + currentGap))
-      if (currentIndex !== activeProviderIndex && currentIndex < providerData.length) {
-        setActiveProviderIndex(currentIndex)
-      }
-      
-      // Update arrow visibility
-      leftArrow.style.opacity = scrollLeft > 0 ? '1' : '0.3'
-      rightArrow.style.opacity = scrollLeft < scrollWidth - clientWidth - 10 ? '1' : '0.3'
     }
 
     // Initial state
     updateScrollState()
 
-    // Add scroll event listener
-    scrollContainer.addEventListener('scroll', updateScrollState)
+    // Optimized scroll handling with throttling
+    let isScrolling = false
+    let scrollTimeout: NodeJS.Timeout | null = null
+    let animationFrame: number | null = null
+    let lastScrollTime = 0
+    let cardElementsCache: NodeListOf<Element> | null = null
+    
+    // Cache DOM queries for performance
+    const getCachedCardElements = () => {
+      if (!cardElementsCache) {
+        cardElementsCache = scrollContainer.querySelectorAll('.provider-package-card')
+      }
+      return cardElementsCache
+    }
+    
+    // Throttled scroll handler using requestAnimationFrame
+    const handleScroll = (_event: Event) => {
+      try {
+        const now = performance.now()
+        
+        // Throttle to 60fps max
+        if (now - lastScrollTime < 16) return
+        lastScrollTime = now
+        
+        if (animationFrame) {
+          cancelAnimationFrame(animationFrame)
+        }
+        
+        animationFrame = requestAnimationFrame(() => {
+          updateScrollState()
+        })
+        
+        if (!isScrolling) {
+          if (scrollContainer && scrollContainer.style) {
+            scrollContainer.style.scrollSnapType = 'none'
+          }
+          isScrolling = true
+        }
+        
+        if (scrollTimeout) {
+          clearTimeout(scrollTimeout)
+        }
+        
+        scrollTimeout = setTimeout(() => {
+          if (scrollContainer && scrollContainer.style) {
+            scrollContainer.style.scrollSnapType = 'x mandatory'
+          }
+          isScrolling = false
+          
+          // Final state update after snapping
+          if (animationFrame) {
+            cancelAnimationFrame(animationFrame)
+          }
+          animationFrame = requestAnimationFrame(() => {
+            updateScrollState()
+          })
+        }, 150)
+        
+      } catch (error) {
+        console.warn('Scroll handler error:', error)
+      }
+    }
+    
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true })
 
     // Add keyboard navigation
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -141,12 +304,23 @@ export default function LTEPage() {
 
     document.addEventListener('keydown', handleKeyDown)
 
-    // Cleanup
-    return () => {
-      leftArrow.removeEventListener('click', handleLeftScroll)
-      rightArrow.removeEventListener('click', handleRightScroll)
-      scrollContainer.removeEventListener('scroll', updateScrollState)
-      document.removeEventListener('keydown', handleKeyDown)
+      // Cleanup
+      return () => {
+        try {
+          if (leftArrow) leftArrow.removeEventListener('click', handleLeftScroll)
+          if (rightArrow) rightArrow.removeEventListener('click', handleRightScroll)
+          if (scrollContainer) scrollContainer.removeEventListener('scroll', handleScroll)
+          document.removeEventListener('keydown', handleKeyDown)
+          if (scrollTimeout) clearTimeout(scrollTimeout)
+          if (animationFrame) cancelAnimationFrame(animationFrame)
+          cardElementsCache = null
+        } catch (cleanupError) {
+          console.warn('Cleanup error:', cleanupError)
+        }
+      }
+    } catch (effectError) {
+      console.warn('useEffect error:', effectError)
+      return () => {}
     }
   }, [providerData.length, activeProviderIndex])
 
@@ -260,33 +434,40 @@ export default function LTEPage() {
                 key={provider.slug}
                 className={`scroll-dot ${index === activeProviderIndex ? 'active' : ''}`}
                 onClick={() => {
-                  const scrollContainer = document.getElementById('provider-package-display')
-                  if (scrollContainer) {
-                    const cardWidth = 380 // Desktop card width
-                    const gap = 60 // Desktop gap
-                    
-                    // Calculate mobile card width and gap
-                    let mobileCardWidth, mobileGap
-                    if (window.innerWidth <= 480) {
-                      mobileCardWidth = (window.innerWidth - 32) * 0.9 // calc((100vw - 32px) * 0.9)
-                      mobileGap = 32 // 16px margin on each side
-                    } else if (window.innerWidth <= 768) {
-                      mobileCardWidth = (window.innerWidth - 40) * 0.9 // calc((100vw - 40px) * 0.9)
-                      mobileGap = 40 // 20px margin on each side
-                    } else {
-                      mobileCardWidth = cardWidth
-                      mobileGap = gap
+                  try {
+                    const scrollContainer = document.getElementById('provider-package-display')
+                    if (scrollContainer) {
+                      // Desktop card width and gap not needed here; compute from DOM
+                      
+                      // Calculate mobile card width and gap
+                      // compute using actual DOM; unused widths removed
+                      
+                      // Find the actual card element and scroll to center it
+                      const allCards = scrollContainer.querySelectorAll('.provider-package-card')
+                      const targetCard = allCards[index]
+                      
+                      if (targetCard) {
+                        const cardRect = targetCard.getBoundingClientRect()
+                        const containerRect = scrollContainer.getBoundingClientRect()
+                        const cardLeft = cardRect.left - containerRect.left + scrollContainer.scrollLeft
+                        const cardCenter = cardLeft + (cardRect.width / 2)
+                        const viewportCenter = scrollContainer.clientWidth / 2
+                        const scrollPosition = cardCenter - viewportCenter
+                        
+                        scrollContainer.scrollTo({
+                          left: Math.max(0, scrollPosition),
+                          behavior: 'smooth'
+                        })
+                      }
+                      
+                      try {
+                        setActiveProviderIndex(index)
+                      } catch {
+                        // Ignore state update errors
+                      }
                     }
-                    
-                    const currentCardWidth = window.innerWidth <= 768 ? mobileCardWidth : cardWidth
-                    const currentGap = window.innerWidth <= 768 ? mobileGap : gap
-                    
-                    const scrollPosition = (currentCardWidth + currentGap) * index
-                    scrollContainer.scrollTo({
-                      left: scrollPosition,
-                      behavior: 'smooth'
-                    })
-                    setActiveProviderIndex(index)
+                  } catch (error) {
+                    console.warn('Scroll indicator click error:', error)
                   }
                 }}
               />
@@ -426,11 +607,15 @@ export default function LTEPage() {
           z-index: 2;
           scroll-behavior: smooth;
           -webkit-overflow-scrolling: touch;
+          overscroll-behavior-x: contain;
           background: #e8e8e8;
           border-radius: 0;
           width: 100%;
           max-width: 100%;
           justify-content: flex-start;
+          transform: translateZ(0);
+          will-change: scroll-position;
+          scroll-snap-type: x mandatory;
         }
 
         .provider-package-display::-webkit-scrollbar {
@@ -439,7 +624,14 @@ export default function LTEPage() {
 
         .provider-package-card {
           scroll-snap-align: center;
+          scroll-snap-stop: always;
           flex-shrink: 0;
+          transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                     box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                     border-color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          will-change: transform;
+          transform: translateZ(0);
+          backface-visibility: hidden;
         }
 
         .desktop-scroll-arrow {
@@ -515,24 +707,38 @@ export default function LTEPage() {
           border-radius: 50%;
           background: rgba(45, 40, 35, 0.4);
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
           flex-shrink: 0;
           border: none;
           display: flex;
           align-items: center;
           justify-content: center;
+          position: relative;
         }
 
         .scroll-dot.active {
           background: #4a90e2;
           transform: scale(1.4);
           box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.3);
+          animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+          0% { box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.3); }
+          50% { box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.6); }
+          100% { box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.3); }
         }
 
         .scroll-dot:hover {
           background: #4a90e2;
           opacity: 0.8;
           transform: scale(1.2);
+          animation: bounce 0.6s ease;
+        }
+        
+        @keyframes bounce {
+          0%, 100% { transform: scale(1.2); }
+          50% { transform: scale(1.35); }
         }
 
         .no-packages {
@@ -578,13 +784,16 @@ export default function LTEPage() {
 
           .provider-package-display {
             gap: 20px;
-            padding: 20px 40px;
+            padding: 20px 30px;
             background: #e8e8e8;
             width: 100vw;
             max-width: 100vw;
             scroll-snap-type: x mandatory;
-            scroll-padding: 0 40px;
+            scroll-padding-left: calc(50vw - 160px);
+            scroll-padding-right: calc(50vw - 160px);
+            scroll-snap-stop: always;
             justify-content: flex-start;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
           }
 
           .provider-package-card {
@@ -620,15 +829,18 @@ export default function LTEPage() {
 
           .provider-package-display {
             gap: 16px;
-            padding: 20px 24px;
+            padding: 20px 20px;
             background: #e8e8e8;
             width: 100vw;
             max-width: 100vw;
             scroll-snap-type: x mandatory;
-            scroll-padding: 0 24px;
+            scroll-padding-left: calc(50vw - 150px);
+            scroll-padding-right: calc(50vw - 150px);
+            scroll-snap-stop: always;
             scrollbar-width: none;
             -ms-overflow-style: none;
             justify-content: flex-start;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
           }
 
           .provider-package-card {
@@ -763,6 +975,7 @@ function LTEPackageCard({ provider, providerIndex, onPackageSelect }: LTEPackage
         </div>
       )}
 
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img 
         src={provider.logo} 
         alt={provider.name} 
@@ -972,11 +1185,21 @@ function LTEPackageCard({ provider, providerIndex, onPackageSelect }: LTEPackage
         }
 
         .provider-package-card:hover {
-          transform: translateY(-8px);
+          transform: translateY(-8px) scale(1.02);
           box-shadow: 
             0 20px 60px rgba(0, 0, 0, 0.2),
             0 8px 24px rgba(0, 0, 0, 0.15),
             inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+        
+        .provider-package-card.snap-active {
+          transform: scale(1.02);
+          box-shadow: 
+            0 12px 32px rgba(74, 144, 226, 0.15),
+            0 4px 16px rgba(74, 144, 226, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+          border-color: #4a90e2;
+          border-width: 2px;
         }
 
         .provider-logo-main {
@@ -1270,11 +1493,11 @@ function LTEPackageCard({ provider, providerIndex, onPackageSelect }: LTEPackage
 
         @media (max-width: 768px) {
           .provider-package-card {
-            width: calc((100vw - 40px) * 0.9);
-            min-width: calc((100vw - 40px) * 0.9);
-            max-width: calc((100vw - 40px) * 0.9);
+            width: min(320px, calc(100vw - 60px));
+            min-width: min(320px, calc(100vw - 60px));
+            max-width: min(320px, calc(100vw - 60px));
             padding: 20px;
-            margin: 0 20px;
+            margin: 0 10px;
             max-height: 540px;
             scroll-snap-align: center;
           }
@@ -1295,43 +1518,51 @@ function LTEPackageCard({ provider, providerIndex, onPackageSelect }: LTEPackage
           }
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 600px) {
           .provider-package-card {
-            width: calc((100vw - 32px) * 0.9);
-            min-width: calc((100vw - 32px) * 0.9);
-            max-width: calc((100vw - 32px) * 0.9);
             padding: 18px;
-            margin: 0 16px;
+            width: min(310px, calc(100vw - 50px));
+            min-width: min(310px, calc(100vw - 50px));
+            max-width: min(310px, calc(100vw - 50px));
+            margin: 0 12px;
             max-height: 520px;
             scroll-snap-align: center;
           }
-
-          .provider-logo-main {
-            max-width: 140px;
-            max-height: 55px;
-          }
-
+          
           .price-main {
             font-size: 2.2rem;
           }
-
-          .feature-checklist {
-            margin-bottom: 20px;
-          }
-
-          .check-availability-btn {
-            padding: 12px 18px;
-            font-size: 0.95rem;
-            max-width: 280px;
-          }
-
-          .router-tooltip {
-            width: 300px;
-            font-size: 0.65rem;
-            padding: 10px 12px;
-            max-height: 350px;
+          
+          .feature-text {
+            font-size: 0.9rem;
           }
         }
+        
+        /* Mobile devices with better constraints */
+        @media (max-width: 480px) {
+          .provider-package-card {
+            width: min(300px, calc(100vw - 40px));
+            min-width: min(300px, calc(100vw - 40px));
+            max-width: min(300px, calc(100vw - 40px));
+            padding: 18px;
+            margin: 0 8px;
+            max-height: 520px;
+            scroll-snap-align: center;
+          }
+        }
+        
+        @media (max-width: 380px) {
+          .provider-package-card {
+            width: min(280px, calc(100vw - 32px));
+            min-width: min(280px, calc(100vw - 32px));
+            max-width: min(280px, calc(100vw - 32px));
+            margin: 0 8px;
+            padding: 16px;
+            max-height: 500px;
+          }
+        }
+        
+
       `}</style>
     </div>
   )

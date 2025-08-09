@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     let excelBuffer: Buffer;
     try {
       excelBuffer = Buffer.from(validatedBody.data, 'base64');
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         { success: false, error: 'Invalid file format' },
         { status: 400, headers }

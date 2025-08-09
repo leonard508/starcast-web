@@ -167,6 +167,7 @@ const SignupForm = ({ onSubmit, disabled, loading }) => {
             {(filePreview || fileName) && (
               <div className="upload-preview">
                 {filePreview && (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img 
                     src={filePreview} 
                     alt="ID Preview" 

@@ -219,7 +219,7 @@ async function sendWhatsAppMessage(to: string, message: string): Promise<void> {
 }
 
 // Handle Twilio webhook verification
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   return NextResponse.json({ 
     message: 'Twilio WhatsApp webhook endpoint',
     status: 'ready' 

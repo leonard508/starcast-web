@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 
 const BookingForm = ({ onSubmit }) => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { /* register, */ handleSubmit /* , formState: { errors } */ } = useForm();
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="booking-form">

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { DataCategory, ProcessingPurpose, LegalBasis, ConsentManager } from '@/lib/compliance/popi-compliance'
+import { DataCategory, ProcessingPurpose, LegalBasis } from '@/lib/compliance/popi-compliance'
 
 interface ConsentFormData {
   dataCategory: DataCategory
@@ -75,7 +75,7 @@ const CUSTOMER_CONSENTS: ConsentFormData[] = [
   }
 ]
 
-export default function PrivacyConsent({ onConsentComplete, userType }: PrivacyConsentProps) {
+export default function PrivacyConsent({ onConsentComplete, userType: _userType }: PrivacyConsentProps) {
   const [consents, setConsents] = useState<ConsentFormData[]>(CUSTOMER_CONSENTS)
   const [showFullPolicy, setShowFullPolicy] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)

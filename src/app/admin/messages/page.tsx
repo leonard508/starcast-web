@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 // import ConversationsPanel from '@/components/ConversationsPanel' // Disabled - requires Twilio Conversations setup
 import WhatsAppMessages from '@/components/WhatsAppMessages'
 import { supabase } from '@/lib/auth';
+import { authedFetch } from '@/lib/http'
 
 interface Contact {
   id: string
@@ -180,10 +181,10 @@ export default function MessagesPage() {
   const [searchTerm, setSearchTerm] = useState('')
   // const [filterType] = useState<'all' | 'email' | 'whatsapp'>('all')
 
-  useEffect(() => {
-    checkAuth()
-    loadContacts()
-    loadMessages()
+  const initPage = useCallback(async () => {
+    await checkAuth()
+    await loadContacts()
+    await loadMessages()
     
     // Handle URL parameters for pre-selected user
     const urlParams = new URLSearchParams(window.location.search)
@@ -197,7 +198,11 @@ export default function MessagesPage() {
     }
   }, [])
 
-  const checkAuth = async () => {
+  useEffect(() => {
+    initPage()
+  }, [initPage])
+
+  const checkAuth = useCallback(async () => {
     try {
       const { data: { user }, error } = await supabase.auth.getUser();
 
@@ -220,13 +225,11 @@ export default function MessagesPage() {
       console.error('Auth check failed:', error);
       router.push('/login?redirect=/admin/messages');
     }
-  }
+  }, [router])
 
-  const loadContacts = async () => {
+  const loadContacts = useCallback(async () => {
     try {
-      const response = await fetch('/api/users', {
-        credentials: 'include'
-      })
+      const response = await authedFetch('/api/users', { credentials: 'include' })
       
       if (response.ok) {
         const data = await response.json()
@@ -244,13 +247,13 @@ export default function MessagesPage() {
     } catch (error) {
       console.error('Failed to load contacts:', error)
     }
-  }
+  }, [])
 
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     // TODO: Implement message history API
     // Messages are now handled by WhatsAppMessages component
     console.log('Message history loading handled by WhatsApp component')
-  }
+  }, [])
 
   const handleTemplateSelect = (templateId: string) => {
     const template = templates.find(t => t.id === templateId)
@@ -335,14 +338,17 @@ export default function MessagesPage() {
     }
   }
 
-  const filteredContacts = contacts.filter(contact => {
-    const matchesSearch = searchTerm === '' || 
-      contact.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.email.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    return matchesSearch
-  })
+  const filteredContacts = useMemo(() => {
+    const needle = searchTerm.toLowerCase()
+    return contacts.filter(contact => {
+      if (!needle) return true
+      return (
+        contact.firstName.toLowerCase().includes(needle) ||
+        contact.lastName.toLowerCase().includes(needle) ||
+        contact.email.toLowerCase().includes(needle)
+      )
+    })
+  }, [contacts, searchTerm])
 
   if (loading) {
     return (

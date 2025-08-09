@@ -5,7 +5,7 @@ nixPkgs = ['nodejs_22']
 NODE_VERSION = "22"
 
 [phases.build]
-cmds = ["npm ci", "npm run build"]
+cmds = ["npm install", "npx prisma generate", "npm run build"]
 
 [phases.start]
 cmd = "npm start"

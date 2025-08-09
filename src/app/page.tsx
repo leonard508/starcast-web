@@ -138,7 +138,7 @@ export default function Home() {
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Why Choose Starcast?</h2>
           <p className={styles.sectionSubtitle}>
-            We're committed to delivering exceptional internet connectivity and technical support 
+            We&apos;re committed to delivering exceptional internet connectivity and technical support 
             that keeps you connected to what matters most.
           </p>
         </div>
@@ -158,22 +158,22 @@ export default function Home() {
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>What Our Customers Say</h2>
           <p className={styles.sectionSubtitle}>
-            Don't just take our word for it. Here's what our satisfied customers have to say.
+            Don&apos;t just take our word for it. Here&apos;s what our satisfied customers have to say.
           </p>
         </div>
         <div className={styles.testimonialsContainer}>
           <div className={`${styles.testimonialCard} ${activeTestimonial === 0 ? styles.active : ''}`}>
-            <p className={styles.testimonialText}>"{testimonials[0].text}"</p>
+            <p className={styles.testimonialText}>&quot;{testimonials[0].text}&quot;</p>
             <div className={styles.testimonialAuthor}>{testimonials[0].author}</div>
             <div className={styles.testimonialRole}>{testimonials[0].role}</div>
           </div>
           <div className={`${styles.testimonialCard} ${activeTestimonial === 1 ? styles.active : ''}`}>
-            <p className={styles.testimonialText}>"{testimonials[1].text}"</p>
+            <p className={styles.testimonialText}>&quot;{testimonials[1].text}&quot;</p>
             <div className={styles.testimonialAuthor}>{testimonials[1].author}</div>
             <div className={styles.testimonialRole}>{testimonials[1].role}</div>
           </div>
           <div className={`${styles.testimonialCard} ${activeTestimonial === 2 ? styles.active : ''}`}>
-            <p className={styles.testimonialText}>"{testimonials[2].text}"</p>
+            <p className={styles.testimonialText}>&quot;{testimonials[2].text}&quot;</p>
             <div className={styles.testimonialAuthor}>{testimonials[2].author}</div>
             <div className={styles.testimonialRole}>{testimonials[2].role}</div>
           </div>

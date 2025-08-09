@@ -147,7 +147,7 @@ function mapTwilioStatusToDbStatus(twilioStatus: string): string {
 }
 
 // GET endpoint for testing
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   return NextResponse.json({ 
     message: 'WhatsApp status webhook endpoint is active',
     timestamp: new Date().toISOString(),

@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 export default function TestPage() {
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial' }}>
@@ -13,9 +15,9 @@ export default function TestPage() {
       <hr />
       <h2>Quick Navigation:</h2>
       <ul>
-        <li><a href="/login">🔐 Login Page</a></li>
-        <li><a href="/admin">👨‍💼 Admin Dashboard</a></li>
-        <li><a href="/">🏠 Home Page</a></li>
+        <li><Link href="/login">🔐 Login Page</Link></li>
+        <li><Link href="/admin">👨‍💼 Admin Dashboard</Link></li>
+        <li><Link href="/">🏠 Home Page</Link></li>
       </ul>
       <hr />
       <p><strong>Next Step:</strong> Try accessing the admin dashboard</p>

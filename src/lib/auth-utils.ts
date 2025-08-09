@@ -1,8 +1,9 @@
 import { supabase } from './auth-client'
 
-// Map usernames to emails for authentication
+// Map usernames to emails for authentication (expandable)
 const USERNAME_EMAIL_MAP: Record<string, string> = {
   'starcastadmin': 'starcast.tech@gmail.com',
+  'starcast.admin': 'starcast.tech@gmail.com',
   'admin': 'admin@starcast.co.za'
 }
 
@@ -11,23 +12,16 @@ const USERNAME_EMAIL_MAP: Record<string, string> = {
  * Maps username to email for Supabase authentication
  */
 export async function signInWithUsername(username: string, password: string) {
-  // Check if it's a known username
-  const email = USERNAME_EMAIL_MAP[username.toLowerCase()]
-  
+  const normalized = username.trim().toLowerCase()
+  // Map to known email, or accept direct email input
+  const email = USERNAME_EMAIL_MAP[normalized] || (normalized.includes('@') ? username.trim() : undefined)
+
   if (!email) {
-    return {
-      data: null,
-      error: { message: 'Invalid username or password' }
-    }
+    return { data: null, error: { message: 'Invalid username or email' } }
   }
-  
+
   // Use Supabase email authentication
-  const result = await supabase.auth.signInWithPassword({
-    email,
-    password
-  })
-  
-  return result
+  return supabase.auth.signInWithPassword({ email, password })
 }
 
 /**

@@ -255,7 +255,7 @@ Your message has been forwarded to our agents who will respond within 15 minutes
   return null // No auto-response for other messages
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   return NextResponse.json({ 
     message: 'WhatsApp webhook endpoint is active',
     timestamp: new Date().toISOString()

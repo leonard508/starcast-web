@@ -156,12 +156,6 @@ const Header = () => {
               >
                 LTE
               </Link>
-              <Link 
-                href="/lte-5g" 
-                className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
-              >
-                LTE-5G
-              </Link>
             </nav>
 
             {/* User Actions */}
@@ -272,13 +266,6 @@ const Header = () => {
                 >
                   LTE
                 </Link>
-                <Link 
-                  href="/lte-5g" 
-                  className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
-                  onClick={() => setShowMobileMenu(false)}
-                >
-                  LTE-5G
-                </Link>
               </nav>
             </div>
           )}
@@ -351,7 +338,7 @@ const Header = () => {
 
             <div className="mt-6 text-center space-y-2">
               <p className="text-sm text-gray-600">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link href="/register" className="text-blue-600 hover:underline font-medium">
                   Create Account
                 </Link>

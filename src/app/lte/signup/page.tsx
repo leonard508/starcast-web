@@ -165,7 +165,7 @@ Device delivery typically takes 5-7 days after approval.
 Questions? Contact us at starcast.tech@gmail.com`)
       
       router.push('/')
-    } catch (error) {
+    } catch (_error) {
       alert('Failed to submit application. Please try again.')
     } finally {
       setSubmitting(false)
@@ -309,13 +309,14 @@ Questions? Contact us at starcast.tech@gmail.com`)
                     {/* Package Details */}
                     <div className="bg-white rounded-lg p-4 border border-gray-200">
                       <div className="flex items-center mb-3">
-                        {selectedPackage.provider.logo && (
-                          <img 
-                            src={selectedPackage.provider.logo} 
-                            alt={selectedPackage.provider.name}
-                            className="h-8 w-8 mr-3"
-                          />
-                        )}
+                            {selectedPackage.provider.logo && (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img 
+                                src={selectedPackage.provider.logo} 
+                                alt={selectedPackage.provider.name}
+                                className="h-8 w-8 mr-3"
+                              />
+                            )}
                         <div>
                           <div className="font-semibold text-lg text-gray-900">{packageTitle}</div>
                           <div className="text-sm text-gray-600">{selectedPackage.type === 'LTE_FIXED' ? 'Fixed LTE' : 'Mobile LTE'}</div>
@@ -370,7 +371,7 @@ Questions? Contact us at starcast.tech@gmail.com`)
                             <span>-R{(originalPrice - finalPrice).toFixed(0)}/mo</span>
                           </div>
                           <div className="text-sm text-green-600 bg-green-50 p-2 rounded">
-                            ✅ Promo code "{formData.promoCode}" applied!
+                            ✅ Promo code &quot;{formData.promoCode}&quot; applied!
                           </div>
                         </div>
                       )}

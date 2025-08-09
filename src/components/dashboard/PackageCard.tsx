@@ -70,6 +70,7 @@ export function PackageCard({ order }: PackageCardProps) {
         <div className="flex items-center space-x-4">
           {pkg.provider.logo ? (
             <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center p-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img 
                 src={pkg.provider.logo} 
                 alt={pkg.provider.name}
