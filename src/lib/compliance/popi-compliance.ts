@@ -359,14 +359,14 @@ export class DataSubjectRights {
   /**
    * Right to Erasure - Delete user data (with legal compliance)
    */
-  static async deleteUserData(userId: string, reason: string): Promise<void> {
+  static async deleteUserData(userId: string, _reason: string): Promise<void> {
     try {
       // Check if user has legal obligation to retain data (e.g., billing records)
       const hasLegalObligation = await this.checkDataRetentionObligation(userId)
       
       if (hasLegalObligation) {
         // Anonymize instead of delete
-        await this.anonymizeUserData(userId, reason)
+        await this.anonymizeUserData(userId, _reason)
       } else {
         // Complete deletion
         await db.user.delete({
@@ -418,7 +418,7 @@ export class DataSubjectRights {
   /**
    * Anonymize user data while retaining necessary records
    */
-  private static async anonymizeUserData(userId: string, reason: string): Promise<void> {
+  private static async anonymizeUserData(userId: string, _reason: string): Promise<void> {
     const anonymizedEmail = `anonymized_${Date.now()}@deleted.starcast.local`
     
     await db.user.update({
