@@ -9,8 +9,8 @@ console.log('='.repeat(40));
 
 const requiredEnvVars = [
   'DATABASE_URL',
-  'BETTER_AUTH_SECRET',
-  'NEXT_PUBLIC_BETTER_AUTH_URL'
+  'NEXT_PUBLIC_SUPABASE_URL',
+  'NEXT_PUBLIC_SUPABASE_ANON_KEY'
 ];
 
 const optionalEnvVars = [
@@ -45,21 +45,21 @@ optionalEnvVars.forEach(varName => {
 
 console.log('\n🧪 Configuration Validation:');
 
-// Validate BETTER_AUTH_SECRET length
-const authSecret = process.env.BETTER_AUTH_SECRET;
-if (authSecret && authSecret.length >= 32) {
-  console.log('✅ BETTER_AUTH_SECRET: Sufficient length');
+// Validate NEXT_PUBLIC_SUPABASE_URL format
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+if (supabaseUrl && supabaseUrl.startsWith('https://')) {
+  console.log('✅ NEXT_PUBLIC_SUPABASE_URL: Valid HTTPS URL');
 } else {
-  console.log('❌ BETTER_AUTH_SECRET: Too short (needs 32+ characters)');
+  console.log('❌ NEXT_PUBLIC_SUPABASE_URL: Must be HTTPS URL');
   hasAllRequired = false;
 }
 
-// Validate NEXT_PUBLIC_BETTER_AUTH_URL format
-const authUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL;
-if (authUrl && authUrl.startsWith('https://')) {
-  console.log('✅ NEXT_PUBLIC_BETTER_AUTH_URL: Valid HTTPS URL');
+// Validate NEXT_PUBLIC_SUPABASE_ANON_KEY format
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+if (supabaseKey && supabaseKey.startsWith('eyJ')) {
+  console.log('✅ NEXT_PUBLIC_SUPABASE_ANON_KEY: Valid JWT format');
 } else {
-  console.log('❌ NEXT_PUBLIC_BETTER_AUTH_URL: Must be HTTPS URL');
+  console.log('❌ NEXT_PUBLIC_SUPABASE_ANON_KEY: Must be valid JWT token');
   hasAllRequired = false;
 }
 

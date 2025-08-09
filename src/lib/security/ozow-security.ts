@@ -301,7 +301,7 @@ export class FraudDetection {
 
       const total = bills.reduce((sum, bill) => sum + Number(bill.totalAmount), 0)
       return total / bills.length
-    } catch (error) {
+    } catch (_error) {
       return 500 // Default fallback
     }
   }
@@ -315,7 +315,7 @@ export class FraudDetection {
       })
 
       return lastSession?.ipAddress || null
-    } catch (error) {
+    } catch (_error) {
       return null
     }
   }

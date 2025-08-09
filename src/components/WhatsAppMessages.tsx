@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { supabase } from '@/lib/auth-client'
 
 interface WhatsAppMessage {
   id: string
@@ -45,46 +46,35 @@ export default function WhatsAppMessages() {
   const [sendingReply, setSendingReply] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [messageStatus, setMessageStatus] = useState<{[key: string]: string}>({})
-  const [typingUsers, setTypingUsers] = useState<string[]>([])
-  const [lastSeen, setLastSeen] = useState<{[key: string]: string}>({})
+  const [_messageStatus, setMessageStatus] = useState<{[key: string]: string}>({})
   const [isTyping, setIsTyping] = useState(false)
-
-  useEffect(() => {
-    loadMessages()
-    // Auto-refresh every 5 seconds for better real-time experience
-    const interval = setInterval(loadMessages, 5000)
-    return () => clearInterval(interval)
-  }, [selectedConversation])
-
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  // Simulate typing indicator
-  useEffect(() => {
-    let typingTimeout: NodeJS.Timeout
-    if (isTyping) {
-      typingTimeout = setTimeout(() => setIsTyping(false), 3000)
-    }
-    return () => clearTimeout(typingTimeout)
-  }, [isTyping])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     try {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const accessToken = sessionData.session?.access_token
+      
       const params = new URLSearchParams()
       if (selectedConversation) {
         params.append('phone', selectedConversation)
       }
       params.append('limit', '100')
 
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      }
+      
+      if (accessToken) {
+        headers.Authorization = `Bearer ${accessToken}`
+      }
+
       const response = await fetch(`/api/whatsapp/messages?${params}`, {
-        credentials: 'include'
+        credentials: 'include',
+        headers,
       })
 
       if (response.ok) {
@@ -129,7 +119,27 @@ export default function WhatsAppMessages() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedConversation])
+
+  useEffect(() => {
+    loadMessages()
+    const interval = setInterval(loadMessages, 5000)
+    return () => clearInterval(interval)
+  }, [selectedConversation, loadMessages])
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
+  // Simulate typing indicator
+  useEffect(() => {
+    let typingTimeout: NodeJS.Timeout
+    if (isTyping) {
+      typingTimeout = setTimeout(() => setIsTyping(false), 3000)
+    }
+    return () => clearTimeout(typingTimeout)
+  }, [isTyping])
 
   const sendReply = async () => {
     if (!selectedConversation || !replyMessage.trim()) return

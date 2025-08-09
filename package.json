@@ -13,16 +13,12 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@react-email/components": "^0.3.2",
     "@react-pdf/renderer": "^4.3.0",
-    "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.53.0",
     "@twilio/conversations": "^2.6.2",
     "@types/bcrypt": "^6.0.0",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^22.5.0",
     "@types/nodemailer": "^6.4.17",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "bull": "^4.16.5",
@@ -37,6 +33,7 @@
     "next": "^15.4.2",
     "node-cron": "^4.2.1",
     "nodemailer": "^7.0.5",
+    "openai": "^5.12.2",
     "prisma": "^6.1.0",
     "rate-limiter-flexible": "^7.2.0",
     "react": "^19.0.0",
@@ -46,16 +43,16 @@
     "tailwind-merge": "^3.3.1",
     "tsx": "^4.19.0",
     "twilio": "^5.8.0",
-    "typescript": "^5.6.0",
     "zod": "^3.24.0"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
   },
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbo",
     "build": "prisma generate && next build",
-    "start": "next start -H 0.0.0.0 -p ${PORT:-3000}",
+    "start": "NODE_ENV=production next start -H 0.0.0.0 -p ${PORT:-3000}",
     "start:railway": "node scripts/railway-start.cjs",
     "lint": "next lint --fix",
     "lint:check": "next lint",
@@ -75,7 +72,7 @@
     "railway:fix-db": "node scripts/fix-railway-database.js",
     "import:excel": "node scripts/import-excel-data.js",
     "test:excel": "node test-excel-import.js",
-    "analyze": "cross-env ANALYZE=true next build",
+    "analyze": "cross-env ANALYZE=true next build --experimental-build-mode=compile",
     "prepare": "husky install",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
@@ -114,6 +111,9 @@
   "devDependencies": {
     "@next/eslint-plugin-next": "^15.4.2",
     "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.5.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.15.0",
     "eslint-config-next": "^15.4.2",
@@ -122,7 +122,8 @@
     "node-fetch": "^2.7.0",
     "postcss": "^8.5.6",
     "prettier": "^3.3.0",
-    "tailwindcss": "^3.0.0"
+    "tailwindcss": "^3.0.0",
+    "typescript": "^5.6.0"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -141,5 +142,18 @@
       "pre-commit": "lint-staged",
       "pre-push": "npm run type-check"
     }
-  }
+  },
+  "description": "A modern ISP reseller platform built with Next.js for managing internet service packages and customer applications.",
+  "main": "call-emergency-admin.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leonard508/starcast-web.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/leonard508/starcast-web/issues"
+  },
+  "homepage": "https://github.com/leonard508/starcast-web#readme"
 }
