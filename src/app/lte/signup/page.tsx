@@ -110,7 +110,7 @@ function LTESignupContent() {
 
       const data = await response.json()
       setPromoValidation(data)
-    } catch (error) {
+    } catch {
       setPromoValidation({
         valid: false,
         message: 'Failed to validate promo code'
@@ -165,7 +165,7 @@ Device delivery typically takes 5-7 days after approval.
 Questions? Contact us at starcast.tech@gmail.com`)
       
       router.push('/')
-    } catch (_error) {
+    } catch {
       alert('Failed to submit application. Please try again.')
     } finally {
       setSubmitting(false)

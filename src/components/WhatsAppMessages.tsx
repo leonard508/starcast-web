@@ -46,7 +46,7 @@ export default function WhatsAppMessages() {
   const [sendingReply, setSendingReply] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [_messageStatus, setMessageStatus] = useState<{[key: string]: string}>({})
+  const [, setMessageStatus] = useState<{[key: string]: string}>({})
   const [isTyping, setIsTyping] = useState(false)
 
   const scrollToBottom = () => {

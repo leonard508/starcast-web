@@ -82,7 +82,7 @@ function SignupContent() {
 
       const data = await response.json()
       setPromoValidation(data)
-    } catch (error) {
+    } catch {
       setPromoValidation({
         valid: false,
         message: 'Failed to validate promo code'
