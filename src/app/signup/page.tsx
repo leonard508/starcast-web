@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import GoogleAddressAutocomplete from '@/components/GoogleAddressAutocomplete'
 
 interface Package {
   id: string
@@ -314,12 +315,34 @@ function SignupContent() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Installation Address *
                     </label>
-                    <input
-                      type="text"
+                    <GoogleAddressAutocomplete
+                      value={formData.address}
+                      onChange={(value, place) => {
+                        setFormData(prev => ({ ...prev, address: value }))
+                        
+                        // Auto-fill city and postal code from Google Places result
+                        if (place?.address_components) {
+                          const cityComponent = place.address_components.find(
+                            comp => comp.types.includes('locality') || comp.types.includes('sublocality')
+                          )
+                          const provinceComponent = place.address_components.find(
+                            comp => comp.types.includes('administrative_area_level_1')
+                          )
+                          const postalCodeComponent = place.address_components.find(
+                            comp => comp.types.includes('postal_code')
+                          )
+                          
+                          setFormData(prev => ({
+                            ...prev,
+                            city: cityComponent?.long_name || prev.city,
+                            province: provinceComponent?.long_name || prev.province,
+                            postalCode: postalCodeComponent?.long_name || prev.postalCode
+                          }))
+                        }
+                      }}
                       name="address"
                       required
-                      value={formData.address}
-                      onChange={handleInputChange}
+                      placeholder="Start typing your installation address..."
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>

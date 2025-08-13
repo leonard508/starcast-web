@@ -1,0 +1,23 @@
+node_modules
+npm-debug.log
+.next
+out
+dist
+.git
+.gitignore
+Dockerfile
+Dockerfile.*
+README.md
+build/docs
+Cursor web
+Cursor web/**
+*.Zone.Identifier
+*.local
+.env
+.env.*
+*.db
+*.sqlite
+*.log
+**/*.log
+**/*.tsbuildinfo
+

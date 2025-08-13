@@ -105,9 +105,10 @@ export class SecurityConfig {
 # Database Configuration
 DATABASE_URL="postgresql://username:password@host:port/database?schema=public"
 
-# BetterAuth Configuration
-BETTER_AUTH_SECRET="${crypto.randomBytes(32).toString('hex')}"
-NEXT_PUBLIC_BETTER_AUTH_URL="https://your-domain.com"
+# Supabase Authentication Configuration
+NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-supabase-service-role-key"
 
 # Email Configuration
 BREVO_API_KEY="your-brevo-api-key"
@@ -172,11 +173,11 @@ export class SecurityAudit {
     }
 
     // Check HTTPS enforcement
-    const authUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL
-    if (!authUrl?.startsWith('https://')) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    if (!supabaseUrl?.startsWith('https://')) {
       issues.push({
         severity: 'high',
-        message: 'HTTPS not enforced for authentication URL'
+        message: 'HTTPS not enforced for Supabase URL'
       })
       score -= 15
     }
@@ -193,7 +194,7 @@ export class SecurityAudit {
 
     // Check for weak secrets
     const secrets = [
-      process.env.BETTER_AUTH_SECRET,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
       process.env.POPI_ENCRYPTION_KEY,
       process.env.TRANSACTION_HASH_SECRET
     ]

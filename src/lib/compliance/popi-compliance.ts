@@ -517,7 +517,8 @@ export class OzowSecurityCompliance {
     }
 
     // Check HTTPS enforcement
-    if (!process.env.NEXT_PUBLIC_BETTER_AUTH_URL?.startsWith('https://')) {
+    const appUrl = process.env.RAILWAY_PUBLIC_DOMAIN || process.env.NEXT_PUBLIC_SUPABASE_URL
+    if (!appUrl?.startsWith('https://')) {
       issues.push('HTTPS not enforced for authentication')
     }
 

@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import GoogleAddressAutocomplete from '@/components/GoogleAddressAutocomplete'
 
 interface Package {
   id: string
@@ -545,13 +546,17 @@ Questions? Contact us at starcast.tech@gmail.com`)
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Full Address *
                         </label>
-                        <input
-                          type="text"
+                        <GoogleAddressAutocomplete
+                          value={formData.address}
+                          onChange={(value, place) => {
+                            setFormData(prev => ({ ...prev, address: value }))
+                          }}
+                          onPostalCodeExtract={(postalCode) => {
+                            setFormData(prev => ({ ...prev, postalCode }))
+                          }}
                           name="address"
                           required
-                          placeholder="House number, Street name, Suburb, City"
-                          value={formData.address}
-                          onChange={handleInputChange}
+                          placeholder="Start typing your delivery address..."
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         />
                         <p className="text-sm text-gray-500 mt-1">

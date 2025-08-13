@@ -25,7 +25,9 @@ export async function POST(request: NextRequest) {
     const validatedData = CreatePaymentSchema.parse(body)
 
     // Get base URL for callback URLs
-    const baseUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || 'http://localhost:3000'
+    const baseUrl = process.env.RAILWAY_STATIC_URL 
+      ? `https://${process.env.RAILWAY_STATIC_URL}`
+      : 'http://localhost:3000'
 
     // Initialize Ozow service
     const ozowService = new OzowPaymentService()

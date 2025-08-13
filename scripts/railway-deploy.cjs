@@ -59,7 +59,7 @@ class RailwayDeployer {
         // 1. Security audit
         if (!this.skipAudit) {
             await this.runCommand(
-                'node scripts/security-audit.js',
+                'node scripts/security-audit.cjs',
                 'Security audit',
                 { timeout: 60000 }
             );
@@ -67,13 +67,13 @@ class RailwayDeployer {
         
         // 2. Environment validation
         await this.runCommand(
-            'node scripts/deployment-health-check.js pre',
+            'node scripts/deployment-health-check.cjs pre',
             'Environment validation'
         );
         
         // 3. Database migration guard
         await this.runCommand(
-            'node scripts/database-migration-guard.js',
+            'node scripts/database-migration-guard.cjs',
             'Database migration validation'
         );
         
@@ -198,7 +198,7 @@ class RailwayDeployer {
         
         if (!this.skipHealthCheck) {
             await this.runCommand(
-                'node scripts/deployment-health-check.js post',
+                'node scripts/deployment-health-check.cjs post',
                 'Production health check'
             );
         }
@@ -334,7 +334,7 @@ if (require.main === module) {
         console.log(`
 Railway Deployment Script Usage:
 
-node scripts/railway-deploy.js [options]
+node scripts/railway-deploy.cjs [options]
 
 Options:
   --skip-audit           Skip security audit (not recommended)
@@ -343,8 +343,8 @@ Options:
   --help                 Show this help message
 
 Examples:
-  node scripts/railway-deploy.js
-  node scripts/railway-deploy.js --skip-audit
+  node scripts/railway-deploy.cjs
+  node scripts/railway-deploy.cjs --skip-audit
         `);
         process.exit(0);
     }

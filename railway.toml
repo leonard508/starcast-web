@@ -1,0 +1,9 @@
+[build]
+  command = "npm ci && npx prisma generate && npm run build"
+
+[deploy]
+  startCommand = "npm start"
+
+[environments.production]
+  variables = { NODE_ENV = "production" }
+

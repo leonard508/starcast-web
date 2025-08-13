@@ -32,8 +32,8 @@ export async function GET(request: NextRequest) {
         version: Prisma.prismaVersion?.client || 'unknown',
       },
       auth: {
-        BETTER_AUTH_SECRET_EXISTS: !!process.env.BETTER_AUTH_SECRET,
-        BETTER_AUTH_URL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
+        SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+        SUPABASE_ANON_KEY_EXISTS: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
       },
       email: {
         BREVO_API_KEY_EXISTS: !!process.env.BREVO_API_KEY,
