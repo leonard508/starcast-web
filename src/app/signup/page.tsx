@@ -317,19 +317,19 @@ function SignupContent() {
                     </label>
                     <GoogleAddressAutocomplete
                       value={formData.address}
-                      onChange={(value, place) => {
+                      onChange={(value: string, place?: any) => {
                         setFormData(prev => ({ ...prev, address: value }))
                         
                         // Auto-fill city and postal code from Google Places result
                         if (place?.address_components) {
                           const cityComponent = place.address_components.find(
-                            comp => comp.types.includes('locality') || comp.types.includes('sublocality')
+                            (comp: any) => comp.types.includes('locality') || comp.types.includes('sublocality')
                           )
                           const provinceComponent = place.address_components.find(
-                            comp => comp.types.includes('administrative_area_level_1')
+                            (comp: any) => comp.types.includes('administrative_area_level_1')
                           )
                           const postalCodeComponent = place.address_components.find(
-                            comp => comp.types.includes('postal_code')
+                            (comp: any) => comp.types.includes('postal_code')
                           )
                           
                           setFormData(prev => ({

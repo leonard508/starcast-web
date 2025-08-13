@@ -106,7 +106,7 @@ const GoogleAddressAutocomplete: React.FC<GoogleAddressAutocompleteProps> = ({
           // Extract postal code if callback provided
           if (onPostalCodeExtract && place.address_components) {
             const postalCodeComponent = place.address_components.find(
-              component => component.types.includes('postal_code')
+              (component: any) => component.types.includes('postal_code')
             )
             if (postalCodeComponent) {
               onPostalCodeExtract(postalCodeComponent.long_name)
