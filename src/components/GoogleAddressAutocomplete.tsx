@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react'
 
 interface GoogleAddressAutocompleteProps {
   value: string
-  onChange: (value: string, place?: google.maps.places.PlaceResult) => void
+  onChange: (value: string, place?: any) => void
   placeholder?: string
   name?: string
   required?: boolean
@@ -13,8 +13,9 @@ interface GoogleAddressAutocompleteProps {
 
 declare global {
   interface Window {
-    google: typeof google
+    google: any
     initGoogleMaps: () => void
+    gm_authFailure?: () => void
   }
 }
 
@@ -28,7 +29,7 @@ const GoogleAddressAutocomplete: React.FC<GoogleAddressAutocompleteProps> = ({
   onPostalCodeExtract
 }) => {
   const inputRef = useRef<HTMLInputElement>(null)
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null)
+  const autocompleteRef = useRef<any>(null)
   const [isLoaded, setIsLoaded] = useState(false)
   const [error, setError] = useState<string>('')
 
@@ -82,7 +83,7 @@ const GoogleAddressAutocomplete: React.FC<GoogleAddressAutocompleteProps> = ({
 
     try {
       // Create autocomplete instance
-      autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
+      autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current as any, {
         componentRestrictions: { country: 'za' }, // Restrict to South Africa
         fields: ['formatted_address', 'geometry', 'address_components'],
         types: ['address']
