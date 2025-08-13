@@ -29,6 +29,18 @@ const nextConfig = {
     optimizeCss: true,
     optimizeServerReact: true,
   },
+
+  // Reduce noisy, harmless build warnings
+  webpack: (config) => {
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings || []),
+      {
+        module: /@supabase\/realtime-js/,
+        message: /Critical dependency: the request of a dependency is an expression/,
+      },
+    ]
+    return config
+  },
   
   
   // Headers for performance
