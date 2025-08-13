@@ -42,6 +42,15 @@ const GoogleAddressAutocomplete: React.FC<GoogleAddressAutocompleteProps> = ({
       return
     }
 
+    // Dev-only diagnostics (no key value is printed)
+    if (process.env.NODE_ENV !== 'production') {
+      const masked = `${GOOGLE_MAPS_API_KEY.slice(0, 6)}***${GOOGLE_MAPS_API_KEY.slice(-4)}`
+      console.info('[Maps] Public key present:', {
+        masked,
+        length: GOOGLE_MAPS_API_KEY.length,
+      })
+    }
+
     // Check if Google Maps is already loaded
     if (window.google && window.google.maps && window.google.maps.places) {
       initializeAutocomplete()
