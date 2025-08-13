@@ -35,8 +35,15 @@ const GoogleAddressAutocomplete: React.FC<GoogleAddressAutocompleteProps> = ({
 
   // Google Maps API key - this should be set in your environment variables
   const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+  const IS_PROD = process.env.NODE_ENV === 'production'
+  const ENABLE_MAPS_DEV = process.env.NEXT_PUBLIC_ENABLE_MAPS_DEV === 'true'
 
   useEffect(() => {
+    // In non-production environments, do not load Maps unless explicitly enabled
+    if (!IS_PROD && !ENABLE_MAPS_DEV) {
+      return
+    }
+
     if (!GOOGLE_MAPS_API_KEY) {
       setError('Google Maps API key not configured')
       return
@@ -156,6 +163,9 @@ const GoogleAddressAutocomplete: React.FC<GoogleAddressAutocompleteProps> = ({
   }
 
   const getPlaceholder = () => {
+    if (!IS_PROD && !ENABLE_MAPS_DEV) {
+      return "Address autocomplete disabled in development"
+    }
     if (error) {
       return "Enter address manually (autocomplete unavailable)"
     }
